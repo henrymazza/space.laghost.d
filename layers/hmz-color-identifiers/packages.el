@@ -1,0 +1,56 @@
+(defvar hmz-color-identifiers-packages
+  '(
+    color-identifiers-mode
+    )
+)
+
+
+(defvar hmz-color-identifiers-excluded-packages '())
+
+(defun hmz-color-identifiers/make-local-face (face-name &rest args)
+  "Make a buffer face local"
+  (interactive)
+  (let ((local-face (intern (concat (symbol-name face-name) "-local"))))
+    ;; First create new face which is a copy of the old face
+    (copy-face face-name local-face)
+    (apply 'set-face-attribute local-face nil args)
+    (set (make-local-variable face-name) local-face)))
+
+;; (defun hmz-color-identifiers/init-rainbow-identifiers ()
+;;   "Initialization of rainbow indentifiers in hmz-color-identifiers layer."
+
+;;   (use-package rainbow-identifiers
+;;     :ensure t)
+
+;;   )
+
+(defun hmz-color-identifiers/init-color-identifiers-mode ()
+  "Tabbar customizations"
+  (use-package color-identifiers-mode
+  :ensure t
+  :diminish color-identifiers-mode
+  :init
+  (defun hmz-color-identifiers/turn-on-color-identifiers ()
+    (interactive)
+    (let ((faces '(font-lock-comment-face
+                   font-lock-comment-delimiter-face
+                   font-lock-constant-face
+                   font-lock-type-face
+                   font-lock-function-name-face
+                   font-lock-variable-name-face
+                   font-lock-keyword-face
+                   font-lock-string-face
+                   font-lock-builtin-face
+                   font-lock-preprocessor-face
+                   font-lock-warning-face
+                   font-lock-doc-face)))
+      (dolist (face faces)
+        (hmz-color-identifiers/make-local-face face :foreground nil))
+      (hmz-color-identifiers/make-local-face 'font-lock-keyword-face :foreground nil :weight 'bold)
+      (hmz-color-identifiers/make-local-face 'font-lock-builtin-face :foreground nil :weight 'bold)
+      (color-identifiers-mode 1)))
+  ;;(add-hook 'java-mode-hook #'color-identifiers-mode)
+  ;;(add-hook 'emacs-lisp-mode-hook #'color-identifiers-mode)
+  ;;(global-color-identifiers-mode 1)
+  )
+  )
