@@ -19,9 +19,11 @@ which require an initialization must be listed explicitly in the list.")
      '(tabbar-separator (quote (1.2))))
 
     (custom-set-faces
-     '(tabbar-default ((t (:height 1.1 :overline t :weight thin :family "San Francisco"))))
+     '(tabbar-default ((t (:height 1.2 :overline t :weight thin :family "San Francisco"))))
+     '(tabbar-modified ((t (:inherit tabbar-default :foreground "spring green"))))
      '(tabbar-button ((t (:inherit tabbar-default))))
-     '(tabbar-selected ((t (:inherit tabbar-default :foreground "deep sky blue"))))
+     '(tabbar-selected ((t (:inherit tabbar-default :overline "deep sky blue" :foreground "deep sky blue"))))
+
      '(tabbar-selected-modified ((t (:inherit tabbar-selected :foreground "spring green" :background "#346B47"))))
      '(tabbar-unselected ((t (:inherit tabbar-default )))))
 
@@ -55,12 +57,24 @@ That is, a propertized string used as an `header-line-format' template
 element.
 Call `tabbar-tab-label-function' to obtain a label for TAB."
       (concat
-       (propertize (all-the-icons-octicon "bug")
-                   'face `(:family ,(all-the-icons-octicon-family)
-                                   :foreground 'tabbar-selected
-                                   :overline t
-                                   :height 1.2)
-                   'display '(raise -0.1))
+       (propertize
+        (concat
+         (all-the-icons-icon-for-file
+          (replace-regexp-in-string "<.*>" "" (format "%s"(tabbar-tab-value tab))))
+         " "
+         )
+        'face `(:inherit ,(cond ((and (tabbar-selected-p tab (tabbar-current-tabset))
+                                      (tabbar-modified-p tab (tabbar-current-tabset)))
+                                 'tabbar-selected-modified)
+                                ((tabbar-selected-p tab (tabbar-current-tabset))
+                                 'tabbar-selected)
+                                ((tabbar-modified-p tab (tabbar-current-tabset))
+                                 'tabbar-modified)
+                                (t 'tabbar-unselected))  :family ,(all-the-icons-octicon-family)
+                                :foreground 'tabbar-selected
+                                :overline t
+                                :height 1.3)
+        'display '(raise -0.2))
        (propertize
         (if tabbar-tab-label-function
             (funcall tabbar-tab-label-function tab)
