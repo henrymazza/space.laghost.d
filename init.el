@@ -315,10 +315,11 @@ before packages are loaded. If you are unsure, you should try in setting them in
   ;; (setq initial-frame-alist '((undecorated . t)))
 
   (when (window-system)
-    (set-frame-height (selected-frame) 40)
-    (set-frame-width (selected-frame) 80)
-    (set-frame-position (selected-frame) 480 150))
-  (setq default-frame-alist '((undecorated . t)))
+    ;; (set-frame-height (selected-frame) 40)
+    ;; (set-frame-width (selected-frame) 80)
+    ;; (set-frame-position (selected-frame) 480 150)
+    )
+  (setq default-frame-alist '((undecorated . nil)))
 
 )
 
@@ -706,6 +707,7 @@ Example:
  '(button ((t (:background "#2E3440" :foreground "#88C0D0" :box (:line-width 2 :color "#D8DEE9" :style none)))))
  '(font-lock-function-name-face ((t (:inherit normal :foreground "#bc6ec5"))))
  '(font-lock-keyword-face ((t (:inherit normal :foreground "#4f97d7"))))
+ '(header-line ((t (:foreground "#D8DEE9"))))
  '(linum ((t (:foreground "#44505c" :height 0.7 :family "San Francisco"))))
  '(minibuffer-prompt ((t (:foreground "#88C0D0" :weight bold :family "San Francisco"))))
  '(neo-dir-link-face ((t (:inherit bold :foreground "#4f97d7" :weight normal :height 120 :family "San Francisco"))))

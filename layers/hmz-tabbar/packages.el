@@ -20,11 +20,11 @@ which require an initialization must be listed explicitly in the list.")
 
     (custom-set-faces
      '(tabbar-default ((t (:height 1.0 :overline t :background "#2E3440" :weight thin :foreground "#AAAAAA" :family "San Francisco"))))
-     '(tabbar-modified ((t (:inherit tabbar-default :foreground "spring green"))))
+     '(tabbar-modified ((t (:inherit tabbar-default :foreground "SeaGreen"))))
      '(tabbar-button ((t (:inherit tabbar-default))))
      '(tabbar-selected ((t (:inherit tabbar-default :overline t :foreground "white"))))
 
-     '(tabbar-selected-modified ((t (:inherit tabbar-selected :foreground "spring green"))))
+     '(tabbar-selected-modified ((t (:inherit tabbar-selected :foreground "Spring Green"))))
 
      '(tabbar-unselected ((t (:inherit tabbar-default )))))
 
@@ -58,32 +58,29 @@ That is, a propertized string used as an `header-line-format' template
 element.
 Call `tabbar-tab-label-function' to obtain a label for TAB."
 
-      (setq jj "mehsdfkjalkdjflkasdjf")
       (concat
-        (propertize
-           (concat
-            (all-the-icons-icon-for-file
-             (replace-regexp-in-string "<.*>" "" (format "%s"(tabbar-tab-value tab)))
-             )
-            (if tabbar-tab-label-function
-                (funcall tabbar-tab-label-function tab)
-              tab))
-           'tabbar-tab tab
-           'local-map (tabbar-make-tab-keymap tab)
-           'help-echo 'tabbar-help-on-tab
-           'mouse-face 'tabbar-highlight
-           'face (cond ((and (tabbar-selected-p tab (tabbar-current-tabset))
-                             (tabbar-modified-p tab (tabbar-current-tabset)))
-                        'tabbar-selected-modified)
-                       ((tabbar-selected-p tab (tabbar-current-tabset))
-                        'tabbar-selected)
-                       ((tabbar-modified-p tab (tabbar-current-tabset))
-                        'tabbar-modified)
-                       (t 'tabbar-unselected))
-           'display '(raise 0.1)
-           'pointer 'hand)
-        (put-text-property 1 3 '(:family "San Francisco") jj)
-        jj
+       (all-the-icons-icon-for-file
+        (replace-regexp-in-string "<.*>" "" (format "%s"(tabbar-tab-value tab)))
+        )
+       (propertize
+        (concat
+         (if tabbar-tab-label-function
+             (funcall tabbar-tab-label-function tab)
+           tab))
+        'tabbar-tab tab
+        'local-map (tabbar-make-tab-keymap tab)
+        'help-echo 'tabbar-help-on-tab
+        'mouse-face 'tabbar-highlight
+        'face (cond ((and (tabbar-selected-p tab (tabbar-current-tabset))
+                          (tabbar-modified-p tab (tabbar-current-tabset)))
+                     'tabbar-selected-modified)
+                    ((tabbar-selected-p tab (tabbar-current-tabset))
+                     'tabbar-selected)
+                    ((tabbar-modified-p tab (tabbar-current-tabset))
+                     'tabbar-modified)
+                    (t 'tabbar-unselected))
+        'display '(raise 0.2)
+        'pointer 'hand)
        tabbar-separator-value))
 
 
@@ -106,17 +103,32 @@ element."
                              ((eq name 'scroll-left) (all-the-icons-wicon "fire"))
                              ((eq name 'scroll-right) (all-the-icons-wicon "hurricane"))
                              (t "X")) " ")
-                          'tabbar-button name
-                          'face `(:inherit 'tabbar-default :family ,(all-the-icons-wicon-family) :height 1.5 :foreground "orange")
-                          'display '(raise 0.0)
-                          'mouse-face 'tabbar-button-highlight
-                          'pointer 'hand
-                          'local-map (tabbar-make-button-keymap name)
-                          'help-echo 'tabbar-help-on-button)
-              (propertize (cdr label)
-                          'face 'tabbar-button
-                          'pointer 'arrow)))))
+               'tabbar-button name
+               'face `(:inherit 'tabbar-default :family ,(all-the-icons-wicon-family) :height 1.5 :foreground "orange")
+               'display '(raise 0.0)
+               'mouse-face 'tabbar-button-highlight
+               'pointer 'hand
+               'local-map (tabbar-make-button-keymap name)
+               'help-echo 'tabbar-help-on-button)
 
+              (propertize
+               (concat " "
+                       (cond ((eq name 'home) (all-the-icons-wicon "alien"))
+                             ((eq name 'scroll-left) (all-the-icons-wicon "fire"))
+                             ((eq name 'scroll-right) (all-the-icons-wicon "hurricane"))
+                             (t "X")) " ")
+               'tabbar-button name
+               'face `(:inherit 'tabbar-default :family ,(all-the-icons-wicon-family) :height 1.5 :foreground "#AAAAAA")
+               'display '(raise 0.0)
+               'mouse-face 'tabbar-button-highlight
+               'pointer 'hand
+               'local-map (tabbar-make-button-keymap name)
+               'help-echo 'tabbar-help-on-button)
+              ))))
+
+    ;; set to nil to force refresh
+    (setq tabbar-scroll-left-button-value nil)
+    (setq tabbar-scroll-right-button-value nil)
 
 
     ;; Tabbar Groups Definition
