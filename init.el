@@ -340,6 +340,9 @@ you should place you code here."
   ;; windows divider
   (window-divider-mode 1)
 
+  ;; make those tildes disapear
+  (setq indicate-empty-lines nil)
+
   ;; Colors layer
   (push '(nord . (20 80)) colors-theme-identifiers-sat&light)
   (load-theme 'nord)
@@ -684,9 +687,9 @@ Example:
  '(neo-autorefresh t)
  '(neo-filepath-sort-function (lambda (f1 f2) (string< (downcase f1) (downcase f2))))
  '(neo-force-change-root t)
- '(neo-show-hidden-files nil)
+ '(neo-show-hidden-files nil t)
  '(neo-theme (if (display-graphic-p) (quote icons) (quote arrow)))
- '(neo-vc-integration (quote (char)))
+ '(neo-vc-integration (quote (char)) t)
  '(neo-window-position (quote right))
  '(osx-clipboard-mode t)
  '(package-selected-packages
@@ -707,17 +710,11 @@ Example:
  '(button ((t (:background "#2E3440" :foreground "#88C0D0" :box (:line-width 2 :color "#D8DEE9" :style none)))))
  '(font-lock-function-name-face ((t (:inherit normal :foreground "#bc6ec5"))))
  '(font-lock-keyword-face ((t (:inherit normal :foreground "#4f97d7"))))
- '(header-line ((t (:foreground "#D8DEE9"))))
+ '(header-line ((t (:background "#2E3440" :foreground "#D8DEE9" :overline "#3B4252"))))
  '(linum ((t (:foreground "#44505c" :height 0.7 :family "San Francisco"))))
  '(minibuffer-prompt ((t (:foreground "#88C0D0" :weight bold :family "San Francisco"))))
  '(neo-dir-link-face ((t (:inherit bold :foreground "#4f97d7" :weight normal :height 120 :family "San Francisco"))))
  '(neo-file-link-face ((t (:foreground "#b2b2b2" :weight light :height 120 :width normal :family "San Francisco"))))
  '(neo-header-face ((t (:foreground "light gray" :weight semi-bold :height 1.2 :family "San Francisco"))))
  '(neo-root-dir-face ((t (:inherit bold :foreground "#bc6ec5" :family "San Francisco"))))
- '(tabbar-button ((t (:inherit tabbar-default))))
- '(tabbar-default ((t (:height 1.0 :overline t :background "#2E3440" :weight thin :foreground "#AAAAAA" :family "San Francisco"))))
- '(tabbar-modified ((t (:inherit tabbar-default :foreground "spring green"))))
- '(tabbar-selected ((t (:inherit tabbar-default :overline t :foreground "white"))))
- '(tabbar-selected-modified ((t (:inherit tabbar-selected :foreground "spring green"))))
- '(tabbar-unselected ((t (:inherit tabbar-default))))
- '(window-divider ((t (:foreground "deep sky blue")))))
+ '(window-divider ((t (:foreground "#3B4252")))))
