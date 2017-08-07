@@ -19,16 +19,15 @@ which require an initialization must be listed explicitly in the list.")
      '(tabbar-separator (quote (1.2))))
 
     (custom-set-faces
-     '(tabbar-default ((t (:height 1.0 :background "#2E3440" :weight thin :foreground "#AAAAAA" :family "San Francisco"))))
+     '(tabbar-default ((t (:inherit header-line-format :height 1.0 :background "#2E3440" :weight thin :foreground "#AAAAAA" :family "San Francisco"))))
      '(tabbar-modified ((t (:inherit tabbar-default :foreground "SeaGreen"))))
      '(tabbar-button ((t (:inherit tabbar-default))))
-     '(tabbar-selected ((t (:inherit tabbar-default :overline t :foreground "white"))))
+     '(tabbar-selected ((t (:inherit tabbar-default :foreground "white"))))
+     '(tabbar-highlight ((t (:inherit tabbar-default :foreground "deep sky blue" :underline nil :overline t))))
 
      '(tabbar-selected-modified ((t (:inherit tabbar-selected :foreground "Spring Green"))))
 
      '(tabbar-unselected ((t (:inherit tabbar-default )))))
-
-
 
     ;; adding spaces
     (defun tabbar-buffer-tab-label (tab)
@@ -49,52 +48,46 @@ That is, a string used to represent it on the tab bar."
                            (length (tabbar-view
                                     (tabbar-current-tabset)))))))))
 
+
     (defsubst tabbar-line-tab (tab)
       "Return the display representation of tab TAB.
 That is, a propertized string used as an `header-line-format' template
 element.
 Call `tabbar-tab-label-function' to obtain a label for TAB."
+      (let
+          ((tab-face (cond ((and (tabbar-selected-p tab (tabbar-current-tabset))
+                                (tabbar-modified-p tab (tabbar-current-tabset)))
+                           'tabbar-selected-modified)
+                          ((tabbar-selected-p tab (tabbar-current-tabset))
+                           'tabbar-selected)
+                          ((tabbar-modified-p tab (tabbar-current-tabset))
+                           'tabbar-modified)
+                          (t 'tabbar-unselected)))
 
-      ;; (setq j (all-the-icons-icon-for-file "jujuba.rb"))
-      ;; (set-text-properties 0 0 nil i)
-      ;; (message "%s - %s" i (text-properties-at 0 i))
+                    (the-icon (all-the-icons-icon-for-file
+                              (replace-regexp-in-string "<.*>" "" (format "%s"(tabbar-tab-value tab)))))
+                    (tab-is-active (tabbar-selected-p tab (tabbar-current-tabset))))
 
-      ;; (remove-text-properties 0 0 '(face nil) i)
-      ;; (message "%s" (plist-put (plist-get (text-properties-at 0 j) 'face) :height 0.5))
+      (setq icon-face (plist-get (text-properties-at 0 the-icon) 'face))
 
-      ;; (message "%s" i)
-      ;; (message "%s"
-      ;;          (propertize i
-      ;;                      'face (:inherit (text-properties-at 0 i))))
-
-
-      (setq
-       tab-face (cond ((and (tabbar-selected-p tab (tabbar-current-tabset))
-                            (tabbar-modified-p tab (tabbar-current-tabset)))
-                       'tabbar-selected-modified)
-                      ((tabbar-selected-p tab (tabbar-current-tabset))
-                       'tabbar-selected)
-                      ((tabbar-modified-p tab (tabbar-current-tabset))
-                       'tabbar-modified)
-                      (t 'tabbar-unselected))
-
-       the-icon (all-the-icons-icon-for-file
-                 (replace-regexp-in-string "<.*>" "" (format "%s"(tabbar-tab-value tab)))))
-
-
-      (setq icon-face
-            (plist-put (plist-get (text-properties-at 0 the-icon) 'face) :height 1.0))
+      (require 'org)
 
       (concat
-
        (propertize
         the-icon
-        'face icon-face
-        'display '(raise 0.3)
+        'face (org-combine-plists
+               icon-face (if tab-is-active
+                             '(:height 1.5)
+                           '(:foreground "#AAAAAA")))
+        'display (if tab-is-active '(raise 0.3) '(raise 0.8))
+        'tabbar-tab tab
+        'local-map (tabbar-make-tab-keymap tab)
+        'help-echo 'tabbar-help-on-tab
+        'mouse-face 'tabbar-highlight
         )
-       " "
        (propertize
         (concat
+         " "
          (if tabbar-tab-label-function
              (funcall tabbar-tab-label-function tab)
            tab))
@@ -103,9 +96,9 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
         'help-echo 'tabbar-help-on-tab
         'mouse-face 'tabbar-highlight
         'face tab-face
-        'display '(raise 0.3)
+        'display '(raise 0.8)
         'pointer 'hand)
-       tabbar-separator-value))
+       tabbar-separator-value)))
 
     (defsubst tabbar-line-button (name)
       "Return the display representation of button NAME.
@@ -113,43 +106,46 @@ That is, a propertized string used as an `header-line-format' template
 element."
       (let ((label (if tabbar-button-label-function
                        (funcall tabbar-button-label-function name)
-                     (cons name name))))
+                     (cons name name)))
+            (glyph (cond ((eq name 'home) (all-the-icons-wicon "alien" :face '(:height 1.0)))
+                         ((eq name 'scroll-left) (all-the-icons-material "navigate_before"))
+                         ((eq name 'scroll-right) (all-the-icons-material "navigate_next"))
+                   (t "X")))
+            )
+
         ;; Cache the display value of the enabled/disabled buttons in
         ;; variables `tabbar-NAME-button-value'.
         (set (intern (format "tabbar-%s-button-value"  name))
              (cons
-              (propertize
-               (concat " "
-                       (cond ((eq name 'home) (all-the-icons-wicon "alien"))
-                             ((eq name 'scroll-left) (all-the-icons-wicon "fire"))
-                             ((eq name 'scroll-right) (all-the-icons-wicon "hurricane"))
-                             (t "X")) " ")
-               'tabbar-button name
-               'face `(:inherit tabbar-default :family ,(all-the-icons-wicon-family) :height 1.5 :foreground "orange")
-               'display '(raise 0.0)
-               'mouse-face 'tabbar-button-highlight
-               'pointer 'hand
-               'local-map (tabbar-make-button-keymap name)
-               'help-echo 'tabbar-help-on-button)
+              (propertize glyph
+                          'tabbar-button name
+                          'face (org-combine-plists
+                                 '(:inherit tabbar-default)
+                                 (plist-get (text-properties-at 0 glyph) 'face)
+                                 '(:foreground "orange" ))
+                          ;; 'display '(raise 0.3)
+                          'mouse-face 'tabbar-button-highlight
+                          'pointer 'hand
+                          'local-map (tabbar-make-button-keymap name)
+                          'help-echo 'tabbar-help-on-button)
 
-              (propertize
-               (concat " "
-                       (cond ((eq name 'home) (all-the-icons-wicon "alien"))
-                             ((eq name 'scroll-left) (all-the-icons-wicon "fire"))
-                             ((eq name 'scroll-right) (all-the-icons-wicon "hurricane"))
-                             (t "X")) " ")
-               'tabbar-button name
-               'face `(:inherit tabbar-default :family ,(all-the-icons-wicon-family) :height 1.5 :foreground "#AAAAAA")
-               'display '(raise 0.0)
-               'mouse-face 'tabbar-button-highlight
-               'pointer 'hand
-               'local-map (tabbar-make-button-keymap name)
-               'help-echo 'tabbar-help-on-button)
+              (propertize glyph
+                          'tabbar-button name
+                          'face (org-combine-plists
+                                 '(:inherit tabbar-default)
+                                 (plist-get (text-properties-at 0 glyph) 'face)
+                                 '(:foreground "#AAAAAA" ))
+                          ;; 'display '(raise 0.3)
+                          'mouse-face 'tabbar-button-highlight
+                          'pointer 'hand
+                          'local-map (tabbar-make-button-keymap name)
+                          'help-echo 'tabbar-help-on-button)
               ))))
 
     ;; set to nil to force refresh
     (setq tabbar-scroll-left-button-value nil)
     (setq tabbar-scroll-right-button-value nil)
+    (setq tabbar-home-button-value nil)
 
 
     ;; Tabbar Groups Definition
