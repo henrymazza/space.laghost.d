@@ -311,16 +311,16 @@ before packages are loaded. If you are unsure, you should try in setting them in
   ;; Don't replace copied text with killed region
   (setq save-interprogram-paste-before-kill t)
 
+  ;; avoid slowness
+  (setq inhibit-compacting-font-caches t)
+
+  ;; show garbage collection
+  (setq garbage-collection-messages t)
+
   ;; Hide title bar
-  ;; (setq initial-frame-alist '((undecorated . t)))
+  (setq initial-frame-alist '((undecorated . t)))
 
-  (when (window-system)
-    ;; (set-frame-height (selected-frame) 40)
-    ;; (set-frame-width (selected-frame) 80)
-    ;; (set-frame-position (selected-frame) 480 150)
-    )
-  (setq default-frame-alist '((undecorated . nil)))
-
+  ;; (setq default-frame-alist '((undecorated . nil)))
 )
 
 (defun dotspacemacs/user-config ()
@@ -343,10 +343,6 @@ you should place you code here."
   ;; make those tildes disapear
   (setq indicate-empty-lines nil)
 
-  ;; Colors layer
-  (push '(nord . (20 80)) colors-theme-identifiers-sat&light)
-  (load-theme 'nord)
-
   ;; Make insert cursor a vertical Bar. Keep default color.
   (setq evil-emacs-state-cursor '("SkyBlue2" bar))
 
@@ -355,6 +351,17 @@ you should place you code here."
 
   ;; space in between lines
   (setq-default line-spacing 2)
+
+
+  ;; settings for window systems
+  (when (window-system)
+    ;; (set-frame-height (selected-frame) 40)
+    ;; (set-frame-width (selected-frame) 80)
+    ;; (set-frame-position (selected-frame) 480 150)
+
+    (push '(nord . (20 80)) colors-theme-identifiers-sat&light)
+    (load-theme 'nord)
+    )
 
   ;; Ember Mode
   (add-hook 'js-mode-hook (lambda () (ember-mode t)))
@@ -385,6 +392,17 @@ you should place you code here."
   ;; command-T
   (global-set-key (kbd "s-t") 'helm-projectile-find-file)
   (setq projectile-enable-caching t)
+
+  ;; keep last messages visible
+  (defadvice message (after message-tail activate)
+    "goto point max after a message"
+    (with-current-buffer "*Messages*"
+      (goto-char (point-max))
+      (walk-windows (lambda (window)
+                      (if (string-equal (buffer-name (window-buffer window)) "*Messages*")
+                          (set-window-point window (point-max))))
+                    nil
+                    t)))
 
   ;; my old pal C-k
   (define-key evil-normal-state-map (kbd "C-k") 'kill-this-buffer)
@@ -544,7 +562,54 @@ you should place you code here."
                ;; Set width here so it takes scaled font size
                (setq neo-window-width 16)
                (setq neo-window-fixed-size nil)
-               )))
+               ))
+
+   (setq
+    hmz-last-cons-cells-consed 0
+    hmz-last-floats-consed 0
+    hmz-last-vector-cells-consed 0
+    hmz-last-symbols-consed 0
+    hmz-last-string-chars-consed 0
+    misc-objects-consed 0
+    hmz-last-intervals-consed 0
+    hmz-last-strings-consed 0
+    )
+   (add-hook 'post-gc-hook
+             (lambda ()
+               (message " cons: %s floats: %s vector: %s symbols: %s string: %s misc-obj: %s intervals: %s strings: %s"
+                        (- cons-cells-consed hmz-last-cons-cells-consed)
+                        (- floats-consed hmz-last-floats-consed)
+                        (- vector-cells-consed hmz-last-vector-cells-consed)
+                        (- symbols-consed hmz-last-symbols-consed)
+                        (- string-chars-consed hmz-last-string-chars-consed)
+                        (- misc-objects-consed hmz-last-misc-objects-consed)
+                        (- intervals-consed hmz-last-intervals-consed)
+                        (- strings-consed hmz-last-strings-consed))
+
+               (setq
+                hmz-last-cons-cells-consed cons-cells-consed
+                hmz-last-floats-consed floats-consed
+                hmz-last-vector-cells-consed vector-cells-consed
+                hmz-last-symbols-consed symbols-consed
+                hmz-last-string-chars-consed string-chars-consed
+                hmz-last-misc-objects-consed misc-objects-consed
+                hmz-last-intervals-consed intervals-consed
+                hmz-last-strings-consed strings-consed
+                                           )
+               ))
+
+   (message "Garbage Collections During Startup: %s" gcs-done)
+   ;; Go back to sane values
+   (run-with-idle-timer
+    5 nil
+    (lambda ()
+      (setq gc-cons-threshold 1000000)
+      (message "Init took %s secs, GC ran %s times. gc-cons-threshold restored to %S."
+               (emacs-init-time)
+               gcs-done
+               gc-cons-threshold)))
+
+   )
 
 ;;;;;;;;;;;;;;;
 ;; Rotate Text
@@ -694,7 +759,7 @@ Example:
  '(osx-clipboard-mode t)
  '(package-selected-packages
    (quote
-    (spaceline-all-the-icons all-the-icons memoize font-lock+ xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar spaceline smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc ir-black-theme info+ indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flycheck-pos-tip flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode elisp-slime-nav dumb-jump diff-hl company-web company-tern company-statistics column-enforce-mode color-identifiers-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+    (powerline rake inflections pcre2el spinner org-plus-contrib markdown-mode skewer-mode simple-httpd json-snatcher json-reformat multiple-cursors js2-mode hydra parent-mode projectile request haml-mode gitignore-mode fringe-helper git-gutter+ git-gutter flyspell-correct pos-tip flycheck pkg-info epl flx magit magit-popup git-commit with-editor iedit smartparens paredit anzu evil goto-chg undo-tree highlight f diminish web-completion-data s dash-functional tern company inf-ruby bind-map bind-key yasnippet packed dash helm avy helm-core async auto-complete popup esup spaceline-all-the-icons all-the-icons memoize font-lock+ xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar spaceline smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc ir-black-theme info+ indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flycheck-pos-tip flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode elisp-slime-nav dumb-jump diff-hl company-web company-tern company-statistics column-enforce-mode color-identifiers-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
  '(scroll-bar-mode nil)
  '(tabbar-separator (quote (1.2)))
  '(tabbar-use-images nil)
@@ -707,7 +772,7 @@ Example:
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(default ((((class color) (min-colors 89)) (:foreground "#D8DEE9" :background "#2E3440" :family "Fira Code" :foundry "nil" :slant normal :weight normal :height 181 :width normal))))
- '(button ((t (:background "#2E3440" :foreground "#88C0D0" :box (:line-width 2 :color "#D8DEE9" :style none)))))
+ '(button ((t (:background "#2E3440" :foreground "#88C0D0"))))
  '(font-lock-function-name-face ((t (:inherit normal :foreground "#bc6ec5"))))
  '(font-lock-keyword-face ((t (:inherit normal :foreground "#4f97d7"))))
  '(header-line ((t (:background "#2E3440" :foreground "#D8DEE9" :overline "#3B4252"))))
@@ -717,4 +782,11 @@ Example:
  '(neo-file-link-face ((t (:foreground "#b2b2b2" :weight light :height 120 :width normal :family "San Francisco"))))
  '(neo-header-face ((t (:foreground "light gray" :weight semi-bold :height 1.2 :family "San Francisco"))))
  '(neo-root-dir-face ((t (:inherit bold :foreground "#bc6ec5" :family "San Francisco"))))
+ '(tabbar-button ((t (:inherit tabbar-default))))
+ '(tabbar-default ((t (:inherit header-line-format :height 1.0 :background "#2E3440" :weight thin :foreground "#AAAAAA" :family "San Francisco"))))
+ '(tabbar-highlight ((t (:inherit tabbar-default :foreground "deep sky blue" :underline nil :overline t))))
+ '(tabbar-modified ((t (:inherit tabbar-default :foreground "SeaGreen"))))
+ '(tabbar-selected ((t (:inherit tabbar-default :foreground "white"))))
+ '(tabbar-selected-modified ((t (:inherit tabbar-selected :foreground "Spring Green"))))
+ '(tabbar-unselected ((t (:inherit tabbar-default))))
  '(window-divider ((t (:foreground "#3B4252")))))

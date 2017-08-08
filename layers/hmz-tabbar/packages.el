@@ -29,6 +29,10 @@ which require an initialization must be listed explicitly in the list.")
 
      '(tabbar-unselected ((t (:inherit tabbar-default )))))
 
+    (add-to-list 'all-the-icons-icon-alist
+                 '("\\.lua$" all-the-icons-wicon "moon-waning-crescent-5" :face all-the-icons-cyan))
+
+    :config
     ;; adding spaces
     (defun tabbar-buffer-tab-label (tab)
       "Return a label for TAB.
@@ -71,15 +75,15 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
       (setq icon-face (plist-get (text-properties-at 0 the-icon) 'face))
 
       (require 'org)
-
       (concat
        (propertize
         the-icon
-        'face (org-combine-plists
-               icon-face (if tab-is-active
-                             '(:height 1.5)
-                           '(:foreground "#AAAAAA")))
-        'display (if tab-is-active '(raise 0.3) '(raise 0.8))
+        'face (with-eval-after-load 'org
+                (org-combine-plists
+                 icon-face (if tab-is-active
+                               '(:height 1.5)
+                             '(:height 1.2 :foreground "#81A1C1"))))
+        'display (if tab-is-active '(raise 0.0) '(raise 0.0))
         'tabbar-tab tab
         'local-map (tabbar-make-tab-keymap tab)
         'help-echo 'tabbar-help-on-tab
@@ -96,7 +100,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
         'help-echo 'tabbar-help-on-tab
         'mouse-face 'tabbar-highlight
         'face tab-face
-        'display '(raise 0.8)
+        'display '(raise 0.2)
         'pointer 'hand)
        tabbar-separator-value)))
 
@@ -107,23 +111,25 @@ element."
       (let ((label (if tabbar-button-label-function
                        (funcall tabbar-button-label-function name)
                      (cons name name)))
-            (glyph (cond ((eq name 'home) (all-the-icons-wicon "alien" :face '(:height 1.0)))
+            (glyph (cond ((eq name 'home) (all-the-icons-wicon "alien" :face '(:height 1.5)))
                          ((eq name 'scroll-left) (all-the-icons-material "navigate_before"))
                          ((eq name 'scroll-right) (all-the-icons-material "navigate_next"))
                    (t "X")))
             )
 
+        (require 'org)
         ;; Cache the display value of the enabled/disabled buttons in
         ;; variables `tabbar-NAME-button-value'.
         (set (intern (format "tabbar-%s-button-value"  name))
              (cons
               (propertize glyph
                           'tabbar-button name
-                          'face (org-combine-plists
-                                 '(:inherit tabbar-default)
-                                 (plist-get (text-properties-at 0 glyph) 'face)
-                                 '(:foreground "orange" ))
-                          ;; 'display '(raise 0.3)
+                          'face (with-eval-after-load 'org
+                                  (org-combine-plists
+                                   '(:inherit tabbar-default)
+                                   (plist-get (text-properties-at 0 glyph) 'face)
+                                   '(:foreground "orange" )))
+                          'display '(raise -0.0)
                           'mouse-face 'tabbar-button-highlight
                           'pointer 'hand
                           'local-map (tabbar-make-button-keymap name)
@@ -134,8 +140,8 @@ element."
                           'face (org-combine-plists
                                  '(:inherit tabbar-default)
                                  (plist-get (text-properties-at 0 glyph) 'face)
-                                 '(:foreground "#AAAAAA" ))
-                          ;; 'display '(raise 0.3)
+                                 '(:foreground "#AAAAAA"))
+                          'display '(raise -0.0)
                           'mouse-face 'tabbar-button-highlight
                           'pointer 'hand
                           'local-map (tabbar-make-button-keymap name)
@@ -143,10 +149,9 @@ element."
               ))))
 
     ;; set to nil to force refresh
-    (setq tabbar-scroll-left-button-value nil)
-    (setq tabbar-scroll-right-button-value nil)
-    (setq tabbar-home-button-value nil)
-
+    ;; (setq tabbar-scroll-left-button-value nil)
+    ;; (setq tabbar-scroll-right-button-value nil)
+    ;; (setq tabbar-home-button-value nil)
 
     ;; Tabbar Groups Definition
     (defun my-tabbar-buffer-groups ()
@@ -162,22 +167,5 @@ element."
                   (t "user"))))
 
     (setq tabbar-buffer-groups-function 'my-tabbar-buffer-groups)
-    ;;  (defun tab(projectile-project-rootobar-add-tab-disabled (tabset object &optional append_ignored)
-    ;;    "Add to TABSET a tab with value OBJECT if there isn't one there yet.
-    ;; If the tab is added, it is added at the beginning of the tab list,
-    ;; unless the optional argument APPEND is non-nil, in which case it is
-    ;; added at the end."
-    ;;    (let ((tabs (tabbar-tabs tabset)))
-    ;;      (if (tabbar-get-tab object tabset)
-    ;;          tabs
-    ;;        (let ((tab (tabbar-make-tab object tabset)))
-    ;;          (tabbar-set-template tabset nil)
-    ;;          ;;(set tabset tabs)
-    ;;          (set tabset (sort (cons tab tabs)
-    ;;                            (lambda (a b)
-    ;;                              (string< (buffer-name (car a)) (buffer-name (car b)))
-    ;;                              )))
-
-    ;;          ))))
 
     ))
