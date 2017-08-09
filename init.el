@@ -419,10 +419,6 @@ you should place you code here."
               (hidden-mode-line-mode t)
               (visual-line-mode t)))
 
-  ;; safari like back and forward tabs
-  (global-set-key [(control tab)] 'tabbar-forward-tab)
-  (global-set-key [(control shift tab)] 'tabbar-backward-tab)
-
   ;; Unix Style C-h
   (global-set-key (kbd "C-?") 'help-command) ;; this isn't working...
   (global-set-key (kbd "M-?") 'mark-paragraph)
@@ -775,7 +771,7 @@ Example:
  '(button ((t (:background "#2E3440" :foreground "#88C0D0"))))
  '(font-lock-function-name-face ((t (:inherit normal :foreground "#bc6ec5"))))
  '(font-lock-keyword-face ((t (:inherit normal :foreground "#4f97d7"))))
- '(header-line ((t (:background "#2E3440" :foreground "#D8DEE9" :overline "#3B4252"))))
+ '(header-line ((t (:background "#2E3340" :foreground "#D8DEE9"))))
  '(linum ((t (:foreground "#44505c" :height 0.7 :family "San Francisco"))))
  '(minibuffer-prompt ((t (:foreground "#88C0D0" :weight bold :family "San Francisco"))))
  '(neo-dir-link-face ((t (:inherit bold :foreground "#4f97d7" :weight normal :height 120 :family "San Francisco"))))
@@ -786,7 +782,7 @@ Example:
  '(tabbar-default ((t (:inherit header-line-format :height 1.0 :background "#2E3440" :weight thin :foreground "#AAAAAA" :family "San Francisco"))))
  '(tabbar-highlight ((t (:inherit tabbar-default :foreground "deep sky blue" :underline nil :overline t))))
  '(tabbar-modified ((t (:inherit tabbar-default :foreground "SeaGreen"))))
- '(tabbar-selected ((t (:inherit tabbar-default :foreground "white"))))
+ '(tabbar-selected ((t (:inherit tabbar-default :overline "white" :foreground "white"))))
  '(tabbar-selected-modified ((t (:inherit tabbar-selected :foreground "Spring Green"))))
  '(tabbar-unselected ((t (:inherit tabbar-default))))
  '(window-divider ((t (:foreground "#3B4252")))))

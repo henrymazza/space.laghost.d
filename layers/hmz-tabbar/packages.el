@@ -22,7 +22,7 @@ which require an initialization must be listed explicitly in the list.")
      '(tabbar-default ((t (:inherit header-line-format :height 1.0 :background "#2E3440" :weight thin :foreground "#AAAAAA" :family "San Francisco"))))
      '(tabbar-modified ((t (:inherit tabbar-default :foreground "SeaGreen"))))
      '(tabbar-button ((t (:inherit tabbar-default))))
-     '(tabbar-selected ((t (:inherit tabbar-default :foreground "white"))))
+     '(tabbar-selected ((t (:inherit tabbar-default :overline "white" :foreground "white"))))
      '(tabbar-highlight ((t (:inherit tabbar-default :foreground "deep sky blue" :underline nil :overline t))))
 
      '(tabbar-selected-modified ((t (:inherit tabbar-selected :foreground "Spring Green"))))
@@ -33,6 +33,11 @@ which require an initialization must be listed explicitly in the list.")
                  '("\\.lua$" all-the-icons-wicon "moon-waning-crescent-5" :face all-the-icons-cyan))
 
     :config
+
+    ;; safari like back and forward tabs
+    (global-set-key [(control tab)] 'tabbar-forward-tab)
+    (global-set-key [(control shift tab)] 'tabbar-backward-tab)
+
     ;; adding spaces
     (defun tabbar-buffer-tab-label (tab)
       "Return a label for TAB.
@@ -81,7 +86,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
         'face (with-eval-after-load 'org
                 (org-combine-plists
                  icon-face (if tab-is-active
-                               '(:height 1.5)
+                               '(:height 1.2 :overline t)
                              '(:height 1.2 :foreground "#81A1C1"))))
         'display (if tab-is-active '(raise 0.0) '(raise 0.0))
         'tabbar-tab tab
@@ -111,10 +116,11 @@ element."
       (let ((label (if tabbar-button-label-function
                        (funcall tabbar-button-label-function name)
                      (cons name name)))
-            (glyph (cond ((eq name 'home) (all-the-icons-wicon "alien" :face '(:height 1.5)))
+            (glyph (cond ((eq name 'home) (all-the-icons-wicon "alien" :face '(:height 1.2) :display (list 'space :width (car tabbar-separator))))
                          ((eq name 'scroll-left) (all-the-icons-material "navigate_before"))
                          ((eq name 'scroll-right) (all-the-icons-material "navigate_next"))
                    (t "X")))
+            (raise-amount 0.0)
             )
 
         (require 'org)
@@ -122,36 +128,38 @@ element."
         ;; variables `tabbar-NAME-button-value'.
         (set (intern (format "tabbar-%s-button-value"  name))
              (cons
-              (propertize glyph
+              (concat (when (eq name 'home) " ")
+                      (propertize glyph
                           'tabbar-button name
                           'face (with-eval-after-load 'org
                                   (org-combine-plists
                                    '(:inherit tabbar-default)
                                    (plist-get (text-properties-at 0 glyph) 'face)
                                    '(:foreground "orange" )))
-                          'display '(raise -0.0)
+                          'display '(raise 0.0)
                           'mouse-face 'tabbar-button-highlight
                           'pointer 'hand
                           'local-map (tabbar-make-button-keymap name)
-                          'help-echo 'tabbar-help-on-button)
+                          'help-echo 'tabbar-help-on-button))
 
-              (propertize glyph
+              (concat (when (eq name 'home) " ")
+                      (propertize glyph
                           'tabbar-button name
                           'face (org-combine-plists
                                  '(:inherit tabbar-default)
                                  (plist-get (text-properties-at 0 glyph) 'face)
                                  '(:foreground "#AAAAAA"))
-                          'display '(raise -0.0)
+                          'display '(raise 0.0)
                           'mouse-face 'tabbar-button-highlight
                           'pointer 'hand
                           'local-map (tabbar-make-button-keymap name)
-                          'help-echo 'tabbar-help-on-button)
+                          'help-echo 'tabbar-help-on-button))
               ))))
 
     ;; set to nil to force refresh
-    ;; (setq tabbar-scroll-left-button-value nil)
-    ;; (setq tabbar-scroll-right-button-value nil)
-    ;; (setq tabbar-home-button-value nil)
+    (setq tabbar-scroll-left-button-value nil)
+    (setq tabbar-scroll-right-button-value nil)
+    (setq tabbar-home-button-value nil)
 
     ;; Tabbar Groups Definition
     (defun my-tabbar-buffer-groups ()
