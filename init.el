@@ -84,7 +84,8 @@ values."
     osx
     ruby-on-rails
     (ruby :variables ruby-version-manager 'rbenv)
-    spell-checking
+    (spell-checking :variables
+                    spell-checking-enable-by-default nil)
     syntax-checking
     ;; themes-megapack
     typography
@@ -159,7 +160,7 @@ values."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press <SPC> T n to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(nord)
+   dotspacemacs-themes '(tango)
                          ;; nord
                          ;; spacemacs-dark
                          ;; solarized-dark
@@ -352,16 +353,15 @@ you should place you code here."
   ;; space in between lines
   (setq-default line-spacing 2)
 
-
   ;; settings for window systems
   (when (window-system)
     ;; (set-frame-height (selected-frame) 40)
     ;; (set-frame-width (selected-frame) 80)
     ;; (set-frame-position (selected-frame) 480 150)
 
-    (push '(nord . (20 80)) colors-theme-identifiers-sat&light)
-    (load-theme 'nord)
-    )
+    (when (member 'nord dotspacemacs-themes)
+      (push '(nord . (20 80)) colors-theme-identifiers-sat&light)
+      (load-theme 'nord)))
 
   ;; Ember Mode
   (add-hook 'js-mode-hook (lambda () (ember-mode t)))
@@ -741,7 +741,7 @@ Example:
  '(coffee-tab-width 2 t)
  '(custom-safe-themes
    (quote
-    ("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "868f73b5cf78e72ca2402e1d48675e49cc9a9619c5544af7bf216515d22b58e7" "6c35ffc17f8288be4c7866deb7437e8af33cd09930e195738cdfef911ab77274" "d8f76414f8f2dcb045a37eb155bfaa2e1d17b6573ed43fb1d18b936febc7bbc2" "7ceb8967b229c1ba102378d3e2c5fef20ec96a41f615b454e0dc0bfa1d326ea6" "5999e12c8070b9090a2a1bbcd02ec28906e150bb2cdce5ace4f965c76cf30476" "67e998c3c23fe24ed0fb92b9de75011b92f35d3e89344157ae0d544d50a63a72" "66132890ee1f884b4f8e901f0c61c5ed078809626a547dbefbb201f900d03fd8" default)))
+    ("fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "868f73b5cf78e72ca2402e1d48675e49cc9a9619c5544af7bf216515d22b58e7" "6c35ffc17f8288be4c7866deb7437e8af33cd09930e195738cdfef911ab77274" "d8f76414f8f2dcb045a37eb155bfaa2e1d17b6573ed43fb1d18b936febc7bbc2" "7ceb8967b229c1ba102378d3e2c5fef20ec96a41f615b454e0dc0bfa1d326ea6" "5999e12c8070b9090a2a1bbcd02ec28906e150bb2cdce5ace4f965c76cf30476" "67e998c3c23fe24ed0fb92b9de75011b92f35d3e89344157ae0d544d50a63a72" "66132890ee1f884b4f8e901f0c61c5ed078809626a547dbefbb201f900d03fd8" default)))
  '(evil-shift-width 2)
  '(evil-want-Y-yank-to-eol t)
  '(mac-auto-operator-composition-mode t)
@@ -767,22 +767,4 @@ Example:
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((((class color) (min-colors 89)) (:foreground "#D8DEE9" :background "#2E3440" :family "Fira Code" :foundry "nil" :slant normal :weight normal :height 181 :width normal))))
- '(button ((t (:background "#2E3440" :foreground "#88C0D0"))))
- '(font-lock-function-name-face ((t (:inherit normal :foreground "#bc6ec5"))))
- '(font-lock-keyword-face ((t (:inherit normal :foreground "#4f97d7"))))
- '(header-line ((t (:background "#2E3340" :foreground "#D8DEE9"))))
- '(linum ((t (:foreground "#44505c" :height 0.7 :family "San Francisco"))))
- '(minibuffer-prompt ((t (:foreground "#88C0D0" :weight bold :family "San Francisco"))))
- '(neo-dir-link-face ((t (:inherit bold :foreground "#4f97d7" :weight normal :height 120 :family "San Francisco"))))
- '(neo-file-link-face ((t (:foreground "#b2b2b2" :weight light :height 120 :width normal :family "San Francisco"))))
- '(neo-header-face ((t (:foreground "light gray" :weight semi-bold :height 1.2 :family "San Francisco"))))
- '(neo-root-dir-face ((t (:inherit bold :foreground "#bc6ec5" :family "San Francisco"))))
- '(tabbar-button ((t (:inherit tabbar-default))))
- '(tabbar-default ((t (:inherit header-line-format :height 1.0 :background "#2E3440" :weight thin :foreground "#AAAAAA" :family "San Francisco"))))
- '(tabbar-highlight ((t (:inherit tabbar-default :foreground "deep sky blue" :underline nil :overline t))))
- '(tabbar-modified ((t (:inherit tabbar-default :foreground "SeaGreen"))))
- '(tabbar-selected ((t (:inherit tabbar-default :overline "white" :foreground "white"))))
- '(tabbar-selected-modified ((t (:inherit tabbar-selected :foreground "Spring Green"))))
- '(tabbar-unselected ((t (:inherit tabbar-default))))
- '(window-divider ((t (:foreground "#3B4252")))))
+)

@@ -19,18 +19,19 @@ which require an initialization must be listed explicitly in the list.")
      '(tabbar-separator (quote (1.2))))
 
     (custom-set-faces
-     '(tabbar-default ((t (:inherit header-line-format :height 1.0 :background "#2E3440" :weight thin :foreground "#AAAAAA" :family "San Francisco"))))
-     '(tabbar-modified ((t (:inherit tabbar-default :foreground "SeaGreen"))))
-     '(tabbar-button ((t (:inherit tabbar-default))))
-     '(tabbar-selected ((t (:inherit tabbar-default :overline "deep sky blue" :foreground "white"))))
-     '(tabbar-highlight ((t (:inherit tabbar-default :foreground "deep sky blue" :underline nil :overline t))))
+     ;; '(tabbar-default ((t (:inherit header-line-format :height 1.0 :weight thin :foreground "#AAAAAA" :family "San Francisco"))))
+     ;; '(tabbar-modified ((t (:inherit tabbar-default :foreground "SeaGreen"))))
+     ;; '(tabbar-button ((t (:inherit tabbar-default))))
+     ;; '(tabbar-selected ((t (:inherit tabbar-default :overline "orange" :foreground "white"))))
+     ;; '(tabbar-highlight ((t (:inherit tabbar-default :foreground "deep sky blue" :underline nil :overline t))))
 
-     '(tabbar-selected-modified ((t (:inherit tabbar-selected :foreground "Spring Green"))))
+     ;; '(tabbar-selected-modified ((t (:inherit tabbar-selected :foreground "Spring Green"))))
 
-     '(tabbar-unselected ((t (:inherit tabbar-default )))))
+     ;; '(tabbar-unselected ((t (:inherit tabbar-default ))))
+     )
 
     (add-to-list 'all-the-icons-icon-alist
-                 '("\\.lua$" all-the-icons-wicon "moon-waning-crescent-5" :face all-the-icons-cyan))
+                 '("\\.lua$" all-the-icons-wicon "moon-waning-crescent-3" :face all-the-icons-cyan))
 
     :config
 
@@ -86,7 +87,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
         'face (with-eval-after-load 'org
                 (org-combine-plists
                  icon-face (if tab-is-active
-                               '(:height 1.2 :overline "deep sky blue")
+                               '(:height 1.2 :overline "orange")
                              '(:height 1.2 :foreground "#81A1C1"))))
         'display (if tab-is-active '(raise 0.0) '(raise 0.0))
         'tabbar-tab tab
@@ -105,7 +106,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
         'help-echo 'tabbar-help-on-tab
         'mouse-face 'tabbar-highlight
         'face tab-face
-        'display '(raise 0.2)
+        'display '(raise 0.0)
         'pointer 'hand)
        tabbar-separator-value)))
 
@@ -116,7 +117,7 @@ element."
       (let ((label (if tabbar-button-label-function
                        (funcall tabbar-button-label-function name)
                      (cons name name)))
-            (glyph (cond ((eq name 'home) (all-the-icons-wicon "alien" :face '(:height 1.2) :display (list 'space :width (car tabbar-separator))))
+            (glyph (cond ((eq name 'home) (all-the-icons-wicon "alien" :face '(:height 1.2)))
                          ((eq name 'scroll-left) (all-the-icons-material "navigate_before"))
                          ((eq name 'scroll-right) (all-the-icons-material "navigate_next"))
                    (t "X")))
@@ -136,7 +137,8 @@ element."
                                    '(:inherit tabbar-default)
                                    (plist-get (text-properties-at 0 glyph) 'face)
                                    '(:foreground "orange" )))
-                          'display '(raise 0.0)
+                          'display '(raise 0.0 )
+                          ;; (list 'space :width (car tabbar-separator))
                           'mouse-face 'tabbar-button-highlight
                           'pointer 'hand
                           'local-map (tabbar-make-button-keymap name)
