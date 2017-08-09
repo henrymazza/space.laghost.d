@@ -22,7 +22,7 @@ which require an initialization must be listed explicitly in the list.")
      '(tabbar-default ((t (:inherit header-line-format :height 1.0 :background "#2E3440" :weight thin :foreground "#AAAAAA" :family "San Francisco"))))
      '(tabbar-modified ((t (:inherit tabbar-default :foreground "SeaGreen"))))
      '(tabbar-button ((t (:inherit tabbar-default))))
-     '(tabbar-selected ((t (:inherit tabbar-default :overline "white" :foreground "white"))))
+     '(tabbar-selected ((t (:inherit tabbar-default :overline "deep sky blue" :foreground "white"))))
      '(tabbar-highlight ((t (:inherit tabbar-default :foreground "deep sky blue" :underline nil :overline t))))
 
      '(tabbar-selected-modified ((t (:inherit tabbar-selected :foreground "Spring Green"))))
@@ -86,7 +86,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
         'face (with-eval-after-load 'org
                 (org-combine-plists
                  icon-face (if tab-is-active
-                               '(:height 1.2 :overline t)
+                               '(:height 1.2 :overline "deep sky blue")
                              '(:height 1.2 :foreground "#81A1C1"))))
         'display (if tab-is-active '(raise 0.0) '(raise 0.0))
         'tabbar-tab tab
