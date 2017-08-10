@@ -5,9 +5,6 @@
   "List of all packages to install and/or initialize. Built-in packages
 which require an initialization must be listed explicitly in the list.")
 
-(defvar hmz-tabbar-excluded-packages '()
-  "List of packages to exclude.")
-
 (defun hmz-tabbar/init-tabbar ()
   "Tabbar customizations"
   (use-package tabbar
@@ -19,22 +16,20 @@ which require an initialization must be listed explicitly in the list.")
      '(tabbar-separator (quote (1.2))))
 
     (custom-set-faces
-     ;; '(tabbar-default ((t (:inherit header-line-format :height 1.0 :weight thin :foreground "#AAAAAA" :family "San Francisco"))))
-     ;; '(tabbar-modified ((t (:inherit tabbar-default :foreground "SeaGreen"))))
-     ;; '(tabbar-button ((t (:inherit tabbar-default))))
-     ;; '(tabbar-selected ((t (:inherit tabbar-default :overline "orange" :foreground "white"))))
-     ;; '(tabbar-highlight ((t (:inherit tabbar-default :foreground "deep sky blue" :underline nil :overline t))))
+     '(tabbar-default ((t (:inherit header-line :height 0.8 :weight thin :box nil))))
+     '(tabbar-modified ((t (:inherit tabbar-default :foreground "SeaGreen" :box nil))))
+     '(tabbar-button ((t (:inherit tabbar-default))))
+     '(tabbar-selected ((t (:inherit tabbar-default :overline t :weight normal))))
+     '(tabbar-highlight ((t (:inherit highlight :underline nil :overline t))))
 
-     ;; '(tabbar-selected-modified ((t (:inherit tabbar-selected :foreground "Spring Green"))))
-
-     ;; '(tabbar-unselected ((t (:inherit tabbar-default ))))
+     '(tabbar-selected-modified ((t (:inherit tabbar-selected))))
+     '(tabbar-unselected ((t (:inherit tabbar-default ))))
      )
 
     (add-to-list 'all-the-icons-icon-alist
                  '("\\.lua$" all-the-icons-wicon "moon-waning-crescent-3" :face all-the-icons-cyan))
 
     :config
-
     ;; safari like back and forward tabs
     (global-set-key [(control tab)] 'tabbar-forward-tab)
     (global-set-key [(control shift tab)] 'tabbar-backward-tab)
@@ -85,10 +80,11 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
        (propertize
         the-icon
         'face (with-eval-after-load 'org
-                (org-combine-plists
-                 icon-face (if tab-is-active
-                               '(:height 1.2 :overline "orange")
-                             '(:height 1.2 :foreground "#81A1C1"))))
+          (org-combine-plists
+           '(:inherit tabbar-default)
+           (plist-get (text-properties-at 0 the-icon) 'face)
+           ;; (unless tab-is-active '(:foreground (face-attribute 'default :foreground)))
+           ))
         'display (if tab-is-active '(raise 0.0) '(raise 0.0))
         'tabbar-tab tab
         'local-map (tabbar-make-tab-keymap tab)
@@ -106,7 +102,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
         'help-echo 'tabbar-help-on-tab
         'mouse-face 'tabbar-highlight
         'face tab-face
-        'display '(raise 0.0)
+        'display '(raise 0.2)
         'pointer 'hand)
        tabbar-separator-value)))
 
@@ -117,7 +113,7 @@ element."
       (let ((label (if tabbar-button-label-function
                        (funcall tabbar-button-label-function name)
                      (cons name name)))
-            (glyph (cond ((eq name 'home) (all-the-icons-wicon "alien" :face '(:height 1.2)))
+            (glyph (cond ((eq name 'home) (concat " "(all-the-icons-wicon "alien" :face '(:inherit tabbar-default :height 1.2))))
                          ((eq name 'scroll-left) (all-the-icons-material "navigate_before"))
                          ((eq name 'scroll-right) (all-the-icons-material "navigate_next"))
                    (t "X")))
@@ -129,33 +125,31 @@ element."
         ;; variables `tabbar-NAME-button-value'.
         (set (intern (format "tabbar-%s-button-value"  name))
              (cons
-              (concat (when (eq name 'home) " ")
-                      (propertize glyph
+              (propertize glyph
                           'tabbar-button name
                           'face (with-eval-after-load 'org
                                   (org-combine-plists
                                    '(:inherit tabbar-default)
-                                   (plist-get (text-properties-at 0 glyph) 'face)
-                                   '(:foreground "orange" )))
+                                   (plist-get (text-properties-at (- (length glyph) 1) glyph) 'face)
+                                   ))
                           'display '(raise 0.0 )
                           ;; (list 'space :width (car tabbar-separator))
                           'mouse-face 'tabbar-button-highlight
                           'pointer 'hand
                           'local-map (tabbar-make-button-keymap name)
-                          'help-echo 'tabbar-help-on-button))
+                          'help-echo 'tabbar-help-on-button)
 
-              (concat (when (eq name 'home) " ")
-                      (propertize glyph
+
+              (propertize glyph
                           'tabbar-button name
                           'face (org-combine-plists
                                  '(:inherit tabbar-default)
-                                 (plist-get (text-properties-at 0 glyph) 'face)
-                                 '(:foreground "#AAAAAA"))
+                                 (plist-get (text-properties-at 0 glyph) 'face))
                           'display '(raise 0.0)
                           'mouse-face 'tabbar-button-highlight
                           'pointer 'hand
                           'local-map (tabbar-make-button-keymap name)
-                          'help-echo 'tabbar-help-on-button))
+                          'help-echo 'tabbar-help-on-button)
               ))))
 
     ;; set to nil to force refresh

@@ -160,7 +160,8 @@ values."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press <SPC> T n to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(tango)
+   dotspacemacs-themes '(nord)
+                         ;; tango
                          ;; nord
                          ;; spacemacs-dark
                          ;; solarized-dark
@@ -277,7 +278,7 @@ values."
    ;; Select a scope to highlight delimiters. Possible values are `any',
    ;; `current', `all' or `nil'. Default is `all' (highlight any scope and
    ;; emphasis the current one). (default 'all)
-   dotspacemacs-highlight-delimiters 'all
+   dotspacemacs-highlight-delimiters nil
    ;; If non nil advises quit functions to keep server open when quitting.
    ;; (default nil)
    dotspacemacs-persistent-server nil
@@ -359,9 +360,11 @@ you should place you code here."
     ;; (set-frame-width (selected-frame) 80)
     ;; (set-frame-position (selected-frame) 480 150)
 
-    (when (member 'nord dotspacemacs-themes)
+    (if (member 'nord dotspacemacs-themes)
+        (rainbow-identifiers-mode nil)
       (push '(nord . (20 80)) colors-theme-identifiers-sat&light)
-      (load-theme 'nord)))
+      (rainbow-identifiers-mode t)
+      ))
 
   ;; Ember Mode
   (add-hook 'js-mode-hook (lambda () (ember-mode t)))
@@ -738,7 +741,7 @@ Example:
  ;; If there is more than one, they won't work right.
  '(ansi-color-names-vector
    ["#0a0814" "#f2241f" "#67b11d" "#b1951d" "#4f97d7" "#a31db1" "#28def0" "#b2b2b2"])
- '(coffee-tab-width 2 t)
+ '(coffee-tab-width 2)
  '(custom-safe-themes
    (quote
     ("fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "868f73b5cf78e72ca2402e1d48675e49cc9a9619c5544af7bf216515d22b58e7" "6c35ffc17f8288be4c7866deb7437e8af33cd09930e195738cdfef911ab77274" "d8f76414f8f2dcb045a37eb155bfaa2e1d17b6573ed43fb1d18b936febc7bbc2" "7ceb8967b229c1ba102378d3e2c5fef20ec96a41f615b454e0dc0bfa1d326ea6" "5999e12c8070b9090a2a1bbcd02ec28906e150bb2cdce5ace4f965c76cf30476" "67e998c3c23fe24ed0fb92b9de75011b92f35d3e89344157ae0d544d50a63a72" "66132890ee1f884b4f8e901f0c61c5ed078809626a547dbefbb201f900d03fd8" default)))
@@ -767,4 +770,12 @@ Example:
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
-)
+ '(header-line ((t (:inherit mode-line :background "grey90" :foreground "grey20" :box nil :height 1.1 :family "San Francisco"))))
+ '(linum ((t (:inherit (shadow default) :height 0.5 :family "San Francisco"))))
+ '(tabbar-button ((t (:inherit tabbar-default))))
+ '(tabbar-default ((t (:inherit header-line :height 0.8 :weight thin :box nil))))
+ '(tabbar-highlight ((t (:inherit tabbar-default :foreground "deep sky blue" :underline nil :overline t))))
+ '(tabbar-modified ((t (:inherit tabbar-default :foreground "SeaGreen" :box nil))))
+ '(tabbar-selected ((t (:inherit tabbar-default :overline t))))
+ '(tabbar-selected-modified ((t (:inherit tabbar-selected))))
+ '(tabbar-unselected ((t (:inherit tabbar-default)))))
