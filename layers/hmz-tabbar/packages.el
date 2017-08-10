@@ -9,22 +9,64 @@ which require an initialization must be listed explicitly in the list.")
   "Tabbar customizations"
   (use-package tabbar
     :defer t
+
     :init
     (tabbar-mode 1)
 
-    (custom-set-variables
-     '(tabbar-separator (quote (1.2))))
+    ;; (custom-set-variables
+    ;;  '(tabbar-separator (quote (1.2))))
 
-    (custom-set-faces
-     '(tabbar-default ((t (:inherit header-line :height 0.8 :weight thin :box nil))))
-     '(tabbar-modified ((t (:inherit tabbar-default :foreground "SeaGreen" :box nil))))
-     '(tabbar-button ((t (:inherit tabbar-default))))
-     '(tabbar-selected ((t (:inherit tabbar-default :overline t :weight normal))))
-     '(tabbar-highlight ((t (:inherit highlight :underline nil :overline t))))
+    ;; (default bold)
+    ;; (setq face-remapping-alist nil)
+    ;; (face-remap-add-relative 'linum :height 0.6 :background (face-attribute 'default :background))
 
-     '(tabbar-selected-modified ((t (:inherit tabbar-selected))))
-     '(tabbar-unselected ((t (:inherit tabbar-default ))))
-     )
+    ;; use set-face-attribute to redefine faces globally without interfering with customize
+
+
+    (set-face-attribute 'tabbar-default nil
+                        :inherit 'default
+                        :height 0.8
+                        :underline nil
+                        :weight 'light
+                        :box nil)
+
+    (set-face-attribute 'tabbar-selected nil
+                        :box nil
+                        :inherit 'tabbar-default
+                        :overline t
+                        :weight 'normal)
+
+    (set-face-attribute 'tabbar-highlight nil
+                        :inherit 'tabbar-default
+                        :box nil)
+
+    (set-face-attribute 'tabbar-selected-modified nil
+                        :inherit 'tabbar-default
+                        :box nil)
+
+    (set-face-attribute 'tabbar-modified nil
+                        :box nil
+                        :inherit 'tabbar-selected
+                        )
+
+    (set-face-attribute 'tabbar-unselected nil
+                        :box nil
+                        :inherit 'tabbar-default)
+
+    (set-face-attribute 'tabbar-button nil
+                        :height 1.5
+                        :inherit 'tabbar-default)
+
+    ;; (face-remap-add-relative
+    ;;  '(tabbar-default :inherit header-line :height 0.8 :weight thin :box nil)
+    ;;  '(tabbar-modified :inherit tabbar-default :foreground "SeaGreen" :box nil)
+    ;;  '(tabbar-button ((t (:inherit tabbar-default))))
+    ;;  '(tabbar-selected ((t (:inherit tabbar-default :overline t :weight normal))))
+    ;;  '(tabbar-highlight ((t (:inherit highlight :underline nil :overline t))))
+
+    ;;  '(tabbar-selected-modified ((t (:inherit tabbar-selected))))
+    ;;  '(tabbar-unselected ((t (:inherit tabbar-default ))))
+    ;;  )
 
     (add-to-list 'all-the-icons-icon-alist
                  '("\\.lua$" all-the-icons-wicon "moon-waning-crescent-3" :face all-the-icons-cyan))
@@ -81,9 +123,9 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
         the-icon
         'face (with-eval-after-load 'org
           (org-combine-plists
-           '(:inherit tabbar-default)
            (plist-get (text-properties-at 0 the-icon) 'face)
-           ;; (unless tab-is-active '(:foreground (face-attribute 'default :foreground)))
+           '(:background (tabbar-background-color))
+           ;; (unless tab-is-active '(:foreground nil))
            ))
         'display (if tab-is-active '(raise 0.0) '(raise 0.0))
         'tabbar-tab tab
@@ -93,7 +135,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
         )
        (propertize
         (concat
-         " "
+
          (if tabbar-tab-label-function
              (funcall tabbar-tab-label-function tab)
            tab))
@@ -102,7 +144,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
         'help-echo 'tabbar-help-on-tab
         'mouse-face 'tabbar-highlight
         'face tab-face
-        'display '(raise 0.2)
+        'display '(raise 0.25)
         'pointer 'hand)
        tabbar-separator-value)))
 
