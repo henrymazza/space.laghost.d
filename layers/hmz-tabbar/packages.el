@@ -11,17 +11,13 @@ which require an initialization must be listed explicitly in the list.")
     :defer t
 
     :init
+
+    ;; Turn the thing on!
     (tabbar-mode 1)
 
-    ;; (custom-set-variables
-    ;;  '(tabbar-separator (quote (1.2))))
-
-    ;; (default bold)
-    ;; (setq face-remapping-alist nil)
-    ;; (face-remap-add-relative 'linum :height 0.6 :background (face-attribute 'default :background))
-
-    ;; use set-face-attribute to redefine faces globally without interfering with customize
-
+    :config
+    ;; override so we can change default value instead of custom one
+    (setq tabbar-separator (list 1.2))
 
     (set-face-attribute 'tabbar-default nil
                         :inherit 'default
@@ -29,6 +25,12 @@ which require an initialization must be listed explicitly in the list.")
                         :underline nil
                         :weight 'light
                         :box nil)
+
+    (set-face-attribute 'tabbar-selected-modified nil
+                        :box nil
+                        :inherit 'tabbar-default
+                        :overline t
+                        :weight 'normal)
 
     (set-face-attribute 'tabbar-selected nil
                         :box nil
@@ -57,21 +59,9 @@ which require an initialization must be listed explicitly in the list.")
                         :height 1.5
                         :inherit 'tabbar-default)
 
-    ;; (face-remap-add-relative
-    ;;  '(tabbar-default :inherit header-line :height 0.8 :weight thin :box nil)
-    ;;  '(tabbar-modified :inherit tabbar-default :foreground "SeaGreen" :box nil)
-    ;;  '(tabbar-button ((t (:inherit tabbar-default))))
-    ;;  '(tabbar-selected ((t (:inherit tabbar-default :overline t :weight normal))))
-    ;;  '(tabbar-highlight ((t (:inherit highlight :underline nil :overline t))))
-
-    ;;  '(tabbar-selected-modified ((t (:inherit tabbar-selected))))
-    ;;  '(tabbar-unselected ((t (:inherit tabbar-default ))))
-    ;;  )
-
     (add-to-list 'all-the-icons-icon-alist
                  '("\\.lua$" all-the-icons-wicon "moon-waning-crescent-3" :face all-the-icons-cyan))
 
-    :config
     ;; safari like back and forward tabs
     (global-set-key [(control tab)] 'tabbar-forward-tab)
     (global-set-key [(control shift tab)] 'tabbar-backward-tab)
@@ -124,7 +114,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
         'face (with-eval-after-load 'org
           (org-combine-plists
            (plist-get (text-properties-at 0 the-icon) 'face)
-           '(:background (tabbar-background-color))
+           `(:background ,(tabbar-background-color))
            ;; (unless tab-is-active '(:foreground nil))
            ))
         'display (if tab-is-active '(raise 0.0) '(raise 0.0))
@@ -213,5 +203,4 @@ element."
                   (t "user"))))
 
     (setq tabbar-buffer-groups-function 'my-tabbar-buffer-groups)
-
     ))

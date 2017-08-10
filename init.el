@@ -87,7 +87,7 @@ values."
     (spell-checking :variables
                     spell-checking-enable-by-default nil)
     syntax-checking
-    themes-megapack
+    ;; themes-megapack
     typography
     uninpaired
     version-control
@@ -121,7 +121,7 @@ values."
   ;; spacemacs settings.
   (setq-default
    ;; Default theme
-   ;; dotspacemacs-default-theme 'dracula
+   dotspacemacs-default-theme 'dracula
    ;; If non nil ELPA repositories are contacted via HTTPS whenever it's
    ;; possible. Set it to nil if you have no way to use HTTPS in your
    ;; environment, otherwise it is strongly recommended to let it set to t.
@@ -176,7 +176,7 @@ values."
                               :size 18
                               :weight normal
                               :width normal
-                              :powerline-scale 0.5)
+                              :powerline-scale 1.1)
    ;; The leader key
    dotspacemacs-leader-key "SPC"
    ;; The leader key accessible in `emacs state' and `insert state'
@@ -318,7 +318,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
   (setq inhibit-compacting-font-caches t)
 
   ;; show garbage collection
-  (setq garbage-collection-messages t)
+  (setq garbage-collection-messages nil)
 
   ;; Hide title bar
   ;; (setq initial-frame-alist '((undecorated . t)))
@@ -406,13 +406,15 @@ you should place you code here."
   ;; keep last messages visible
   (defadvice message (after message-tail activate)
     "goto point max after a message"
-    (with-current-buffer "*Messages*"
-      (goto-char (point-max))
-      (walk-windows (lambda (window)
-                      (if (string-equal (buffer-name (window-buffer window)) "*Messages*")
-                          (set-window-point window (point-max))))
-                    nil
-                    t)))
+    ;;don't make anything if *Messages* is current
+    (unless (eq (current-buffer) "*Messages*")
+      (with-current-buffer "*Messages*"
+        (goto-char (point-max))
+        (walk-windows (lambda (window)
+                        (if (string-equal (buffer-name (window-buffer window)) "*Messages*")
+                            (set-window-point window (point-max))))
+                      nil
+                      t))))
 
   ;; my old pal C-k
   (define-key evil-normal-state-map (kbd "C-k") 'kill-this-buffer)
@@ -568,40 +570,6 @@ you should place you code here."
                ;; Set width here so it takes scaled font size
                (setq neo-window-width 16)
                (setq neo-window-fixed-size nil)
-               ))
-
-   (setq
-    hmz-last-cons-cells-consed 0
-    hmz-last-floats-consed 0
-    hmz-last-vector-cells-consed 0
-    hmz-last-symbols-consed 0
-    hmz-last-string-chars-consed 0
-    misc-objects-consed 0
-    hmz-last-intervals-consed 0
-    hmz-last-strings-consed 0
-    )
-   (add-hook 'post-gc-hook
-             (lambda ()
-               (message " cons: %s floats: %s vector: %s symbols: %s string: %s misc-obj: %s intervals: %s strings: %s"
-                        (- cons-cells-consed hmz-last-cons-cells-consed)
-                        (- floats-consed hmz-last-floats-consed)
-                        (- vector-cells-consed hmz-last-vector-cells-consed)
-                        (- symbols-consed hmz-last-symbols-consed)
-                        (- string-chars-consed hmz-last-string-chars-consed)
-                        (- misc-objects-consed hmz-last-misc-objects-consed)
-                        (- intervals-consed hmz-last-intervals-consed)
-                        (- strings-consed hmz-last-strings-consed))
-
-               (setq
-                hmz-last-cons-cells-consed cons-cells-consed
-                hmz-last-floats-consed floats-consed
-                hmz-last-vector-cells-consed vector-cells-consed
-                hmz-last-symbols-consed symbols-consed
-                hmz-last-string-chars-consed string-chars-consed
-                hmz-last-misc-objects-consed misc-objects-consed
-                hmz-last-intervals-consed intervals-consed
-                hmz-last-strings-consed strings-consed
-                                           )
                ))
 
    (message "Garbage Collections During Startup: %s" gcs-done)
