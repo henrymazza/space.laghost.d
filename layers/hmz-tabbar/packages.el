@@ -1,3 +1,4 @@
+;; -*- coding: utf-8; -*-
 (defvar hmz-tabbar-packages
   '(
     tabbar
@@ -11,8 +12,7 @@ which require an initialization must be listed explicitly in the list.")
     :defer t
 
     :init
-
-    ;; Turn the thing on!
+    ;; init me!
     (tabbar-mode 1)
 
     :config
@@ -20,15 +20,24 @@ which require an initialization must be listed explicitly in the list.")
     (setq tabbar-separator (list 1.2))
 
     (set-face-attribute 'tabbar-default nil
-                        :inherit 'default
-                        :height 0.8
+                        :inherit 'header-line
+                        :foreground 'unspecified
+                        :background 'unspecified
                         :underline nil
                         :weight 'light
                         :box nil)
 
-    (set-face-attribute 'tabbar-selected-modified nil
+    (set-face-attribute 'tabbar-selected nil
                         :box nil
                         :inherit 'tabbar-default
+                        :overline t
+                        :foreground 'unspecified
+                        :background 'unspecified
+                        :weight 'normal)
+
+    (set-face-attribute 'tabbar-selected-modified nil
+                        :box nil
+                        :inherit 'tabbar-selected
                         :overline t
                         :weight 'normal)
 
@@ -40,16 +49,15 @@ which require an initialization must be listed explicitly in the list.")
 
     (set-face-attribute 'tabbar-highlight nil
                         :inherit 'tabbar-default
-                        :box nil)
-
-    (set-face-attribute 'tabbar-selected-modified nil
-                        :inherit 'tabbar-default
+                        :underline nil
+                        :overline t
                         :box nil)
 
     (set-face-attribute 'tabbar-modified nil
                         :box nil
-                        :inherit 'tabbar-selected
-                        )
+                        :foreground 'unspecified
+                        :background 'unspecified
+                        :inherit 'tabbar-default)
 
     (set-face-attribute 'tabbar-unselected nil
                         :box nil
@@ -93,30 +101,33 @@ element.
 Call `tabbar-tab-label-function' to obtain a label for TAB."
       (let
           ((tab-face (cond ((and (tabbar-selected-p tab (tabbar-current-tabset))
-                                (tabbar-modified-p tab (tabbar-current-tabset)))
-                           'tabbar-selected-modified)
-                          ((tabbar-selected-p tab (tabbar-current-tabset))
-                           'tabbar-selected)
-                          ((tabbar-modified-p tab (tabbar-current-tabset))
-                           'tabbar-modified)
-                          (t 'tabbar-unselected)))
+                                 (tabbar-modified-p tab (tabbar-current-tabset)))
+                            'tabbar-selected-modified)
+                           ((tabbar-selected-p tab (tabbar-current-tabset))
+                            'tabbar-selected)
+                           ((tabbar-modified-p tab (tabbar-current-tabset))
+                            'tabbar-modified)
+                           (t 'tabbar-unselected)))
 
-                    (the-icon (all-the-icons-icon-for-file
-                              (replace-regexp-in-string "<.*>" "" (format "%s"(tabbar-tab-value tab)))))
-                    (tab-is-active (tabbar-selected-p tab (tabbar-current-tabset))))
+           (the-icon (all-the-icons-icon-for-file
+                      (replace-regexp-in-string "<.*>" "" (format "%s"(tabbar-tab-value tab)))))
 
-      (setq icon-face (plist-get (text-properties-at 0 the-icon) 'face))
+           (tab-is-active (tabbar-selected-p tab (tabbar-current-tabset)))
 
-      (require 'org)
+           (icon-face nil)
+           )
+
+        (setq icon-face (plist-get (text-properties-at 0 the-icon) 'face))
+
       (concat
        (propertize
         the-icon
         'face (with-eval-after-load 'org
-          (org-combine-plists
-           (plist-get (text-properties-at 0 the-icon) 'face)
-           `(:background ,(tabbar-background-color))
-           ;; (unless tab-is-active '(:foreground nil))
-           ))
+                (org-combine-plists
+                 (plist-get (text-properties-at 0 the-icon) 'face)
+                 `(:background ,(tabbar-background-color))
+                 (unless tab-is-active '(:foreground (face-attribute 'tabbar-default :foreground nil '(header-line default))))
+                 ))
         'display (if tab-is-active '(raise 0.0) '(raise 0.0))
         'tabbar-tab tab
         'local-map (tabbar-make-tab-keymap tab)
@@ -145,7 +156,7 @@ element."
       (let ((label (if tabbar-button-label-function
                        (funcall tabbar-button-label-function name)
                      (cons name name)))
-            (glyph (cond ((eq name 'home) (concat " "(all-the-icons-wicon "alien" :face '(:inherit tabbar-default :height 1.2))))
+            (glyph (cond ((eq name 'home) (concat " " (all-the-icons-wicon "alien" :face '(:inherit tabbar-default :height 1.2))))
                          ((eq name 'scroll-left) (all-the-icons-material "navigate_before"))
                          ((eq name 'scroll-right) (all-the-icons-material "navigate_next"))
                    (t "X")))
@@ -157,19 +168,19 @@ element."
         ;; variables `tabbar-NAME-button-value'.
         (set (intern (format "tabbar-%s-button-value"  name))
              (cons
-              (propertize glyph
-                          'tabbar-button name
-                          'face (with-eval-after-load 'org
-                                  (org-combine-plists
-                                   '(:inherit tabbar-default)
-                                   (plist-get (text-properties-at (- (length glyph) 1) glyph) 'face)
-                                   ))
-                          'display '(raise 0.0 )
-                          ;; (list 'space :width (car tabbar-separator))
-                          'mouse-face 'tabbar-button-highlight
-                          'pointer 'hand
-                          'local-map (tabbar-make-button-keymap name)
-                          'help-echo 'tabbar-help-on-button)
+               (propertize glyph
+                           'tabbar-button name
+                           'face (with-eval-after-load 'org
+                                   (org-combine-plists
+                                    '(:inherit tabbar-default)
+                                    (plist-get (text-properties-at (- (length glyph) 1) glyph) 'face)
+                                    ))
+                           'display '(raise 0.0 )
+                           ;; (list 'space :width (car tabbar-separator))
+                           'mouse-face 'tabbar-button-highlight
+                           'pointer 'hand
+                           'local-map (tabbar-make-button-keymap name)
+                           'help-echo 'tabbar-help-on-button)
 
 
               (propertize glyph
