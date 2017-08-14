@@ -36,53 +36,57 @@ which require an initialization must be listed explicitly in the list.")
     ;; override so we can change default value instead of custom one
     (setq tabbar-separator (list 1.2))
 
-    (set-face-attribute 'tabbar-default nil
-                        :inherit 'header-line
-                        :foreground 'unspecified
-                        :background 'unspecified
-                        :underline nil
-                        :weight 'light
-                        :box nil)
+    (defun hmz-tabbar-refresh-faces ()
+      "Refreshes faces dependent of theme faces."
 
-    (set-face-attribute 'tabbar-selected nil
-                        :box nil
-                        :inherit 'tabbar-default
-                        :overline t
-                        :foreground 'unspecified
-                        :background 'unspecified
-                        :weight 'normal)
+      (set-face-attribute 'tabbar-default nil
+                          :inherit 'header-line
+                          :foreground 'unspecified
+                          :background 'unspecified
+                          :underline nil
+                          :weight 'light
+                          :box nil)
 
-    (set-face-attribute 'tabbar-selected-modified nil
-                        :box nil
-                        :inherit 'tabbar-selected
-                        :overline t
-                        :weight 'normal)
+      (set-face-attribute 'tabbar-selected-modified nil
+                          :box nil
+                          :foreground (face-attribute 'font-lock-builtin-face :foreground)
+                          :inherit 'tabbar-selected
+                          :overline t
+                          :weight 'normal)
 
-    (set-face-attribute 'tabbar-selected nil
-                        :box nil
-                        :inherit 'tabbar-default
-                        :overline t
-                        :weight 'normal)
+      (set-face-attribute 'tabbar-selected nil
+                          :box nil
+                          :foreground (face-attribute 'font-lock-function-name-face :foreground)
+                          :inherit 'tabbar-default
+                          :overline t
+                          :weight 'normal)
 
-    (set-face-attribute 'tabbar-highlight nil
-                        :inherit 'tabbar-default
-                        :underline nil
-                        :overline t
-                        :box nil)
+      (set-face-attribute 'tabbar-highlight nil
+                          :inherit 'tabbar-default
+                          :foreground (face-attribute
+                                       'font-lock-keyword-face :foreground)
+                          :underline nil
+                          :overline t
+                          :box nil)
 
-    (set-face-attribute 'tabbar-modified nil
-                        :box nil
-                        :foreground 'unspecified
-                        :background 'unspecified
-                        :inherit 'tabbar-default)
+      (set-face-attribute 'tabbar-modified nil
+                          :box nil
+                          :foreground 'unspecified
+                          :background 'unspecified
+                          :inherit 'tabbar-default)
 
-    (set-face-attribute 'tabbar-unselected nil
-                        :box nil
-                        :inherit 'tabbar-default)
+      (set-face-attribute 'tabbar-unselected nil
+                          :foreground 'unspecified
+                          :background 'unspecified
+                          :box nil
+                          :inherit 'tabbar-default)
 
-    (set-face-attribute 'tabbar-button nil
-                        :height 1.5
-                        :inherit 'tabbar-default)
+      (set-face-attribute 'tabbar-button nil
+                          :height 1.5
+                          :inherit 'tabbar-default)
+      )
+
+    (hmz-tabbar-refresh-faces)
 
     (add-to-list 'all-the-icons-icon-alist
                  '("\\.lua$" all-the-icons-wicon "moon-waning-crescent-3" :face all-the-icons-cyan))
@@ -112,45 +116,35 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
            (icon-face (plist-get (text-properties-at 0 the-icon) 'face))
            )
 
-        (message "%s"
-         (plist-merge
-          ;; (get icon-face 'foreground)
-          (plist-get (text-properties-at 0 the-icon) 'face)
-          `(:background ,(tabbar-background-color))
-          (unless tab-is-active
-            `(:foreground ,(face-attribute 'header-line :foreground nil 'default)))
-          )
-         )
         (concat
-       (propertize
-        the-icon
-        'face (plist-merge
+         (propertize
+          the-icon
+          'face (plist-merge
                  ;; (get icon-face 'foreground)
                  (plist-get (text-properties-at 0 the-icon) 'face)
                  `(:background ,(tabbar-background-color))
                  (unless tab-is-active
                    `(:foreground ,(face-attribute 'header-line :foreground nil 'default)))
                  )
-        'display (if tab-is-active '(raise 0.0) '(raise 0.0))
-        'tabbar-tab tab
-        'local-map (tabbar-make-tab-keymap tab)
-        'help-echo 'tabbar-help-on-tab
-        'mouse-face 'tabbar-highlight
-        )
-       (propertize
-        (concat
-
-         (if tabbar-tab-label-function
-             (funcall tabbar-tab-label-function tab)
-           tab))
-        'tabbar-tab tab
-        'local-map (tabbar-make-tab-keymap tab)
-        'help-echo 'tabbar-help-on-tab
-        'mouse-face 'tabbar-highlight
-        'face tab-face
-        'display '(raise text-raise)
-        'pointer 'hand)
-       tabbar-separator-value)))
+          'display (if tab-is-active '(raise 0.0) '(raise 0.0))
+          'tabbar-tab tab
+          'local-map (tabbar-make-tab-keymap tab)
+          'help-echo 'tabbar-help-on-tab
+          'mouse-face 'tabbar-highlight
+          )
+         (propertize
+          (concat
+           (if tabbar-tab-label-function
+               (funcall tabbar-tab-label-function tab)
+             tab))
+          'tabbar-tab tab
+          'local-map (tabbar-make-tab-keymap tab)
+          'help-echo 'tabbar-help-on-tab
+          'mouse-face 'tabbar-highlight
+          'face tab-face
+          'display `(raise ,(symbol-value 'hmz-tabbar-raise-text))
+          'pointer 'hand)
+         tabbar-separator-value)))
 
     (defsubst tabbar-line-button (name)
       "Return the display representation of button NAME.
@@ -166,33 +160,30 @@ element."
             (raise-amount 0.0)
             )
 
-        ;; (require 'org)
         ;; Cache the display value of the enabled/disabled buttons in
         ;; variables `tabbar-NAME-button-value'.
         (set (intern (format "tabbar-%s-button-value"  name))
              (cons
                (propertize glyph
                            'tabbar-button name
-                           'face (with-eval-after-load 'org
-                                   (plist-merge
+                           'face (plist-merge
                                     '(:inherit tabbar-default)
                                     (plist-get (text-properties-at (- (length glyph) 1) glyph) 'face)
-                                    '(:foreground (face-attribute 'font-lock-keyword-face :foreground))
-                                    ))
-                           'display '(raise 0.0)
+                                    `(:foreground ,(face-attribute 'font-lock-keyword-face :foreground nil))
+                                    )
+                           'display '(raise raise-amount)
                            ;; (list 'space :width (car tabbar-separator))
                            'mouse-face 'tabbar-button-highlight
                            'pointer 'hand
                            'local-map (tabbar-make-button-keymap name)
                            'help-echo 'tabbar-help-on-button)
 
-
               (propertize glyph
                           'tabbar-button name
                           'face (plist-merge
                                  '(:inherit tabbar-default)
                                  (plist-get (text-properties-at 0 glyph) 'face))
-                          'display '(raise 0.0)
+                          'display '(raise raise-amount)
                           'mouse-face 'tabbar-button-highlight
                           'pointer 'hand
                           'local-map (tabbar-make-button-keymap name)
@@ -237,4 +228,23 @@ element."
 
 
 
+    (unless (boundp 'after-load-theme-hook)
+      (defvar after-load-theme-hook nil
+        "Hook run after a color theme is loaded using `load-theme'.")
+      (defadvice load-theme (after run-after-load-theme-hook activate)
+        "Run `after-load-theme-hook'."
+        (run-hooks 'after-load-theme-hook))
+      )
+
+    (add-hook 'after-load-theme-hook
+              (lambda ()
+                (tabbar-mode 0)
+                (setq tabbar-scroll-left-button-value nil)
+                (setq tabbar-scroll-right-button-value nil)
+                (setq tabbar-home-button-value nil)
+
+                (hmz-tabbar-refresh-faces)
+
+                (tabbar-mode 1)
+                ))
     ))

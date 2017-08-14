@@ -158,7 +158,7 @@ values."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press <SPC> T n to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(dracula tango)
+   dotspacemacs-themes '(spacemacs-light dracula tango-dark tango)
                          ;; tango
                          ;; dracula
                          ;; nord
@@ -363,16 +363,6 @@ you should place you code here."
     ;;TODO make this conditional to screen size
     (set-frame-height (selected-frame) 32)
     (set-frame-position (selected-frame) 250 30)
-
-    ;; (push '(dracula . (20 80)) colors-theme-identifiers-sat&light)
-    ;; (push '(nord . (20 80)) colors-theme-identifiers-sat&light)
-    ;; (push '(spacemacs-dark . (20 80)) colors-theme-identifiers-sat&light)
-
-    ;; (rainbow-identifiers-mode)
-    ;; (rainbow-delimiters-mode-enable)
-    ;; ;;WORKAROUND: force rainbow-identifiers to reload
-    ;; ;;            with new sat&light reloading first theme
-    ;; (load-theme (car dotspacemacs-themes))
     )
 
   ;; Ember Mode
@@ -594,16 +584,20 @@ you should place you code here."
    (face-remap-add-relative 'linum :family "San Francisco" :height 0.6)
    (face-remap-add-relative 'header-line :family "San Francisco" :height 1.0)
 
+   ;; smooth scroll when jumping
    (require 'sublimity)
    (require 'sublimity-scroll)
-   ;; (require 'sublimity-map) ;; experimental
    (require 'sublimity-attractive)
    (setq sublimity-attractive-centering-width 110)
-
+   (sublimity-mode t)
 
    ;; keep these configs here once customize loves to screw up
    (set-face-attribute 'linum nil :family "San Francisco" :height 0.6)
    (set-face-attribute 'header-line nil :family "San Francisco" :height 1.0)
+
+   ;; Stylize Echo Area (interestingly it ends up applying other faces styles)
+   (with-current-buffer (get-buffer " *Echo Area 0*")   ; the leading space character is correct
+     (setq-local face-remapping-alist '((default (:height 0.9) variable-pitch)))) ; etc.
 
    )
 
@@ -738,7 +732,7 @@ Example:
  ;; If there is more than one, they won't work right.
  '(ansi-color-names-vector
    ["#0a0814" "#f2241f" "#67b11d" "#b1951d" "#4f97d7" "#a31db1" "#28def0" "#b2b2b2"])
- '(coffee-tab-width 2)
+ '(coffee-tab-width 2 t)
  '(custom-safe-themes
    (quote
     ("ff7625ad8aa2615eae96d6b4469fcc7d3d20b2e1ebc63b761a349bebbb9d23cb" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "868f73b5cf78e72ca2402e1d48675e49cc9a9619c5544af7bf216515d22b58e7" "6c35ffc17f8288be4c7866deb7437e8af33cd09930e195738cdfef911ab77274" "d8f76414f8f2dcb045a37eb155bfaa2e1d17b6573ed43fb1d18b936febc7bbc2" "7ceb8967b229c1ba102378d3e2c5fef20ec96a41f615b454e0dc0bfa1d326ea6" "5999e12c8070b9090a2a1bbcd02ec28906e150bb2cdce5ace4f965c76cf30476" "67e998c3c23fe24ed0fb92b9de75011b92f35d3e89344157ae0d544d50a63a72" "66132890ee1f884b4f8e901f0c61c5ed078809626a547dbefbb201f900d03fd8" default)))
@@ -765,4 +759,6 @@ Example:
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(default ((t (:family "Fira Code" :foundry "nil" :slant normal :weight normal :height 181 :width normal))))
+ '(header-line ((t (:weight thin :family "San Francisco"))))
+ '(linum ((t (:family "San Francisco" :height 0.6)))))

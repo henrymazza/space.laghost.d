@@ -43,11 +43,10 @@
     (defun hmz-color-identifiers/regenerate-rainbow-colors ()
       (use-package color)
       (setq ns-use-srgb-colorspace t)
-      (message "Lightness is: %s" (default-foreground-lightness))
       (loop for i from 1 to 15 do
             (let* (
                    (lightness (default-foreground-lightness))
-                   (saturation 70)
+                   (saturation hmz-color-identifiers-saturation)
                    (angle (* 2 pi (/ i 15.0)))
                    (a (* saturation (cos angle)))
                    (b (* saturation (sin angle)))
@@ -67,21 +66,21 @@
               (set-face-attribute
                (intern (format "rainbow-identifiers-identifier-%s" i))
                nil
-               :foreground (apply 'color-rgb-to-hex rgb-color))))
-      ))
+               :foreground (apply 'color-rgb-to-hex rgb-color)))))
 
+    (unless (boundp 'after-load-theme-hook)
+      (defvar after-load-theme-hook nil
+        "Hook run after a color theme is loaded using `load-theme'.")
+      (defadvice load-theme (after run-after-load-theme-hook activate)
+        "Run `after-load-theme-hook'."
+        (run-hooks 'after-load-theme-hook))
+      )
+
+    (add-hook 'after-init-hook 'hmz-color-identifiers/regenerate-rainbow-colors)
+    (add-hook 'after-load-theme-hook 'hmz-color-identifiers/regenerate-rainbow-colors)
     (add-hook 'prog-mode-hook
               (lambda ()
                 (rainbow-identifiers-mode t)
                 (rainbow-delimiters-mode-enable)
                 ))
-
-    (defvar after-load-theme-hook nil
-      "Hook run after a color theme is loaded using `load-theme'.")
-    (defadvice load-theme (after run-after-load-theme-hook activate)
-      "Run `after-load-theme-hook'."
-      (run-hooks 'after-load-theme-hook))
-
-    (add-hook 'after-load-theme-hook 'hmz-color-identifiers/regenerate-rainbow-colors)
-
-    )
+    ))
