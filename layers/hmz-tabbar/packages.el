@@ -71,7 +71,7 @@ which require an initialization must be listed explicitly in the list.")
 
       (set-face-attribute 'tabbar-modified nil
                           :box nil
-                          :foreground 'unspecified
+                          :foreground (face-attribute 'font-lock-builtin-face :foreground)
                           :background 'unspecified
                           :inherit 'tabbar-default)
 
@@ -225,8 +225,16 @@ element."
                                               (projectile-project-name)
                                             ("project")))
                   (t "user"))))
+    (defun hmz-tabbar-refresh-tabs ()
+      (tabbar-mode 0)
+      (setq tabbar-scroll-left-button-value nil)
+      (setq tabbar-scroll-right-button-value nil)
+      (setq tabbar-home-button-value nil)
 
+      (hmz-tabbar-refresh-faces)
 
+      (tabbar-mode 1)
+      )
 
     (unless (boundp 'after-load-theme-hook)
       (defvar after-load-theme-hook nil
@@ -236,15 +244,7 @@ element."
         (run-hooks 'after-load-theme-hook))
       )
 
-    (add-hook 'after-load-theme-hook
-              (lambda ()
-                (tabbar-mode 0)
-                (setq tabbar-scroll-left-button-value nil)
-                (setq tabbar-scroll-right-button-value nil)
-                (setq tabbar-home-button-value nil)
-
-                (hmz-tabbar-refresh-faces)
-
-                (tabbar-mode 1)
-                ))
+    (add-hook 'after-load-theme-hook 'hmz-tabbar-refresh-tabs)
+    (add-hook 'after-save-hook 'hmz-tabbar-refresh-tabs)
+    (add-hook 'first-change-hook 'hmz-tabbar-refresh-tabs)
     ))

@@ -1,7 +1,35 @@
 (defconst hmz-misc-packages
   '(
     spaceline-all-the-icons
+    indicators
     ))
+
+(defun hmz-misc/init-indicators ()
+  (use-package indicators
+    :config
+    (set-face-attribute 'font-lock-warning-face nil
+     :background "gray50")
+    (add-hook 'prog-mode
+              (lambda ()
+                (ind-create-indicator
+                 'point
+                 :managed t
+                 ;; :fringe 'left-fringe
+                 ;; :relative nil
+                 ;; :face header-line-format
+                 :bitmap 'hollow-square
+                 :priority 210)
+
+                ;; (ind-create-indicator 1000 :managed t :dynamic t)
+                ;; (ind-create-indicator-at-line 30)
+                ;; (ind-create-indicator 13 :dynamic nil)
+                ;; (ind-create-indicator-at-line 15 :dynamic nil)
+                ;; (ind-create-indicator 'point :managed t
+                ;;                       ;; :face font-lock-function-name-face
+                ;;                       :bitmap 'hollow-square
+                ;;                       :priority 1000)
+                )))
+  )
 
 (defun hmz-misc/init-spaceline-all-the-icons ()
   "Spaceline customizations"

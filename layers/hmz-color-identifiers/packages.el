@@ -6,15 +6,24 @@
     )
 )
 
+(defun hmz-color-identifiers/post-rainbow-delimiters ()
+  (use-package rainbow-delimiters
+    :config
+    (add-hook 'prog-mode-hook
+              (lambda ()
+                (rainbow-delimiters-mode t)
+                ))
+    ))
+
 (defun hmz-color-identifiers/init-rainbow-mode ()
   "Initialize Rainbow Mode to show color values as string backgrounds."
 
-  (use-package rainbow-mode)
-
-  (add-hook 'prog-mode-hook
-            (lambda ()
-              (setq rainbow-mode 1)
-              ))
+  (use-package rainbow-mode
+    :config
+    (add-hook 'prog-mode-hook
+              (lambda ()
+                (rainbow-mode t)
+                )))
   )
 
 
