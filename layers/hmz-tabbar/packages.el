@@ -19,7 +19,9 @@ which require an initialization must be listed explicitly in the list.")
     (global-set-key [(control tab)] 'tabbar-forward-tab)
     (global-set-key [(control shift tab)] 'tabbar-backward-tab)
 
-    (global-set-key [(shift tab)] 'tabbar-forward-group)
+    ;; make tab and shift tab move between groups when in Evil Mode (tm)
+    (define-key evil-normal-state-map (kbd "<S-tab>") 'tabbar-backward-group )
+    (define-key evil-normal-state-map (kbd "<tab>") 'tabbar-forward-group)
 
     :config
     (defun plist-merge (&rest plists)
@@ -157,13 +159,13 @@ element."
                          ((eq name 'scroll-left) (all-the-icons-material "navigate_before"))
                          ((eq name 'scroll-right) (all-the-icons-material "navigate_next"))
                    (t "X")))
-            (raise-amount 0.0)
-            )
+            (raise-amount 0.0))
 
         ;; Cache the display value of the enabled/disabled buttons in
         ;; variables `tabbar-NAME-button-value'.
         (set (intern (format "tabbar-%s-button-value"  name))
              (cons
+              (concat
                (propertize glyph
                            'tabbar-button name
                            'face (plist-merge
@@ -177,6 +179,8 @@ element."
                            'pointer 'hand
                            'local-map (tabbar-make-button-keymap name)
                            'help-echo 'tabbar-help-on-button)
+               (when (eq name 'scroll-left) (format "%s"(tabbar-current-tabset)))
+               )
 
               (propertize glyph
                           'tabbar-button name
@@ -207,7 +211,6 @@ element."
                            (length (tabbar-view
                                     (tabbar-current-tabset)))))))))
 
-
     ;; set to nil to force refresh
     ;; (setq tabbar-scroll-left-button-value nil)
     ;; (setq tabbar-scroll-right-button-value nil)
@@ -220,6 +223,8 @@ element."
       dired buffers), and the rest."
       (list (cond ((string-equal "*" (substring (buffer-name) 0 1)) "emacs")
                   ((string-equal " " (substring (buffer-name) 0 1)) "hidden")
+                  ((string-equal "*scratch*" (buffer-name)) "Scratch")
+                  ((string-equal "*Messages*" (buffer-name)) "*Messages*")
                   ((eq major-mode 'dired-mode) "emacs")
                   ((eq projectile-mode t) (if (boundp projectile-project-name)
                                               (projectile-project-name)

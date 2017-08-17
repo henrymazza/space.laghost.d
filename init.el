@@ -387,8 +387,6 @@ you should place you code here."
    ;; fast, or hold down control to move 3x as fast. Perfect for trackpads.
    mouse-wheel-scroll-amount '(2 ((shift) . 4) ((meta) . 6)))
 
-  (define-key evil-normal-state-map (kbd "<S-tab>") 'previous-buffer)
-  (define-key evil-normal-state-map (kbd "<tab>") 'next-buffer)
   (define-key evil-normal-state-map (kbd "C-h") 'help-command)
   (define-key evil-normal-state-map (kbd "C-a") 'rotate-word-at-point)
 
@@ -524,7 +522,7 @@ you should place you code here."
                 set visible of frontmostProcess to false
               end tell"))))
 
-   (defun delete-window-or-frame (&optional window frame force)
+   (defun delete-tab-or-window-or-frame (&optional window frame force)
      (interactive)
      (if (= 1 (length (window-list frame)))
          (condition-case nil
@@ -755,8 +753,32 @@ Example:
  '(package-selected-packages
    (quote
     (indicators evil-smartparens persistent-scratch command-log-mode sublimity zonokai-theme zenburn-theme zen-and-art-theme underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme tronesque-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme reverse-theme railscasts-theme purple-haze-theme professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme pastels-on-dark-theme organic-green-theme omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme niflheim-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme jbeans-theme jazz-theme inkpot-theme heroku-theme hemisu-theme hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme firebelly-theme farmhouse-theme espresso-theme dracula-theme django-theme darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes afternoon-theme powerline rake inflections pcre2el spinner org-plus-contrib markdown-mode skewer-mode simple-httpd json-snatcher json-reformat multiple-cursors js2-mode hydra parent-mode projectile request haml-mode gitignore-mode fringe-helper git-gutter+ git-gutter flyspell-correct pos-tip flycheck pkg-info epl flx magit magit-popup git-commit with-editor iedit smartparens paredit anzu evil goto-chg undo-tree highlight f diminish web-completion-data s dash-functional tern company inf-ruby bind-map bind-key yasnippet packed dash helm avy helm-core async auto-complete popup esup spaceline-all-the-icons all-the-icons memoize font-lock+ xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar spaceline smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc ir-black-theme info+ indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flycheck-pos-tip flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode elisp-slime-nav dumb-jump diff-hl company-web company-tern company-statistics column-enforce-mode color-identifiers-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+ '(powerline-default-separator (quote chamfer))
  '(scroll-bar-mode nil)
- '(sublimity-mode t)
+ '(sublimity-handle-scroll-criteria
+   (quote
+    ((eq sublimity--prev-buf
+         (current-buffer))
+     (eq sublimity--prev-wnd
+         (selected-window))
+     (or
+      (not
+       (boundp
+        (quote cua--rectangle)))
+      (not cua--rectangle))
+     (or
+      (not
+       (boundp
+        (quote multiple-cursors-mode)))
+      (not multiple-cursors-mode))
+     (not
+      (eq major-mode
+          (quote shell-mode)))
+     (not
+      (memq this-command
+            (quote
+             (mac-mwheel-scroll evil-scroll-line-down mwheel-scroll scroll-bar-drag scroll-bar-toolkit-scroll scroll-bar-scroll-up scroll-bar-scroll-down)))))))
+ '(sublimity-mode nil)
  '(sublimity-scroll-drift-length 0)
  '(sublimity-scroll-weight 7.0)
  '(window-divider-default-bottom-width 1)
@@ -769,8 +791,8 @@ Example:
  ;; If there is more than one, they won't work right.
  '(default ((t (:family "Fira Code" :foundry "nil" :slant normal :weight normal :height 181 :width normal))))
  '(font-lock-warning-face ((t (:background "DeepSkyBlue" :foreground "#ffb86c"))))
- '(header-line ((t (:weight thin :family "San Francisco"))))
  '(fringe ((t (:foreground "DeepSkyBlue" :background unspecified))))
+ '(header-line ((t (:weight thin :family "San Francisco"))))
  '(linum ((t (:family "San Francisco" :height 0.6))))
  '(neo-dir-link-face ((t (:foreground "DeepSkyBlue" :family "san francisco"))))
  '(neo-file-link-face ((t (:foreground "White" :family "San Francisco")))))
