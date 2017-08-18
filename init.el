@@ -331,7 +331,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
   (setq undo-tree-auto-save-history t)
 
   ;; keep undo tree files in proper place
-  (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo")))
+  (setq undo-tree-history-directory-alist '(("." . "~/.spacemacs.d/undo")))
 )
 
 (defun dotspacemacs/user-config ()
@@ -362,6 +362,9 @@ you should place you code here."
 
   ;; keep scratch buffer throughout restarts
   (persistent-scratch-setup-default)
+
+  ;; put save file on my own .spacemacs.d dir
+  (setq persistent-scratch-save-file "~/.spacemacs.d/.persistent-scratch")
 
   ;; settings for window systems
   (when (window-system)
@@ -397,6 +400,9 @@ you should place you code here."
   ;; command-T
   (global-set-key (kbd "s-t") 'helm-projectile-find-file)
   (setq projectile-enable-caching t)
+
+  ;; open files with command + o
+  (global-set-key (kbd "s-o") 'find-file)
 
   ;; keep last messages visible
   (defadvice message (after message-tail activate)
@@ -602,6 +608,26 @@ you should place you code here."
    (with-current-buffer (get-buffer " *Echo Area 0*")   ; the leading space character is correct
      (setq-local face-remapping-alist '((default (:height 0.9) variable-pitch)))) ; etc.
 
+   ;; define hook unless already defined
+   (unless (boundp 'after-load-theme-hook)
+     (defvar after-load-theme-hook nil
+       "Hook run after a color theme is loaded using `load-theme'.")
+     (defadvice load-theme (after run-after-load-theme-hook activate)
+       "Run `after-load-theme-hook'."
+       (run-hooks 'after-load-theme-hook)))
+
+   (defun customize-theme-after-load ()
+     (message "THEME: %s" spacemacs--cur-theme)
+     (pcase spacemacs--cur-theme
+       ('spacemacs-light
+        (progn (set-face-attribute 'default nil :background "gray90")))
+       ('tango-dark ())
+       ('tango ())
+       ('dracula (message "Yeah!")))
+     )
+
+   (add-hook 'after-load-theme-hook 'customize-theme-after-load)
+
    )
 
 ;;;;;;;;;;;;;;;
@@ -738,9 +764,10 @@ Example:
  '(coffee-tab-width 2 t)
  '(custom-safe-themes
    (quote
-    ("ff7625ad8aa2615eae96d6b4469fcc7d3d20b2e1ebc63b761a349bebbb9d23cb" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "868f73b5cf78e72ca2402e1d48675e49cc9a9619c5544af7bf216515d22b58e7" "6c35ffc17f8288be4c7866deb7437e8af33cd09930e195738cdfef911ab77274" "d8f76414f8f2dcb045a37eb155bfaa2e1d17b6573ed43fb1d18b936febc7bbc2" "7ceb8967b229c1ba102378d3e2c5fef20ec96a41f615b454e0dc0bfa1d326ea6" "5999e12c8070b9090a2a1bbcd02ec28906e150bb2cdce5ace4f965c76cf30476" "67e998c3c23fe24ed0fb92b9de75011b92f35d3e89344157ae0d544d50a63a72" "66132890ee1f884b4f8e901f0c61c5ed078809626a547dbefbb201f900d03fd8" default)))
+    ("19af39a10b8d3cb45beee0b78274965e79e0f70d1c338c1142b2ba1010e026de" "d3a7eea7ebc9a82b42c47e49517f7a1454116487f6907cf2f5c2df4b09b50fc1" "ff7625ad8aa2615eae96d6b4469fcc7d3d20b2e1ebc63b761a349bebbb9d23cb" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "868f73b5cf78e72ca2402e1d48675e49cc9a9619c5544af7bf216515d22b58e7" "6c35ffc17f8288be4c7866deb7437e8af33cd09930e195738cdfef911ab77274" "d8f76414f8f2dcb045a37eb155bfaa2e1d17b6573ed43fb1d18b936febc7bbc2" "7ceb8967b229c1ba102378d3e2c5fef20ec96a41f615b454e0dc0bfa1d326ea6" "5999e12c8070b9090a2a1bbcd02ec28906e150bb2cdce5ace4f965c76cf30476" "67e998c3c23fe24ed0fb92b9de75011b92f35d3e89344157ae0d544d50a63a72" "66132890ee1f884b4f8e901f0c61c5ed078809626a547dbefbb201f900d03fd8" default)))
  '(evil-shift-width 2)
  '(evil-want-Y-yank-to-eol t)
+ '(fci-rule-color "#151515" t)
  '(mac-auto-operator-composition-mode t)
  '(neo-autorefresh t)
  '(neo-filepath-sort-function (lambda (f1 f2) (string< (downcase f1) (downcase f2))))
