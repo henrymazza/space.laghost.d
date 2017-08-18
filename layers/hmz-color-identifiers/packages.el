@@ -70,8 +70,6 @@
                       (mapcar #'(lambda (c)
                                   (/ c max-component)) rgb-color)))
 
-              (message "> %s" (apply 'color-rgb-to-hex rgb-color))
-
               (set-face-attribute
                (intern (format "rainbow-identifiers-identifier-%s" i))
                nil
