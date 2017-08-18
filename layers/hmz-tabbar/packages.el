@@ -23,6 +23,14 @@ which require an initialization must be listed explicitly in the list.")
     (define-key evil-normal-state-map (kbd "<S-tab>") 'tabbar-backward-group )
     (define-key evil-normal-state-map (kbd "<tab>") 'tabbar-forward-group)
 
+    ;; map mouse wheel events on header line
+    (global-set-key [header-line wheel-right] 'tabbar-press-scroll-right)
+    (global-set-key [header-line double-wheel-right] 'tabbar-press-scroll-right)
+    (global-set-key [header-line triple-wheel-right] 'tabbar-press-scroll-right)
+    (global-set-key [header-line wheel-left] 'tabbar-press-scroll-left)
+    (global-set-key [header-line double-wheel-left] 'tabbar-press-scroll-left)
+    (global-set-key [header-line triple-wheel-left] 'tabbar-press-scroll-left)
+
     :config
     (defun plist-merge (&rest plists)
       (if plists
