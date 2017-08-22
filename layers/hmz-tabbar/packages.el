@@ -133,7 +133,8 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
                  ;; (get icon-face 'foreground)
                  (plist-get (text-properties-at 0 the-icon) 'face)
                  `(:background ,(tabbar-background-color))
-                 (unless tab-is-active
+                 (if tab-is-active
+                     `(:overline ,(face-attribute tab-face :foreground nil 'default))
                    `(:foreground ,(face-attribute 'header-line :foreground nil 'default)))
                  )
           'display (if tab-is-active '(raise 0.0) '(raise 0.0))
@@ -144,6 +145,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
           )
          (propertize
           (concat
+           " "
            (if tabbar-tab-label-function
                (funcall tabbar-tab-label-function tab)
              tab))
@@ -167,11 +169,17 @@ element."
                          ((eq name 'scroll-left) (all-the-icons-material "navigate_before"))
                          ((eq name 'scroll-right) (all-the-icons-material "navigate_next"))
                    (t "X")))
-            (raise-amount 0.0))
+            (raise-amount 0.0)
+            (tabset-name
+             (if (eq name 'scroll-left)
+                 (format "%s" (tabbar-current-tabset))
+               ""))
+            )
 
         ;; Cache the display value of the enabled/disabled buttons in
         ;; variables `tabbar-NAME-button-value'.
-        (set (intern (format "tabbar-%s-button-value"  name))
+        (set (make-symbol (format "tabbar-%s-button-value" name)) nil)
+        (set (intern (format "tabbar-%s-button-value" name))
              (cons
               (concat
                (propertize glyph
@@ -187,10 +195,11 @@ element."
                            'pointer 'hand
                            'local-map (tabbar-make-button-keymap name)
                            'help-echo 'tabbar-help-on-button)
-               (when (eq name 'scroll-left) (format "%s"(tabbar-current-tabset)))
+               tabset-name
                )
 
-              (propertize glyph
+              (concat
+               (propertize glyph
                           'tabbar-button name
                           'face (plist-merge
                                  '(:inherit tabbar-default)
@@ -200,7 +209,8 @@ element."
                           'pointer 'hand
                           'local-map (tabbar-make-button-keymap name)
                           'help-echo 'tabbar-help-on-button)
-              ))))
+               tabset-name
+               )))))
 
     (defun tabbar-buffer-tab-label (tab)
       "Return a label for TAB. That is, a string used to represent it on the tab bar. This was overriden to clean up "

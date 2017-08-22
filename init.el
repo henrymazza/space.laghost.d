@@ -102,7 +102,7 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-  dotspacemacs-additional-packages '(all-the-icons sublimity persistent-scratch)
+  dotspacemacs-additional-packages '(all-the-icons ember-mode sublimity persistent-scratch)
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
@@ -209,7 +209,7 @@ values."
    dotspacemacs-display-default-layout nil
    ;; If non nil then the last auto saved layouts are resume automatically upon
    ;; start. (default nil)
-   dotspacemacs-auto-resume-layouts t
+   dotspacemacs-auto-resume-layouts nil
    ;; Location where to auto-save files. Possible values are `original' to
    ;; auto-save the file in-place, `cache' to auto-save the file to another
    ;; file stored in the cache directory and `nil' to disable auto-saving.
@@ -404,19 +404,6 @@ you should place you code here."
   ;; open files with command + o
   (global-set-key (kbd "s-o") 'find-file)
 
-  ;; keep last messages visible
-  (defadvice message (after message-tail activate)
-    "goto point max after a message"
-    ;;don't make anything if *Messages* is current
-    (unless (eq (current-buffer) "*Messages*")
-      (with-current-buffer "*Messages*"
-        (goto-char (point-max))
-        (walk-windows (lambda (window)
-                        (if (string-equal (buffer-name (window-buffer window)) "*Messages*")
-                            (set-window-point window (point-max))))
-                      nil
-                      t))))
-
   ;; my old pal C-k
   (define-key evil-normal-state-map (kbd "C-k") 'kill-this-buffer)
 
@@ -504,20 +491,6 @@ you should place you code here."
            (evil-visual-state-p)) [escape])))
    (define-key key-translation-map (kbd "C-c") 'my-esc)
 
-   (defun neo-opens-outwards ()
-     "Reveals Neotree expanding frame so internal size keeps the same."
-     (interactive)
-     (if (neo-global--window-exists-p)
-         (progn
-          (set-frame-width (selected-frame) (- (frame-width) 16))
-          (neotree-hide)
-          )
-       (let ((origin-buffer-file-name (buffer-file-name)))
-         (neotree-find (projectile-project-root))
-         (neotree-find origin-buffer-file-name)
-         (set-frame-width (selected-frame) (+ (frame-width) 16)))))
-   (global-set-key (kbd "s-r") 'neo-opens-outwards)
-
    (defun hide-application ()
      "Hides Emacs if trying to close last frame."
      (condition-case nil
@@ -528,7 +501,7 @@ you should place you code here."
                 set visible of frontmostProcess to false
               end tell"))))
 
-   (defun delete-tab-or-window-or-frame (&optional window frame force)
+   (defun delete-window-or-frame (&optional window frame force)
      (interactive)
      (if (= 1 (length (window-list frame)))
          (condition-case nil
@@ -540,9 +513,7 @@ you should place you code here."
 
    (global-set-key (kbd "s-w") 'delete-window-or-frame)
 
-   (spacemacs/set-leader-keys "SPC" 'helm-M-x
-     "[" 'previous-buffer
-     "]" 'next-buffer)
+   (spacemacs/set-leader-keys "SPC" 'helm-M-x)
 
    ;; When running ‘projectile-switch-project’ (C-c p p), ‘neotree’ will
    ;; change root automatically and avoid annoying Dired buffer.
@@ -562,33 +533,91 @@ you should place you code here."
    ;; Always follow symlinks
    (setq vc-follow-symlinks t)
 
-   (add-hook 'neotree-mode-hook
-             (lambda ()
-               ;; (face-remap-add-relative 'default :background-color "white")
-               (hidden-mode-line-mode t)
 
-               ;; custom doesn't work, neither does setting on init file
-               (setq neo-buffer--show-hidden-file-p nil)
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;; Messages Customs
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-               ;; makes the icons smaller, once there's no face settings
-               ;; for them.
-               (text-scale-set -2)
+   (setq hmz-messages-frame nil)
 
-               ;; Set width here so it takes scaled font size
-               (setq neo-window-width 16)
-               (setq neo-window-fixed-size nil)
-               ))
+   (defun hmz-make-mini-monitor ()
+     (interactive)
+     ;; global
+     (if (and hmz-messages-frame (frame-live-p hmz-messages-frame))
+         (delete-frame hmz-messages-frame)
 
-   (message "Garbage Collections During Startup: %s" gcs-done)
-   ;; Go back to sane values
-   (run-with-idle-timer
-    5 nil
-    (lambda ()
-      (setq gc-cons-threshold 1000000)
-      (message "Init took %s secs, GC ran %s times. gc-cons-threshold restored to %S."
-               (emacs-init-time)
-               gcs-done
-               gc-cons-threshold)))
+       (setq hmz-messages-frame
+             (make-frame
+              '((visibility . t)
+                (name . "Monitor")
+                (minibuffer . nil)
+                (height . 35) (width . 35)
+                (top - 0) (left . 0)
+                (buffer-list . '("*Messages*"))
+                (unsplittable . t))))
+
+       ;; (:eval (tabbar-line))
+       ;; (message "%s" hmz-messages-frame)
+
+       ;; (with-selected-frame hmz-messages-frame
+       ;;   ;; disables tabbar completly for that window
+       ;;   (setq-local header-line-format nil))
+
+       (with-selected-window (frame-selected-window hmz-messages-frame)
+         (add-hook 'focus-out-hook
+                   (lambda () (spacemacs/enable-transparency hmz-messages-frame)))
+         (add-hook 'focus-in-hook
+                   (lambda () (spacemacs/disable-transparency hmz-messages-frame)))
+         (spacemacs/enable-transparency hmz-messages-frame 70)
+         (setq dotspacemacs-inactive-transparency 60)
+         (tabbar-local-mode 0)
+         (switch-to-buffer "*Messages*")
+         (text-scale-set -2)
+
+         (setq-local header-line-format nil) ;; disables tabbar completly for that window
+         (setq left-fringe-width 0)
+         (setq right-fringe-width 0)
+         (set-window-fringes (selected-window) 0 0 nil)
+         (hidden-mode-line-mode 1)
+         )))
+
+       (global-set-key (kbd "s-m") 'hmz-make-mini-monitor)
+
+       ;; keep last messages visible
+       (defadvice message (after message-tail activate)
+         "goto point max after a message"
+         ;;don't make anything if *Messages* is current
+         (unless (eq (current-buffer) "*Messages*")
+           (with-current-buffer "*Messages*"
+             (goto-char (point-max))
+
+             ;; There's a problem: minibuffer help messages activates this very same function
+             ;;
+             ;; (if (and hmz-messages-frame (frame-live-p hmz-messages-frame))
+             ;;     (with-selected-frame hmz-messages-frame
+             ;;       (spacemacs/enable-transparency hmz-messages-frame 80)
+             ;;       (run-with-timer 5 nil
+             ;;                       (lambda ()
+             ;;                         (spacemacs/enable-transparency hmz-messages-frame 20)
+             ;;                         ))))
+
+             (walk-windows (lambda (window)
+                             (if (string-equal (buffer-name (window-buffer window)) "*Messages*")
+                                 (set-window-point window (point-max))))
+                           nil
+                           t))))
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+       (message "Garbage Collections During Startup: %s" gcs-done)
+       ;; Go back to sane values
+       (run-with-idle-timer
+        5 nil
+        (lambda ()
+          (setq gc-cons-threshold 1000000)
+          (message "Init took %s secs, GC ran %s times. gc-cons-threshold restored to %S."
+                   (emacs-init-time)
+                   gcs-done
+                   gc-cons-threshold)))
 
    (face-remap-add-relative 'linum :family "San Francisco" :height 0.6)
    (face-remap-add-relative 'header-line :family "San Francisco" :height 1.0)
@@ -623,12 +652,10 @@ you should place you code here."
         (progn (set-face-attribute 'default nil :background "gray90")))
        ('tango-dark ())
        ('tango ())
-       ('dracula (message "Yeah!")))
-     )
+       ('dracula (message "Yeah!"))))
 
    (add-hook 'after-load-theme-hook 'customize-theme-after-load)
-
-   )
+   (add-hook 'after-init-hook 'customize-theme-after-load))
 
 ;;;;;;;;;;;;;;;
 ;; Rotate Text
@@ -772,14 +799,14 @@ Example:
  '(neo-autorefresh t)
  '(neo-filepath-sort-function (lambda (f1 f2) (string< (downcase f1) (downcase f2))))
  '(neo-force-change-root t)
- '(neo-show-hidden-files nil t)
+ '(neo-show-hidden-files nil)
  '(neo-theme (if (display-graphic-p) (quote icons) (quote arrow)))
- '(neo-vc-integration (quote (char)) t)
+ '(neo-vc-integration (quote (char)))
  '(neo-window-position (quote right))
  '(osx-clipboard-mode t)
  '(package-selected-packages
    (quote
-    (indicators evil-smartparens persistent-scratch command-log-mode sublimity zonokai-theme zenburn-theme zen-and-art-theme underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme tronesque-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme reverse-theme railscasts-theme purple-haze-theme professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme pastels-on-dark-theme organic-green-theme omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme niflheim-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme jbeans-theme jazz-theme inkpot-theme heroku-theme hemisu-theme hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme firebelly-theme farmhouse-theme espresso-theme dracula-theme django-theme darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes afternoon-theme powerline rake inflections pcre2el spinner org-plus-contrib markdown-mode skewer-mode simple-httpd json-snatcher json-reformat multiple-cursors js2-mode hydra parent-mode projectile request haml-mode gitignore-mode fringe-helper git-gutter+ git-gutter flyspell-correct pos-tip flycheck pkg-info epl flx magit magit-popup git-commit with-editor iedit smartparens paredit anzu evil goto-chg undo-tree highlight f diminish web-completion-data s dash-functional tern company inf-ruby bind-map bind-key yasnippet packed dash helm avy helm-core async auto-complete popup esup spaceline-all-the-icons all-the-icons memoize font-lock+ xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar spaceline smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc ir-black-theme info+ indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flycheck-pos-tip flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode elisp-slime-nav dumb-jump diff-hl company-web company-tern company-statistics column-enforce-mode color-identifiers-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+    (ember-mode indicators evil-smartparens persistent-scratch command-log-mode sublimity zonokai-theme zenburn-theme zen-and-art-theme underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme tronesque-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme reverse-theme railscasts-theme purple-haze-theme professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme pastels-on-dark-theme organic-green-theme omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme niflheim-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme jbeans-theme jazz-theme inkpot-theme heroku-theme hemisu-theme hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme firebelly-theme farmhouse-theme espresso-theme dracula-theme django-theme darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes afternoon-theme powerline rake inflections pcre2el spinner org-plus-contrib markdown-mode skewer-mode simple-httpd json-snatcher json-reformat multiple-cursors js2-mode hydra parent-mode projectile request haml-mode gitignore-mode fringe-helper git-gutter+ git-gutter flyspell-correct pos-tip flycheck pkg-info epl flx magit magit-popup git-commit with-editor iedit smartparens paredit anzu evil goto-chg undo-tree highlight f diminish web-completion-data s dash-functional tern company inf-ruby bind-map bind-key yasnippet packed dash helm avy helm-core async auto-complete popup esup spaceline-all-the-icons all-the-icons memoize font-lock+ xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar spaceline smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc ir-black-theme info+ indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flycheck-pos-tip flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode elisp-slime-nav dumb-jump diff-hl company-web company-tern company-statistics column-enforce-mode color-identifiers-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
  '(powerline-default-separator (quote chamfer))
  '(scroll-bar-mode nil)
  '(sublimity-handle-scroll-criteria
