@@ -573,6 +573,7 @@ you should place you code here."
          (tabbar-local-mode 0)
          (switch-to-buffer "*Messages*")
          (text-scale-set -2)
+         (set-frame-parameter hmz-messages-frame 'unsplittable t)
 
          (setq-local header-line-format nil) ;; disables tabbar completly for that window
          (setq left-fringe-width 0)
