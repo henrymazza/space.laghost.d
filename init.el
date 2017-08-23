@@ -339,7 +339,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
 This function is called at the very end of Spacemacs initialization after
 layers configuration.
 This is the place where most of your configurations should be done. Unless it is
-explicitly specified that a variable should be set before a package is loaded,
+explicitly specified that a variable should be set before a package is loa,
 you should place you code here."
 
   ;; Blink cursor so I know where I am!
@@ -546,41 +546,38 @@ you should place you code here."
      (if (and hmz-messages-frame (frame-live-p hmz-messages-frame))
          (delete-frame hmz-messages-frame)
 
-       (setq hmz-messages-frame
-             (make-frame
-              '((visibility . t)
-                (name . "Monitor")
-                (minibuffer . nil)
-                (height . 35) (width . 35)
-                (top - 0) (left . 0)
-                (buffer-list . '("*Messages*"))
-                (unsplittable . t))))
+       (let ((original-frame (selected-frame)))
+        (setq hmz-messages-frame
+              (make-frame
+               '((visibility . t)
+                 (name . "Monitor")
+                 (minibuffer . nil)
+                 (height . 35) (width . 35)
+                 (top - 0) (left . 0)
+                 (buffer-list . '("*Messages*"))
+                 (unsplittable . t))))
 
-       ;; (:eval (tabbar-line))
-       ;; (message "%s" hmz-messages-frame)
 
-       ;; (with-selected-frame hmz-messages-frame
-       ;;   ;; disables tabbar completly for that window
-       ;;   (setq-local header-line-format nil))
+        (with-selected-window (frame-selected-window hmz-messages-frame)
+          ;;TODO: (handle-switch-frame)
+          (spacemacs/enable-transparency hmz-messages-frame 70)
+          (setq dotspacemacs-inactive-transparency 60)
+          (tabbar-local-mode 0)
+          (switch-to-buffer "*Messages*")
+          (text-scale-set -2)
+          (set-frame-parameter hmz-messages-frame 'unsplittable t)
+          (set-window-dedicated-p (selected-window) t)
 
-       (with-selected-window (frame-selected-window hmz-messages-frame)
-         (add-hook 'focus-out-hook
-                   (lambda () (spacemacs/enable-transparency hmz-messages-frame)))
-         (add-hook 'focus-in-hook
-                   (lambda () (spacemacs/disable-transparency hmz-messages-frame)))
-         (spacemacs/enable-transparency hmz-messages-frame 70)
-         (setq dotspacemacs-inactive-transparency 60)
-         (tabbar-local-mode 0)
-         (switch-to-buffer "*Messages*")
-         (text-scale-set -2)
-         (set-frame-parameter hmz-messages-frame 'unsplittable t)
-
-         (setq-local header-line-format nil) ;; disables tabbar completly for that window
-         (setq left-fringe-width 0)
-         (setq right-fringe-width 0)
-         (set-window-fringes (selected-window) 0 0 nil)
-         (hidden-mode-line-mode 1)
-         )))
+          (setq-local header-line-format nil) ;; disables tabbar completly for that window
+          (setq left-fringe-width 0)
+          (setq right-fringe-width 0)
+          (set-window-fringes (selected-window) 0 0 nil)
+          (hidden-mode-line-mode 1)
+          )
+        (message "%s" original-frame)
+        (select-frame-set-input-focus original-frame)
+        )
+       ))
 
        (global-set-key (kbd "s-m") 'hmz-make-mini-monitor)
 
