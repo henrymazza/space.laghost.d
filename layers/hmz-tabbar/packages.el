@@ -164,6 +164,8 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
           'pointer 'hand)
          tabbar-separator-value)))
 
+    ;; (tabbar-line-button 'scroll-left)
+
     (defsubst tabbar-line-button (name)
       "Return the display representation of button NAME.
 That is, a propertized string used as an `header-line-format' template
@@ -171,16 +173,21 @@ element."
       (let* ((label (if tabbar-button-label-function
                        (funcall tabbar-button-label-function name)
                      (cons name name)))
-            (glyph (cond ((eq name 'home) (concat " " (all-the-icons-wicon "alien" :face '(:inherit tabbar-default :height 1.2))))
+            (glyph (cond ((eq name 'home)
+                          (concat " "
+                                  (all-the-icons-wicon "alien"
+                                                       :face '(:inherit tabbar-default :height 1.2))))
                          ((eq name 'scroll-left) (all-the-icons-material "navigate_before"))
                          ((eq name 'scroll-right) (all-the-icons-material "navigate_next"))
                    (t "X")))
+
             (raise-amount 0.0)
-            (tabset-name
-             (if (eq name 'scroll-left)
-                 (format "%s" (tabbar-current-tabset))
-               ""))
-            )
+
+            (tabset-name (if (eq name 'scroll-left)
+                             (propertize (format "%s" (tabbar-current-tabset))
+                                         'face '(:inherit tabbar-default
+                                                          :height 1.3)
+                                         'display '(raise 0.1)) "")))
 
         ;; This isn't pretty, but won't break existing code.
         ;; Perhaps other thing's gonna work, but that's what I
@@ -191,8 +198,7 @@ element."
              ;; with existing code.
              (setq tabbar-scroll-left-button-value nil)
              (setq tabbar-scroll-right-button-value nil)
-             (setq tabbar-home-button-value nil)
-             ))
+             (setq tabbar-home-button-value nil)))
 
         ;; Cache the display value of the enabled/disabled buttons in
         ;; variables `tabbar-NAME-button-value'.
@@ -213,8 +219,7 @@ element."
                            'pointer 'hand
                            'local-map (tabbar-make-button-keymap name)
                            'help-echo 'tabbar-help-on-button)
-               (unless (string-equal tabset-name "tabbar-tabsets-tabset") tabset-name)
-               )
+               (unless (string-equal tabset-name "tabbar-tabsets-tabset") tabset-name))
 
               (concat
                (propertize glyph
@@ -231,7 +236,7 @@ element."
                )))))
 
     (defun tabbar-buffer-tab-label (tab)
-      "Return a label for TAB. That is, a string used to represent it on the tab bar. This was overriden to clean up "
+      "Return a label for TAB. That is, a string used to represent it on the tab bar. This was overriden to clean up unwanted chars."
 
       (let ((label (if tabbar--buffer-show-groups
                        (replace-regexp-in-string

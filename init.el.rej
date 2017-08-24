@@ -1,0 +1,11 @@
+diff a/space/spacemacs.d/init.el b/space/spacemacs.d/init.el	(rejected hunks)
+@@ -540,9 +513,6 @@ you should place you code here."
+ 
+    (global-set-key (kbd "s-w") 'delete-window-or-frame)
+ 
+-   (spacemacs/set-leader-keys "SPC" 'helm-M-x
+-     "[" 'previous-buffer
+-     "]" 'next-buffer)
+    ;; When running ‘projectile-switch-project’ (C-c p p), ‘neotree’ will
+    ;; change root automatically and avoid annoying Dired buffer.
+    (setq projectile-switch-project-action 'neotree-projectile-action)
