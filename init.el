@@ -159,7 +159,7 @@ values."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press <SPC> T n to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(spacemacs-light dracula tango-dark tango)
+   dotspacemacs-themes '(dracula spacemacs-light tango-dark tango)
                          ;; tango
                          ;; dracula
                          ;; nord
@@ -512,8 +512,6 @@ you should place you code here."
        (delete-window window)))
 
    (global-set-key (kbd "s-w") 'delete-window-or-frame)
-
-   (spacemacs/set-leader-keys "SPC" 'helm-M-x)
 
    ;; When running ‘projectile-switch-project’ (C-c p p), ‘neotree’ will
    ;; change root automatically and avoid annoying Dired buffer.

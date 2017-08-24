@@ -1,4 +1,4 @@
-;; -*- coding: utf-8; -*-
+;; -*- coding: utf-8; -*-           jujuba
 (defvar hmz-tabbar-packages
   '(
     tabbar
@@ -20,8 +20,14 @@ which require an initialization must be listed explicitly in the list.")
     (global-set-key [(control shift tab)] 'tabbar-backward-tab)
 
     ;; make tab and shift tab move between groups when in Evil Mode (tm)
-    (define-key evil-normal-state-map (kbd "<S-tab>") 'tabbar-backward-group )
-    (define-key evil-normal-state-map (kbd "<tab>") 'tabbar-forward-group)
+    (define-key evil-normal-state-map (kbd "<tab>") 'next-buffer)
+    (define-key evil-normal-state-map (kbd "<S-tab>") 'previous-buffer)
+
+    ;; Used some spacemacs space to cycle between tabbar groups
+    (spacemacs/set-leader-keys "SPC" 'helm-M-x
+      "[" 'tabbar-backward-group
+      "]" 'tabbar-forward-group)
+
 
     ;; map mouse wheel events on header line
     (global-set-key [header-line wheel-right] 'tabbar-press-scroll-right)
@@ -176,6 +182,18 @@ element."
                ""))
             )
 
+        ;; This isn't pretty, but won't break existing code.
+        ;; Perhaps other thing's gonna work, but that's what I
+        ;; came with for now.
+        (run-with-timer nil
+         nil (lambda ()
+             ;; set to nil to force refresh without interfeering
+             ;; with existing code.
+             (setq tabbar-scroll-left-button-value nil)
+             (setq tabbar-scroll-right-button-value nil)
+             (setq tabbar-home-button-value nil)
+             ))
+
         ;; Cache the display value of the enabled/disabled buttons in
         ;; variables `tabbar-NAME-button-value'.
         (set (make-symbol (format "tabbar-%s-button-value" name)) nil)
@@ -195,7 +213,8 @@ element."
                            'pointer 'hand
                            'local-map (tabbar-make-button-keymap name)
                            'help-echo 'tabbar-help-on-button)
-               tabset-name
+               (unless (eq tabset-name "tabbar-tabsets-tabset") tabset-name
+)
                )
 
               (concat
@@ -209,7 +228,7 @@ element."
                           'pointer 'hand
                           'local-map (tabbar-make-button-keymap name)
                           'help-echo 'tabbar-help-on-button)
-               tabset-name
+               (unless (eq tabset-name "tabbar-tabsets-tabset") tabset-name
                )))))
 
     (defun tabbar-buffer-tab-label (tab)
@@ -229,25 +248,21 @@ element."
                            (length (tabbar-view
                                     (tabbar-current-tabset)))))))))
 
-    ;; set to nil to force refresh
-    ;; (setq tabbar-scroll-left-button-value nil)
-    ;; (setq tabbar-scroll-right-button-value nil)
-    ;; (setq tabbar-home-button-value nil)
-
     ;; Tabbar Groups Definition
     (defun tabbar-buffer-groups ()
       "Returns the name of the tab group names the current buffer belongs to.
       There are two groups: Emacs buffers (those whose name starts with '*', plus
       dired buffers), and the rest."
-      (list (cond ((string-equal "*" (substring (buffer-name) 0 1)) "emacs")
-                  ((string-equal " " (substring (buffer-name) 0 1)) "hidden")
-                  ((string-equal "*scratch*" (buffer-name)) "Scratch")
-                  ((string-equal "*Messages*" (buffer-name)) "*Messages*")
-                  ((eq major-mode 'dired-mode) "emacs")
-                  ((eq projectile-mode t) (if (boundp projectile-project-name)
-                                              (projectile-project-name)
-                                            ("project")))
-                  (t "user"))))
+      (list (cond
+             ((string-equal "*scratch*" (buffer-name)) "Scratch")
+             ((string-equal "*Messages*" (buffer-name)) "*Messages*")
+             ((string-equal "*" (substring (buffer-name) 0 1)) "emacs")
+             ((string-equal " " (substring (buffer-name) 0 1)) "hidden")
+             ((eq major-mode 'dired-mode) "emacs")
+             ((eq projectile-mode t) (if (boundp projectile-project-name)
+                                         (projectile-project-name)
+                                       ("project")))
+             (t "user"))))
     (defun hmz-tabbar-refresh-tabs ()
       (tabbar-mode 0)
       (setq tabbar-scroll-left-button-value nil)
@@ -256,8 +271,7 @@ element."
 
       (hmz-tabbar-refresh-faces)
 
-      (tabbar-mode 1)
-      )
+      (tabbar-mode 1))
 
     (unless (boundp 'after-load-theme-hook)
       (defvar after-load-theme-hook nil
