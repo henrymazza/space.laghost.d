@@ -213,8 +213,7 @@ element."
                            'pointer 'hand
                            'local-map (tabbar-make-button-keymap name)
                            'help-echo 'tabbar-help-on-button)
-               (unless (eq tabset-name "tabbar-tabsets-tabset") tabset-name
-)
+               (unless (string-equal tabset-name "tabbar-tabsets-tabset") tabset-name)
                )
 
               (concat
@@ -228,7 +227,7 @@ element."
                           'pointer 'hand
                           'local-map (tabbar-make-button-keymap name)
                           'help-echo 'tabbar-help-on-button)
-               (unless (eq tabset-name "tabbar-tabsets-tabset") tabset-name
+               (unless (string-equal tabset-name "tabbar-tabsets-tabset") tabset-name)
                )))))
 
     (defun tabbar-buffer-tab-label (tab)
