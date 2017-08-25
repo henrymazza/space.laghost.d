@@ -7,7 +7,6 @@
 which require an initialization must be listed explicitly in the list.")
 
 (defun hmz-tabbar/init-tabbar ()
-  "Tabbar customizations"
   (use-package tabbar
     :defer t
 
@@ -164,55 +163,53 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
           'pointer 'hand)
          tabbar-separator-value)))
 
-    ;; (tabbar-line-button 'scroll-left)
-
     (defsubst tabbar-line-button (name)
       "Return the display representation of button NAME.
 That is, a propertized string used as an `header-line-format' template
 element."
       (let* ((label (if tabbar-button-label-function
-                       (funcall tabbar-button-label-function name)
-                     (cons name name)))
-            (glyph (cond ((eq name 'home)
-                          (concat " "
-                                  (all-the-icons-wicon "alien"
-                                                       :face '(:inherit tabbar-default :height 1.2))))
-                         ((eq name 'scroll-left) (all-the-icons-material "navigate_before"))
-                         ((eq name 'scroll-right) (all-the-icons-material "navigate_next"))
-                   (t "X")))
+                        (funcall tabbar-button-label-function name)
+                      (cons name name)))
+             (glyph (cond ((eq name 'home)
+                           (concat " "
+                                   (all-the-icons-wicon "alien"
+                                                        :face '(:inherit tabbar-default :height 1.2))))
+                          ((eq name 'scroll-left) (all-the-icons-material "navigate_before"))
+                          ((eq name 'scroll-right) (all-the-icons-material "navigate_next"))
+                          (t "X")))
 
-            (raise-amount 0.0)
+             (raise-amount 0.0)
 
-            (tabset-name (if (eq name 'scroll-left)
-                             (propertize (format "%s" (tabbar-current-tabset))
-                                         'face '(:inherit tabbar-default
-                                                          :height 1.3)
-                                         'display '(raise 0.1)) "")))
+             (tabset-name (if (eq name 'scroll-left)
+                              (propertize (format "%s" (tabbar-current-tabset))
+                                          'face '(:inherit tabbar-default
+                                                           :height 1.3)
+                                          'display '(raise 0.1)) "")))
 
         ;; This isn't pretty, but won't break existing code.
         ;; Perhaps other thing's gonna work, but that's what I
         ;; came with for now.
-        (run-with-timer nil
-         nil (lambda ()
-             ;; set to nil to force refresh without interfeering
-             ;; with existing code.
-             (setq tabbar-scroll-left-button-value nil)
-             (setq tabbar-scroll-right-button-value nil)
-             (setq tabbar-home-button-value nil)))
+        ;; (run-with-timer 1
+        ;;   1 (lambda ()
+        ;;      ;; set to nil to force refresh without interfeering
+        ;;      ;; with existing code.
+        ;;      (setq tabbar-scroll-left-button-value nil)
+        ;;      (setq tabbar-scroll-right-button-value nil)
+        ;;      (setq tabbar-home-button-value nil)))
 
+        (tabbar-set-template tabset nil)
         ;; Cache the display value of the enabled/disabled buttons in
         ;; variables `tabbar-NAME-button-value'.
-        (set (make-symbol (format "tabbar-%s-button-value" name)) nil)
         (set (intern (format "tabbar-%s-button-value" name))
              (cons
               (concat
                (propertize glyph
                            'tabbar-button name
                            'face (plist-merge
-                                    '(:inherit tabbar-default)
-                                    (plist-get (text-properties-at (- (length glyph) 1) glyph) 'face)
-                                    `(:foreground ,(face-attribute 'font-lock-keyword-face :foreground nil))
-                                    )
+                                  '(:inherit tabbar-default)
+                                  (plist-get (text-properties-at (- (length glyph) 1) glyph) 'face)
+                                  `(:foreground ,(face-attribute 'font-lock-keyword-face :foreground nil))
+                                  )
                            'display '(raise raise-amount)
                            ;; (list 'space :width (car tabbar-separator))
                            'mouse-face 'tabbar-button-highlight
@@ -223,17 +220,23 @@ element."
 
               (concat
                (propertize glyph
-                          'tabbar-button name
-                          'face (plist-merge
-                                 '(:inherit tabbar-default)
-                                 (plist-get (text-properties-at 0 glyph) 'face))
-                          'display '(raise raise-amount)
-                          'mouse-face 'tabbar-button-highlight
-                          'pointer 'hand
-                          'local-map (tabbar-make-button-keymap name)
-                          'help-echo 'tabbar-help-on-button)
+                           'tabbar-button name
+                           'face (plist-merge
+                                  '(:inherit tabbar-default)
+                                  (plist-get (text-properties-at 0 glyph) 'face))
+                           'display '(raise raise-amount)
+                           'mouse-face 'tabbar-button-highlight
+                           'pointer 'hand
+                           'local-map (tabbar-make-button-keymap name)
+                           'help-echo 'tabbar-help-on-button)
                (unless (string-equal tabset-name "tabbar-tabsets-tabset") tabset-name)
                )))))
+
+    (defadvice tabbar-line-format (after tabbar-button-cache-clearer 1 (tabset) activate)
+      "Clear cached button values each time `tabbar-line-format' is called so tabbset name gets refreshed."
+      (setq tabbar-scroll-left-button-value nil)
+      (setq tabbar-scroll-right-button-value nil)
+      (setq tabbar-home-button-value nil))
 
     (defun tabbar-buffer-tab-label (tab)
       "Return a label for TAB. That is, a string used to represent it on the tab bar. This was overriden to clean up unwanted chars."
@@ -267,6 +270,8 @@ element."
                                          (projectile-project-name)
                                        ("project")))
              (t "user"))))
+
+
     (defun hmz-tabbar-refresh-tabs ()
       (tabbar-mode 0)
       (setq tabbar-scroll-left-button-value nil)
