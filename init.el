@@ -531,7 +531,6 @@ you should place you code here."
    ;; Always follow symlinks
    (setq vc-follow-symlinks t)
 
-
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Messages Customs
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -784,7 +783,7 @@ Example:
  ;; If there is more than one, they won't work right.
  '(ansi-color-names-vector
    ["#0a0814" "#f2241f" "#67b11d" "#b1951d" "#4f97d7" "#a31db1" "#28def0" "#b2b2b2"])
- '(coffee-tab-width 2 t)
+ '(coffee-tab-width 2)
  '(custom-safe-themes
    (quote
     ("19af39a10b8d3cb45beee0b78274965e79e0f70d1c338c1142b2ba1010e026de" "d3a7eea7ebc9a82b42c47e49517f7a1454116487f6907cf2f5c2df4b09b50fc1" "ff7625ad8aa2615eae96d6b4469fcc7d3d20b2e1ebc63b761a349bebbb9d23cb" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "868f73b5cf78e72ca2402e1d48675e49cc9a9619c5544af7bf216515d22b58e7" "6c35ffc17f8288be4c7866deb7437e8af33cd09930e195738cdfef911ab77274" "d8f76414f8f2dcb045a37eb155bfaa2e1d17b6573ed43fb1d18b936febc7bbc2" "7ceb8967b229c1ba102378d3e2c5fef20ec96a41f615b454e0dc0bfa1d326ea6" "5999e12c8070b9090a2a1bbcd02ec28906e150bb2cdce5ace4f965c76cf30476" "67e998c3c23fe24ed0fb92b9de75011b92f35d3e89344157ae0d544d50a63a72" "66132890ee1f884b4f8e901f0c61c5ed078809626a547dbefbb201f900d03fd8" default)))
@@ -827,10 +826,18 @@ Example:
      (not
       (memq this-command
             (quote
-             (mac-mwheel-scroll evil-scroll-line-down mwheel-scroll scroll-bar-drag scroll-bar-toolkit-scroll scroll-bar-scroll-up scroll-bar-scroll-down)))))))
+             (mac-mwheel-scroll evil-scroll-line-down mwheel-scroll scroll-bar-drag scroll-bar-toolkit-scroll scroll-bar-scroll-up scroll-bar-scroll-down)))))) t)
  '(sublimity-mode nil)
  '(sublimity-scroll-drift-length 0)
  '(sublimity-scroll-weight 7.0)
+ '(web-mode-auto-close-style 2)
+ '(web-mode-enable-auto-opening t)
+ '(web-mode-enable-auto-pairing nil)
+ '(web-mode-enable-current-element-highlight t)
+ '(web-mode-enable-element-content-fontification t)
+ '(web-mode-enable-element-tag-fontification t)
+ '(web-mode-enable-engine-detection nil)
+ '(web-mode-enable-html-entities-fontification t)
  '(window-divider-default-bottom-width 1)
  '(window-divider-default-places t)
  '(window-divider-default-right-width 1))
