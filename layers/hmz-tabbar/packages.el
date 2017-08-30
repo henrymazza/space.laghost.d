@@ -48,6 +48,15 @@ which require an initialization must be listed explicitly in the list.")
             result)
         nil))
 
+    (defun hmz-lighten-if-too-dark (icon-face)
+      (let* ((color-name (face-attribute (plist-get icon-face :inherit) :foreground nil 'default))
+             (in-hsl (apply #'color-rgb-to-hsl
+                            (color-name-to-rgb color-name))))
+
+        (color-hsl-to-rgb (first in-hsl)
+                          (second in-hsl)
+                          (* 1.2 (third in-hsl)))))
+
     ;; override so we can change default value instead of custom one
     (setq tabbar-separator (list 1.2))
 
@@ -106,6 +115,7 @@ which require an initialization must be listed explicitly in the list.")
     (add-to-list 'all-the-icons-icon-alist
                  '("\\.lua$" all-the-icons-wicon "moon-waning-crescent-3" :face all-the-icons-cyan))
 
+
     ;; Override function that writes tab names so we can insert
     ;; an stylized text with icons
     (defsubst tabbar-line-tab (tab)
@@ -131,6 +141,8 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
            (icon-face (plist-get (text-properties-at 0 the-icon) 'face))
            )
 
+        (message "%s" (hmz-lighten-if-too-dark icon-face))
+
         (concat
          (propertize
           the-icon
@@ -139,7 +151,8 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
                  (plist-get (text-properties-at 0 the-icon) 'face)
                  `(:background ,(tabbar-background-color))
                  (if tab-is-active
-                     `(:overline ,(face-attribute tab-face :foreground nil 'default))
+                     `(:overline ,(face-attribute tab-face :foreground nil 'default)
+                                  )
                    `(:foreground ,(face-attribute 'header-line :foreground nil 'default)))
                  )
           'display (if tab-is-active '(raise 0.0) '(raise 0.0))
@@ -185,17 +198,6 @@ element."
                                           'face '(:inherit tabbar-default
                                                            :height 1.3)
                                           'display '(raise 0.1)) "")))
-
-        ;; This isn't pretty, but won't break existing code.
-        ;; Perhaps other thing's gonna work, but that's what I
-        ;; came with for now.
-        ;; (run-with-timer 1
-        ;;   1 (lambda ()
-        ;;      ;; set to nil to force refresh without interfeering
-        ;;      ;; with existing code.
-        ;;      (setq tabbar-scroll-left-button-value nil)
-        ;;      (setq tabbar-scroll-right-button-value nil)
-        ;;      (setq tabbar-home-button-value nil)))
 
         (tabbar-set-template tabset nil)
         ;; Cache the display value of the enabled/disabled buttons in
