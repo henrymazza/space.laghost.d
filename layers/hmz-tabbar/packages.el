@@ -48,14 +48,10 @@ which require an initialization must be listed explicitly in the list.")
             result)
         nil))
 
-    (defun hmz-lighten-if-too-dark (icon-face)
-      (let* ((color-name (face-attribute (plist-get icon-face :inherit) :foreground nil 'default))
-             (in-hsl (apply #'color-rgb-to-hsl
-                            (color-name-to-rgb color-name))))
 
-        (color-hsl-to-rgb (first in-hsl)
-                          (second in-hsl)
-                          (* 1.2 (third in-hsl)))))
+    (defun hmz-lighten-if-too-dark (icon-face)
+      "Lighen color if (TODO) it's considered too dark."
+      (color-lighten-name (face-attribute (plist-get icon-face :inherit) :foreground nil 'default) 20))
 
     ;; override so we can change default value instead of custom one
     (setq tabbar-separator (list 1.2))
@@ -141,8 +137,6 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
            (icon-face (plist-get (text-properties-at 0 the-icon) 'face))
            )
 
-        (message "%s" (hmz-lighten-if-too-dark icon-face))
-
         (concat
          (propertize
           the-icon
@@ -152,7 +146,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
                  `(:background ,(tabbar-background-color))
                  (if tab-is-active
                      `(:overline ,(face-attribute tab-face :foreground nil 'default)
-                                  )
+                                  :foreground ,(hmz-lighten-if-too-dark icon-face))
                    `(:foreground ,(face-attribute 'header-line :foreground nil 'default)))
                  )
           'display (if tab-is-active '(raise 0.0) '(raise 0.0))
@@ -187,8 +181,8 @@ element."
                            (concat " "
                                    (all-the-icons-wicon "alien"
                                                         :face '(:inherit tabbar-default :height 1.2))))
-                          ((eq name 'scroll-left) (all-the-icons-material "navigate_before"))
-                          ((eq name 'scroll-right) (all-the-icons-material "navigate_next"))
+                          ((eq name 'scroll-left) (all-the-icons-material "chevron_left"))
+                          ((eq name 'scroll-right) (all-the-icons-material "chevron_right"))
                           (t "X")))
 
              (raise-amount 0.0)
