@@ -26,7 +26,22 @@
 (defun hmz-misc/post-init-neotree ()
   (use-package neotree
     :ensure neotree
+
     :init
+    (setq neo-auto-indent-point t)
+    (setq neo-autorefresh t)
+    (setq neo-banner-message "")
+    (setq neo-create-file-auto-open t)
+    (setq neo-filepath-sort-function (lambda (f1 f2) (string< (downcase f1) (downcase f2))))
+    (setq neo-force-change-root t)
+    (setq neo-show-hidden-files t)
+    (setq neo-show-updir-line nil)
+    (setq neo-smart-open t)
+    (setq neo-theme (if (display-graphic-p) (quote icons) (quote arrow)))
+    (setq neo-vc-integration (quote (char)))
+    (setq neo-window-fixed-size nil)
+    (setq neo-window-position (quote right))
+    (setq neo-window-width 24)
 
     :config
 
@@ -89,8 +104,13 @@
         ;; custom doesn't work, neither does setting on init file
         (setq neo-buffer--show-hidden-file-p nil)
 
+        ;; hide cursor when not active
+        (setq cursor-in-non-selected-windows nil)
+
         ;; highlight current line
         (hl-line-mode t)
+        ;; hl-line-mode when window not in focus
+        (setq hl-line-sticky-flag t)
 
         ;; disable fringes
         (setq left-fringe-width 0)
@@ -107,10 +127,22 @@
 
     (add-hook 'neotree-mode-hook 'hmz-neotree-mode-hook)
 
+
+    (defadvice neo-buffer--refresh (after hmz-keep-hl-line-after-buffer-refresh 1 () activate)
+      "Keep hl-line active after refreshing neotree's tree."
+      (hl-line-mode t)
+      (setq hl-line-sticky-flag t))
+
+    (defadvice tabbar-cycle (after hmz-refresh-neotree-upon-cycle-tabs 1 () activate)
+      (when (neo-global--window-exists-p)
+        (neotree-refresh t ))
+      )
+
     (defun neo-global--do-autorefresh ()
-      "Overriden version of neotree refresh function that doesn't try to refresh buffers that are not visiting a file."
+      "Overriden version of neotree refresh function that doesn't try to refresh buffers that are not visiting a file and generating error and jumping cursor as result."
       (interactive)
       (when (and neo-autorefresh (neo-global--window-exists-p) buffer-file-name)
           (neotree-refresh t)
         ))
+
     ))

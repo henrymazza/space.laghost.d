@@ -51,7 +51,7 @@ which require an initialization must be listed explicitly in the list.")
 
     (defun hmz-lighten-if-too-dark (icon-face)
       "Lighen color if (TODO) it's considered too dark."
-      (color-lighten-name (face-attribute (plist-get icon-face :inherit) :foreground nil 'default) 20))
+      (color-lighten-name (face-attribute (plist-get icon-face :inherit) :foreground nil 'default) 2))
 
     ;; override so we can change default value instead of custom one
     (setq tabbar-separator (list 1.2))
@@ -110,6 +110,20 @@ which require an initialization must be listed explicitly in the list.")
 
     (add-to-list 'all-the-icons-icon-alist
                  '("\\.lua$" all-the-icons-wicon "moon-waning-crescent-3" :face all-the-icons-cyan))
+
+
+    (defun tabbar-buffer-help-on-tab (tab)
+      "Return the help string shown when mouse is onto TAB. This function was overriden to show more useful information."
+      (if tabbar--buffer-show-groups
+          (let* ((tabset (tabbar-tab-tabset tab))
+                 (tab (tabbar-selected-tab tabset)))
+            (format "mouse-1: switch to buffer %S in group [%s]"
+                    (buffer-name (tabbar-tab-value tab)) tabset))
+        (propertize (format "%s"
+                (file-relative-name
+                 (projectile-expand-root (buffer-file-name (tabbar-tab-value tab)))
+                 (projectile-project-root)) ) 'face '(:height 1.2 :weight light))))
+
 
 
     ;; Override function that writes tab names so we can insert
