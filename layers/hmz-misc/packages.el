@@ -85,6 +85,8 @@
     (defun neo-opens-outwards ()
       "Reveals Neotree expanding frame and tries to compensate internal size."
       (interactive)
+
+
       (if (neo-global--window-exists-p)
           (progn
             (set-frame-width (selected-frame) (- (frame-width) 24))
@@ -124,9 +126,7 @@
         (setq neo-window-width 24)
         (setq neo-window-fixed-size nil))
 
-
     (add-hook 'neotree-mode-hook 'hmz-neotree-mode-hook)
-
 
     (defadvice neo-buffer--refresh (after hmz-keep-hl-line-after-buffer-refresh 1 () activate)
       "Keep hl-line active after refreshing neotree's tree."
@@ -135,14 +135,10 @@
 
     (defadvice tabbar-cycle (after hmz-refresh-neotree-upon-cycle-tabs 1 () activate)
       (when (neo-global--window-exists-p)
-        (neotree-refresh t ))
-      )
+        (neotree-refresh t )))
 
     (defun neo-global--do-autorefresh ()
       "Overriden version of neotree refresh function that doesn't try to refresh buffers that are not visiting a file and generating error and jumping cursor as result."
       (interactive)
       (when (and neo-autorefresh (neo-global--window-exists-p) buffer-file-name)
-          (neotree-refresh t)
-        ))
-
-    ))
+          (neotree-refresh t)))))

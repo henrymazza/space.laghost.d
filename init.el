@@ -377,6 +377,12 @@ you should place you code here."
   (add-hook 'js-mode-hook (lambda () (ember-mode t)))
   (add-hook 'web-mode-hook (lambda () (ember-mode t)))
 
+  ;; Save Desktop
+  (desktop-save-mode t)
+
+  ;; Find a better char for truncated lines
+  (set-display-table-slot standard-display-table 0 ?\ ) 
+
   ;; Multiple Cursors
   (global-set-key (kbd "C-c m c") 'mc/edit-lines)
 

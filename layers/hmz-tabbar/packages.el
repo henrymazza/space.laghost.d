@@ -122,9 +122,7 @@ which require an initialization must be listed explicitly in the list.")
         (propertize (format "%s"
                 (file-relative-name
                  (projectile-expand-root (buffer-file-name (tabbar-tab-value tab)))
-                 (projectile-project-root)) ) 'face '(:height 1.2 :weight light))))
-
-
+                 (projectile-project-root))) 'face '(:height 1.2 :weight light))))
 
     ;; Override function that writes tab names so we can insert
     ;; an stylized text with icons
@@ -276,10 +274,8 @@ element."
              ((string-equal "*" (substring (buffer-name) 0 1)) "emacs")
              ((string-equal " " (substring (buffer-name) 0 1)) "hidden")
              ((eq major-mode 'dired-mode) "emacs")
-             ((eq projectile-mode t) (if (boundp projectile-project-name)
-                                         (projectile-project-name)
-                                       ("project")))
-             (t "user"))))
+             ((projectile-project-p) (projectile-project-name))
+             (t "other"))))
 
 
     (defun hmz-tabbar-refresh-tabs ()
