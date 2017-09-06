@@ -7,6 +7,7 @@
 which require an initialization must be listed explicitly in the list.")
 
 (defun hmz-tabbar/init-tabbar ()
+  "Tabbar customizations"
   (use-package tabbar
     :defer t
 
