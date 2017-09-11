@@ -85,7 +85,7 @@ values."
     (ruby :variables ruby-version-manager 'rbenv)
     (spell-checking :variables
                     spell-checking-enable-by-default nil)
-    syntax-checking
+    ;; syntax-checking
     ;; themes-megapack
     typography
     ;; uninpaired
@@ -381,7 +381,7 @@ you should place you code here."
   (desktop-save-mode t)
 
   ;; Find a better char for truncated lines
-  (set-display-table-slot standard-display-table 0 ?\ ) 
+  (set-display-table-slot standard-display-table 0 ?\ )
 
   ;; Multiple Cursors
   (global-set-key (kbd "C-c m c") 'mc/edit-lines)
