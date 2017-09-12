@@ -44,6 +44,17 @@
     (setq neo-window-width 24)
 
     :config
+    ;; TODO find how to properly detect if a package is being used
+    (defun hmz-winum-assign-func ()
+      (cond
+       ((equal (buffer-name) "*Calculator*")
+        9)
+       ((string-match-p (buffer-name) ".*\\*NeoTree\\*.*")
+        0)
+       (t
+        nil)))
+
+    (setq winum-assign-func 'hmz-winum-assign-func)
 
     (defun neo-buffer--insert-dir-entry (node depth expanded)
       "Overriden function to get rid of useless typography."
