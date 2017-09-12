@@ -86,7 +86,7 @@ values."
     (ruby :variables ruby-version-manager 'rbenv)
     (spell-checking :variables
                     spell-checking-enable-by-default nil)
-    syntax-checking
+    ;; syntax-checking
     ;; themes-megapack
     typography
     ;; uninpaired
