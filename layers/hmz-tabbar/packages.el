@@ -31,11 +31,17 @@ which require an initialization must be listed explicitly in the list.")
 
     ;; map mouse wheel events on header line
     (global-set-key [header-line wheel-right] 'tabbar-press-scroll-right)
-    (global-set-key [header-line double-wheel-right] 'tabbar-press-scroll-right)
-    (global-set-key [header-line triple-wheel-right] 'tabbar-press-scroll-right)
+    (global-set-key [header-line double-wheel-right] nil)
+    (global-set-key [header-line triple-wheel-right] nil)
     (global-set-key [header-line wheel-left] 'tabbar-press-scroll-left)
-    (global-set-key [header-line double-wheel-left] 'tabbar-press-scroll-left)
-    (global-set-key [header-line triple-wheel-left] 'tabbar-press-scroll-left)
+    (global-set-key [header-line double-wheel-left] nil)
+    (global-set-key [header-line triple-wheel-left] nil)
+
+    (setq mouse-wheel-progessive-speed nil)
+    (setq scroll-step 1)
+
+    (setq mouse-wheel-scroll-amount '(1 ((shift) . 10) ((control) . 30)))
+    (setq mouse-wheel-progressive-speed nil)
 
     :config
     (defun plist-merge (&rest plists)
