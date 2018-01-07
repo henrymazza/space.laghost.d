@@ -174,7 +174,8 @@ values."
    ;; Default font. `powerline-scale' allows to quickly tweak the mode-line
    ;; size to make separators look not too crappy.
    dotspacemacs-default-font '("Fira"
-                              :size 18
+                              :size 17
+                              :height 180
                               :weight normal
                               :width normal
                               :powerline-scale 1.1)
@@ -438,8 +439,8 @@ you should place you code here."
             (lambda ()
               ;; (hidden-mode-line-mode t)
               ;; (spacemacs/enable-transparency)
-              ;; (rainbow-identifiers-mode t)
-              ;; (rainbow-delimiters-mode-enable)
+              (rainbow-identifiers-mode t)
+              (rainbow-delimiters-mode-enable)
 
               ;; flycheck is boring
               (global-flycheck-mode nil)
@@ -801,52 +802,13 @@ Example:
 (add-hook 'comint-mode-hook
           (function (lambda ()
                       (local-set-key (kbd "s-k") 'clear-comint-buffer))))
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ansi-color-names-vector
-   ["#0a0814" "#f2241f" "#67b11d" "#b1951d" "#4f97d7" "#a31db1" "#28def0" "#b2b2b2"])
- '(coffee-tab-width 2 t)
- '(custom-safe-themes
-   (quote
-    ("19af39a10b8d3cb45beee0b78274965e79e0f70d1c338c1142b2ba1010e026de" "d3a7eea7ebc9a82b42c47e49517f7a1454116487f6907cf2f5c2df4b09b50fc1" "ff7625ad8aa2615eae96d6b4469fcc7d3d20b2e1ebc63b761a349bebbb9d23cb" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "868f73b5cf78e72ca2402e1d48675e49cc9a9619c5544af7bf216515d22b58e7" "6c35ffc17f8288be4c7866deb7437e8af33cd09930e195738cdfef911ab77274" "d8f76414f8f2dcb045a37eb155bfaa2e1d17b6573ed43fb1d18b936febc7bbc2" "7ceb8967b229c1ba102378d3e2c5fef20ec96a41f615b454e0dc0bfa1d326ea6" "5999e12c8070b9090a2a1bbcd02ec28906e150bb2cdce5ace4f965c76cf30476" "67e998c3c23fe24ed0fb92b9de75011b92f35d3e89344157ae0d544d50a63a72" "66132890ee1f884b4f8e901f0c61c5ed078809626a547dbefbb201f900d03fd8" default)))
- '(evil-shift-width 2)
- '(evil-want-Y-yank-to-eol t)
- '(fci-rule-color "#151515" t)
- '(global-hl-line-sticky-flag t)
- '(mac-auto-operator-composition-mode t)
- '(mc/always-run-for-all t)
- '(osx-clipboard-mode t)
- '(package-selected-packages
-   (quote
-    (yaml-mode org-bullets org-plus-contrib csv-mode autopair ember-mode indicators evil-smartparens persistent-scratch command-log-mode sublimity zonokai-theme zenburn-theme zen-and-art-theme underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme tronesque-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme reverse-theme railscasts-theme purple-haze-theme professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme pastels-on-dark-theme organic-green-theme omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme niflheim-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme jbeans-theme jazz-theme inkpot-theme heroku-theme hemisu-theme hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme firebelly-theme farmhouse-theme espresso-theme dracula-theme django-theme darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes afternoon-theme powerline rake inflections pcre2el spinner markdown-mode skewer-mode simple-httpd json-snatcher json-reformat multiple-cursors js2-mode hydra parent-mode projectile request haml-mode gitignore-mode fringe-helper git-gutter+ git-gutter flyspell-correct pos-tip flycheck pkg-info epl flx magit magit-popup git-commit with-editor iedit smartparens paredit anzu evil goto-chg undo-tree highlight f diminish web-completion-data s dash-functional tern company inf-ruby bind-map bind-key yasnippet packed dash helm avy helm-core async auto-complete popup esup spaceline-all-the-icons all-the-icons memoize font-lock+ xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar spaceline smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode pbcopy paradox osx-trash osx-dictionary orgit open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc ir-black-theme info+ indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flycheck-pos-tip flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode elisp-slime-nav dumb-jump diff-hl company-web company-tern company-statistics column-enforce-mode color-identifiers-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
- '(powerline-default-separator (quote chamfer))
- '(scroll-bar-mode nil)
- '(sublimity-ignored-scroll-commands
-   (quote
-    (scroll-bar-drag scroll-bar-toolkit-scroll scroll-bar-scroll-up scroll-bar-scroll-down mac-mwheel-scroll)))
- '(sublimity-mode t)
- '(sublimity-scroll-drift-length 0)
- '(sublimity-scroll-weight 7.0)
- '(web-mode-auto-close-style 2)
- '(web-mode-enable-auto-opening t)
- '(web-mode-enable-auto-pairing nil)
- '(web-mode-enable-current-element-highlight t)
- '(web-mode-enable-element-content-fontification t)
- '(web-mode-enable-element-tag-fontification t)
- '(web-mode-enable-engine-detection nil)
- '(web-mode-enable-html-entities-fontification t)
- '(window-divider-default-bottom-width 1)
- '(window-divider-default-places t)
- '(window-divider-default-right-width 1))
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:family "Fira Code" :foundry "nil" :slant normal :weight normal :height 181 :width normal))))
+ '(default ((t (:family "Fira Code" :foundry "nil" :slant normal :weight light :height 161 :width normal))))
  '(all-the-icons-dorange ((t (:foreground "tan3"))))
  '(all-the-icons-lmaroon ((t (:foreground "burlywood3"))))
  '(all-the-icons-maroon ((t (:foreground "burlywood3"))))
