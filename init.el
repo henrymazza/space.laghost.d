@@ -104,7 +104,7 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-  dotspacemacs-additional-packages '(all-the-icons ember-mode sublimity persistent-scratch)
+  dotspacemacs-additional-packages '(all-the-icons handlebars-sgml-mode ember-mode sublimity persistent-scratch)
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
@@ -384,7 +384,13 @@ you should place you code here."
 
   ;; Ember Mode
   (add-hook 'js-mode-hook (lambda () (ember-mode t)))
-  (add-hook 'web-mode-hook (lambda () (ember-mode t)))
+  (add-hook 'web-mode-hook (lambda () (ember-mode t)
+                             (snippet-mode 0)
+                             (rainbow-identifiers t)))
+
+  ;; Clear unused buffers
+  (midnight-mode t)
+  (add-to-list 'clean-buffer-list-kill-never-regexps ".*NeoTree.*")
 
   ;; Save Desktop
   (desktop-save-mode t)
@@ -502,6 +508,18 @@ you should place you code here."
   ;;                                               scss-mode))
   ;;   (dolist (mode rainbow-html-colors-major-mode-list)
   ;;     (add-hook (intern (format "%s-hook" mode)) 'rainbow-mode)))
+
+  (defun bsl/filter-buffers (buffer-list)
+    (delq nil (mapcar
+               (lambda (buffer)
+                 (cond
+                  ((eq (with-current-buffer buffer major-mode)  'dired-mode) nil)
+                  ((eq (with-current-buffer buffer major-mode)  'org-mode) nil)
+                  ((eq (with-current-buffer buffer major-mode)  'org-agenda-mode) nil)
+                  (t buffer)))
+               buffer-list)))
+
+  (advice-add 'helm-skip-boring-buffers :filter-return 'bsl/filter-buffers)
 
   (setq-default create-lockfiles nil)
 
@@ -686,6 +704,9 @@ you should place you code here."
   '(("true" "false")
     ("width" "height")
     ("if" "unless")
+    ("top" "bottom")
+    ("left" "right")
+    ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")
     ("relative" "absolute" "fixed" "static" "sticky")
     ("aliceblue" "antiquewhite" "aqua" "aquamarine" "azure" "beige" "bisque" "black" "blanchedalmond" "blue" "blueviolet" "brown" "burlywood" "cadetblue" "chartreuse" "chocolate" "coral" "cornflowerblue" "cornsilk" "crimson" "cyan" "darkblue" "darkcyan" "darkgoldenrod" "darkgray" "darkgrey" "darkgreen" "darkkhaki" "darkmagenta" "darkolivegreen" "darkorange" "darkorchid" "darkred" "darksalmon" "darkseagreen" "darkslateblue" "darkslategray" "darkslategrey" "darkturquoise" "darkviolet" "deeppink" "deepskyblue" "dimgray" "dimgrey" "dodgerblue" "firebrick" "floralwhite" "forestgreen" "fuchsia" "gainsboro" "ghostwhite" "gold" "goldenrod" "gray" "grey" "green" "greenyellow" "honeydew" "hotpink" "indianred" "indigo" "ivory" "khaki" "lavender" "lavenderblush" "lawngreen" "lemonchiffon" "lightblue" "lightcoral" "lightcyan" "lightgoldenrodyellow" "lightgray" "lightgrey" "lightgreen" "lightpink" "lightsalmon" "lightseagreen" "lightskyblue" "lightslategray" "lightslategrey" "lightsteelblue" "lightyellow" "lime" "limegreen" "linen" "magenta" "maroon" "mediumaquamarine" "mediumblue" "mediumorchid" "mediumpurple" "mediumseagreen" "mediumslateblue" "mediumspringgreen" "mediumturquoise" "mediumvioletred" "midnightblue" "mintcream" "mistyrose" "moccasin" "navajowhite" "navy" "oldlace" "olive" "olivedrab" "orange" "orangered" "orchid" "palegoldenrod" "palegreen" "paleturquoise" "palevioletred" "papayawhip" "peachpuff" "peru" "pink" "plum" "powderblue" "purple" "rebeccapurple" "red" "rosybrown" "royalblue" "saddlebrown" "salmon" "sandybrown" "seagreen" "seashell" "sienna" "silver" "skyblue" "slateblue" "slategray" "slategrey" "snow" "springgreen" "steelblue" "tan" "teal" "thistle" "tomato" "turquoise" "violet" "wheat" "white" "whitesmoke" "yellow" "yellowgreen")
     ("yes" "no"))
@@ -821,3 +842,13 @@ Example:
  '(neo-expand-btn-face ((t (:foreground "SkyBlue" :family "San Francisco"))))
  '(neo-file-link-face ((t (:foreground "White" :family "San Francisco"))))
  '(window-divider ((t (:foreground "dark slate blue")))))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(coffee-tab-width 2)
+ '(midnight-mode t)
+ '(package-selected-packages
+   (quote
+    (handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))))
