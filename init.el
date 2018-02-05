@@ -52,6 +52,8 @@ values."
   ;; of a list then all discovered layers will be installed.
   dotspacemacs-configuration-layers
   '(
+    nginx
+    typescript
     yaml
     csv
      ;; ----------------------------------------------------------------
@@ -104,7 +106,7 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-  dotspacemacs-additional-packages '(all-the-icons handlebars-sgml-mode ember-mode sublimity persistent-scratch)
+  dotspacemacs-additional-packages '(hlinum evil-matchit fic-mode zencoding-mode all-the-icons handlebars-sgml-mode ember-mode sublimity persistent-scratch)
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
@@ -382,11 +384,16 @@ you should place you code here."
     (set-frame-position (selected-frame) 250 30)
     )
 
-  ;; Ember Mode
+
   (add-hook 'js-mode-hook (lambda () (ember-mode t)))
+
+  (add-hook 'sgml-mode-hook 'zencoding-mode)
   (add-hook 'web-mode-hook (lambda () (ember-mode t)
+                             (zencoding-mode)
                              (snippet-mode 0)
                              (rainbow-identifiers t)))
+
+  (setq vi-tilde-fringe-mode 0)
 
   ;; Clear unused buffers
   (midnight-mode t)
@@ -403,6 +410,9 @@ you should place you code here."
 
   ;; Find String in Project
   (global-set-key (kbd "s-F") 'helm-projectile-ag)
+
+  ;; Salve all Projectile buffers
+  (global-set-key (kbd "s-S") 'projectile-save-project-buffers)
 
   ;; Trackpads send a lot more scroll events than regular mouse wheels,
   ;; so the scroll amount and acceleration must be tuned to smooth it out.
@@ -437,21 +447,27 @@ you should place you code here."
   ;; spacemacs as default git editor
   (global-git-commit-mode t)
 
-  ;; hide mode line
-  (setq-default mode-line-format nil)
 
   (add-hook 'css-mode-hook (lambda () (rainbow-mode 1)))
   (add-hook 'prog-mode-hook
             (lambda ()
-              ;; (hidden-mode-line-mode t)
+              (global-hl-line-mode -1)
+
+              (hlinum-activate)
+
+              (hidden-mode-line-mode t)
               ;; (spacemacs/enable-transparency)
               (rainbow-identifiers-mode t)
               (rainbow-delimiters-mode-enable)
+              (rainbow-mode t)
+
+              (smartparens-global-mode t)
+              (global-auto-complete-mode t)
+              (global-evil-matchit-mode 1)
 
               ;; flycheck is boring
               (global-flycheck-mode nil)
 
-              (rainbow-mode t)
               (visual-line-mode t)))
 
   ;; Unix Style C-h
@@ -668,6 +684,9 @@ you should place you code here."
    (setq sublimity-attractive-centering-width 110)
    (sublimity-mode t)
 
+   ;; larger linum column
+   (setq linum-format "%4d ")
+
    ;; keep these configs here once customize loves to screw up
    (set-face-attribute 'linum nil :family "San Francisco" :height 0.6)
    (set-face-attribute 'header-line nil :family "San Francisco" :height 1.0)
@@ -703,6 +722,9 @@ you should place you code here."
 (defvar rotate-text-rotations
   '(("true" "false")
     ("width" "height")
+    ("enable" "disable")
+    ("enabled" "disabled")
+    ("t" "nil")
     ("if" "unless")
     ("top" "bottom")
     ("left" "right")
@@ -833,10 +855,13 @@ Example:
  '(all-the-icons-dorange ((t (:foreground "tan3"))))
  '(all-the-icons-lmaroon ((t (:foreground "burlywood3"))))
  '(all-the-icons-maroon ((t (:foreground "burlywood3"))))
+ '(anzu-match-2 ((t (:foreground "deep sky blue"))))
+ '(evil-search-highlight-persist-highlight-face ((t (:inherit lazy-highlight))))
  '(font-lock-warning-face ((t (:background "DeepSkyBlue" :foreground "#ffb86c"))))
  '(fringe ((t (:foreground "DeepSkyBlue" :background unspecified))))
  '(header-line ((t (:weight thin :family "San Francisco"))))
  '(linum ((t (:family "San Francisco" :height 0.6))))
+ '(linum-highlight-face ((t (:inherit linum :background "#424256" :foreground "#00FF7D"))))
  '(neo-banner-face ((t (:foreground "lightblue" :weight bold :family "san francisco"))))
  '(neo-dir-link-face ((t (:foreground "DeepSkyBlue" :family "san francisco"))))
  '(neo-expand-btn-face ((t (:foreground "SkyBlue" :family "San Francisco"))))
@@ -851,4 +876,4 @@ Example:
  '(midnight-mode t)
  '(package-selected-packages
    (quote
-    (handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))))
+    (hlinum nginx-mode tide typescript-mode flycheck fic-mode zencoding-mode handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))))

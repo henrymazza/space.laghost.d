@@ -85,9 +85,31 @@
           (unless (require 'all-the-icons nil 'noerror)
             (error "Package `all-the-icons' isn't installed"))
           (setq-local tab-width 1)
-          (or (and (equal name 'open) (insert (format " %s " (all-the-icons-octicon "triangle-down" :height 1.0 :v-adjust 0.0 :face '(:foreground "grey50")))))
-              (and (equal name 'close) (insert (format " %s "(all-the-icons-octicon "triangle-right" :height 1.0 :v-adjust -0.0 :face '(:foreground "grey50")))))
-              (and (equal name 'leaf)  (insert (format " %s " (all-the-icons-icon-for-file node-name))))))
+
+          (or (and (equal name 'open)
+                   (insert
+                    (propertize
+                     (format "%s " (all-the-icons-octicon "triangle-down"))
+                     'face `(:family ,(all-the-icons-octicon-family) :foreground "grey50" :height 1.0)
+                     'display '(raise 0.1))
+                    ))
+
+              (and (equal name 'close)
+                   (insert
+                    (propertize
+                     (format "%s  " (all-the-icons-octicon "triangle-right"))
+                     'face `(:family ,(all-the-icons-octicon-family) :foreground  "grey50" :height 1.0 space-width 10.0)
+                     'display `((space (:width 20.0))))
+                    ))
+
+              ;; (and (equal name 'leaf)  (insert (format " %s " (all-the-icons-icon-for-file node-name))))))
+
+              (and (equal name 'leaf)
+                   (insert
+                    (propertize
+                     (format "%s" "\u22EE")
+                     'face `(:height 1.1 :foreground "grey30")
+                     'display '(raise 0.0 width 40.0 space-width 200.0))))))
          (t
           (or (and (equal name 'open)  (funcall n-insert-symbol "- "))
               (and (equal name 'close) (funcall n-insert-symbol "+ ")))))))
@@ -96,17 +118,13 @@
     (defun neo-opens-outwards ()
       "Reveals Neotree expanding frame and tries to compensate internal size."
       (interactive)
-
-
       (if (neo-global--window-exists-p)
           (progn
-            (set-frame-width (selected-frame) (- (frame-width) 24))
             (neotree-hide))
 
         (let ((origin-buffer-file-name (buffer-file-name)))
           (neotree-find (projectile-project-root))
-          (neotree-find origin-buffer-file-name)
-          (set-frame-width (selected-frame) (+ (frame-width) 24)))))
+          (neotree-find origin-buffer-file-name))))
 
     (global-set-key (kbd "s-r") 'neo-opens-outwards)
 
@@ -151,5 +169,6 @@
     (defun neo-global--do-autorefresh ()
       "Overriden version of neotree refresh function that doesn't try to refresh buffers that are not visiting a file and generating error and jumping cursor as result."
       (interactive)
-      (when (and neo-autorefresh (neo-global--window-exists-p) buffer-file-name)
-          (neotree-refresh t)))))
+      (when (and neo-autorefresh (neo-global--window-exists-p) buffer-file-name (not (eq (current-buffer) "*NeoTree*"))
+          (neotree-refresh t))))
+    ))
