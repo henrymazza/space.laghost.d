@@ -331,6 +331,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
 
   ;; make those tildes disapear
   (setq indicate-empty-lines nil)
+  (setq global-vi-tilde-fringe-mode nil)
 
   ;; keep undo tree across restarts
   (setq undo-tree-auto-save-history t)
