@@ -2,7 +2,6 @@
   '(
     rainbow-mode
     rainbow-identifiers
-    rainbow-delimiters
     )
 )
 

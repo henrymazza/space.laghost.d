@@ -72,6 +72,7 @@ values."
     hmz-misc
     (hmz-color-identifiers
      :variables hmz-color-identifiers-saturation 20)
+    hmz-desktop
 
     better-defaults
     ;; cb-yasnippet
@@ -326,12 +327,11 @@ before packages are loaded. If you are unsure, you should try in setting them in
 
   ;; Hide title bar
   ;; (setq initial-frame-alist '((undecorated . t)))
-
   (add-to-list 'default-frame-alist '(undecorated . t))
 
-  ;; make those tildes disapear
-  (setq indicate-empty-lines nil)
-  (setq global-vi-tilde-fringe-mode nil)
+  ;; Startup Screen
+  (setq inhibit-splash-screen t)
+  (setq inhibit-startup-message t)
 
   ;; keep undo tree across restarts
   (setq undo-tree-auto-save-history t)
@@ -356,9 +356,6 @@ you should place you code here."
 
   ;; disable current line highlight
   (global-hl-line-mode -1)
-
-  ;; windows divider
-  (window-divider-mode 1)
 
   ;; Make insert cursor a vertical Bar. Keep default color.
   (setq evil-emacs-state-cursor '("SkyBlue2" bar))
@@ -394,14 +391,9 @@ you should place you code here."
                              (snippet-mode 0)
                              (rainbow-identifiers t)))
 
-  (setq vi-tilde-fringe-mode 0)
-
   ;; Clear unused buffers
   (midnight-mode t)
   (add-to-list 'clean-buffer-list-kill-never-regexps ".*NeoTree.*")
-
-  ;; Save Desktop
-  (desktop-save-mode t)
 
   ;; Find a better char for truncated lines
   (set-display-table-slot standard-display-table 0 ?\ )
@@ -448,28 +440,33 @@ you should place you code here."
   ;; spacemacs as default git editor
   (global-git-commit-mode t)
 
-
   (add-hook 'css-mode-hook (lambda () (rainbow-mode 1)))
-  (add-hook 'prog-mode-hook
-            (lambda ()
-              (global-hl-line-mode -1)
 
-              (hlinum-activate)
+  (defun hmz-prog-mode-hook ()
+    (interactive)
+    (global-hl-line-mode -1)
 
-              (hidden-mode-line-mode t)
-              ;; (spacemacs/enable-transparency)
-              (rainbow-identifiers-mode t)
-              (rainbow-delimiters-mode-enable)
-              (rainbow-mode t)
+    (vi-tilde-fringe-mode nil)
+    (global-vi-tilde-fringe-mode nil)
 
-              (smartparens-global-mode t)
-              (global-auto-complete-mode t)
-              (global-evil-matchit-mode 1)
+    (global-auto-complete-mode t)
+    (hlinum-activate)
 
-              ;; flycheck is boring
-              (global-flycheck-mode nil)
+    (hidden-mode-line-mode t)
+    ;; (spacemacs/enable-transparency)
+    (rainbow-identifiers-mode t)
+    (rainbow-delimiters-mode-enable)
+    (rainbow-mode t)
 
-              (visual-line-mode t)))
+    (smartparens-global-mode t)
+    (global-evil-matchit-mode 1)
+
+    ;; flycheck is boring
+    (global-flycheck-mode nil)
+
+    (visual-line-mode t))
+
+  (add-hook 'prog-mode-hook 'hmz-prog-mode-hook)
 
   ;; Unix Style C-h
   (global-set-key (kbd "C-?") 'help-command) ;; this isn't working...
@@ -867,14 +864,17 @@ Example:
  '(neo-dir-link-face ((t (:foreground "DeepSkyBlue" :family "san francisco"))))
  '(neo-expand-btn-face ((t (:foreground "SkyBlue" :family "San Francisco"))))
  '(neo-file-link-face ((t (:foreground "White" :family "San Francisco"))))
- '(window-divider ((t (:foreground "dark slate blue")))))
+ '(neo-root-dir-face ((t (:foreground "gray40" :weight bold))))
+ '(window-divider ((t (:foreground "black")))))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(coffee-tab-width 2)
+ '(coffee-tab-width 2 t)
  '(midnight-mode t)
+ '(neo-window-width 20)
  '(package-selected-packages
    (quote
-    (hlinum nginx-mode tide typescript-mode flycheck fic-mode zencoding-mode handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))))
+    (ssh hlinum nginx-mode tide typescript-mode flycheck fic-mode zencoding-mode handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+ '(window-divider-mode nil))

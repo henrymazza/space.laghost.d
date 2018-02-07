@@ -90,19 +90,17 @@
                    (insert
                     (propertize
                      (format "%s " (all-the-icons-octicon "triangle-down"))
-                     'face `(:family ,(all-the-icons-octicon-family) :foreground "grey50" :height 1.0)
-                     'display '(raise 0.1))
+                     'face `(:family ,(all-the-icons-octicon-family) :foreground "skyblue" :height 1.1)
+                     'display '(raise -0.1 width 2.0))
                     ))
 
               (and (equal name 'close)
                    (insert
                     (propertize
-                     (format "%s  " (all-the-icons-octicon "triangle-right"))
-                     'face `(:family ,(all-the-icons-octicon-family) :foreground  "grey50" :height 1.0 space-width 10.0)
-                     'display `((space (:width 20.0))))
+                     (format " %s " (all-the-icons-octicon "triangle-right"))
+                     'face `(:family ,(all-the-icons-octicon-family) :foreground  "grey40" :height 1.1 )
+                     'display '(raise 0.1))
                     ))
-
-              ;; (and (equal name 'leaf)  (insert (format " %s " (all-the-icons-icon-for-file node-name))))))
 
               (and (equal name 'leaf)
                    (insert
