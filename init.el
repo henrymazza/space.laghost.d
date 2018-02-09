@@ -107,7 +107,7 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-  dotspacemacs-additional-packages '(hlinum evil-matchit fic-mode zencoding-mode all-the-icons handlebars-sgml-mode ember-mode sublimity persistent-scratch)
+  dotspacemacs-additional-packages '(bpr hlinum evil-matchit fic-mode zencoding-mode all-the-icons handlebars-sgml-mode ember-mode sublimity persistent-scratch)
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
@@ -176,12 +176,12 @@ values."
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font. `powerline-scale' allows to quickly tweak the mode-line
    ;; size to make separators look not too crappy.
-   dotspacemacs-default-font '("Fira"
-                              :size 17
-                              :height 180
+   dotspacemacs-default-font '("Fira Code"
+                              :size 16
+                              :height 161
                               :weight normal
                               :width normal
-                              :powerline-scale 1.1)
+                              :powerline-scale 0.7)
    ;; The leader key
    dotspacemacs-leader-key "SPC"
    ;; The leader key accessible in `emacs state' and `insert state'
@@ -329,9 +329,8 @@ before packages are loaded. If you are unsure, you should try in setting them in
   ;; (setq initial-frame-alist '((undecorated . t)))
   (add-to-list 'default-frame-alist '(undecorated . t))
 
-  ;; Startup Screen
-  (setq inhibit-splash-screen t)
-  (setq inhibit-startup-message t)
+  ;; perhaps it reduces errors with undo-tree
+  (setq undo-tree-enable-undo-in-region nil)
 
   ;; keep undo tree across restarts
   (setq undo-tree-auto-save-history t)
@@ -442,31 +441,37 @@ you should place you code here."
 
   (add-hook 'css-mode-hook (lambda () (rainbow-mode 1)))
 
+  (global-vi-tilde-fringe-mode -1)
+  (global-git-gutter+-mode t)
+  (git-gutter-mode -1)
+
+  ;; flycheck is ugly
+  (global-flycheck-mode -1)
+
   (defun hmz-prog-mode-hook ()
     (interactive)
-    (global-hl-line-mode -1)
 
-    (vi-tilde-fringe-mode nil)
-    (global-vi-tilde-fringe-mode nil)
+    (global-hl-line-mode -1)
 
     (global-auto-complete-mode t)
     (hlinum-activate)
 
-    (hidden-mode-line-mode t)
-    ;; (spacemacs/enable-transparency)
+    (flycheck-mode -1)
+
     (rainbow-identifiers-mode t)
     (rainbow-delimiters-mode-enable)
     (rainbow-mode t)
 
     (smartparens-global-mode t)
     (global-evil-matchit-mode 1)
-
-    ;; flycheck is boring
-    (global-flycheck-mode nil)
+    (setq mode-line-format nil)
+    (hidden-mode-line-mode 1)
 
     (visual-line-mode t))
 
   (add-hook 'prog-mode-hook 'hmz-prog-mode-hook)
+
+  (setq-default mode-line-format nil)
 
   ;; Unix Style C-h
   (global-set-key (kbd "C-?") 'help-command) ;; this isn't working...
@@ -615,8 +620,8 @@ you should place you code here."
 
         (with-selected-window (frame-selected-window hmz-messages-frame)
           ;;TODO: (handle-switch-frame)
-          (spacemacs/enable-transparency hmz-messages-frame 70)
-          (setq dotspacemacs-inactive-transparency 60)
+          (spacemacs/enable-transparency hmz-messages-frame 90)
+          (setq dotspacemacs-inactive-transparency 70)
           (tabbar-local-mode 0)
           (switch-to-buffer "*Messages*")
           (text-scale-set -2)
@@ -627,7 +632,6 @@ you should place you code here."
           (setq left-fringe-width 0)
           (setq right-fringe-width 0)
           (set-window-fringes (selected-window) 0 0 nil)
-          (hidden-mode-line-mode 1)
           )
         (message "%s" original-frame)
         (select-frame-set-input-focus original-frame)
@@ -682,7 +686,7 @@ you should place you code here."
    (setq sublimity-attractive-centering-width 110)
    (sublimity-mode t)
 
-   ;; larger linum column
+   ;; larger linum column to compensate italics
    (setq linum-format "%4d ")
 
    ;; keep these configs here once customize loves to screw up
@@ -871,10 +875,12 @@ Example:
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(coffee-tab-width 2 t)
+ '(coffee-tab-width 2)
  '(midnight-mode t)
+ '(mode-line-format nil)
+ '(mode-line-in-non-selected-windows nil)
  '(neo-window-width 20)
  '(package-selected-packages
    (quote
-    (ssh hlinum nginx-mode tide typescript-mode flycheck fic-mode zencoding-mode handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+    (bpr ssh hlinum nginx-mode tide typescript-mode flycheck fic-mode zencoding-mode handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
  '(window-divider-mode nil))
