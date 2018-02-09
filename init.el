@@ -106,7 +106,7 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-  dotspacemacs-additional-packages '(hlinum evil-matchit fic-mode zencoding-mode all-the-icons handlebars-sgml-mode ember-mode sublimity persistent-scratch)
+  dotspacemacs-additional-packages '(dired+ hlinum evil-matchit fic-mode zencoding-mode all-the-icons handlebars-sgml-mode ember-mode sublimity persistent-scratch)
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
@@ -175,7 +175,7 @@ values."
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font. `powerline-scale' allows to quickly tweak the mode-line
    ;; size to make separators look not too crappy.
-   dotspacemacs-default-font '("Fira"
+   dotspacemacs-default-font '("Fira Code"
                               :size 17
                               :height 180
                               :weight normal
@@ -394,6 +394,12 @@ you should place you code here."
                              (rainbow-identifiers t)))
 
   (setq vi-tilde-fringe-mode 0)
+
+  ;; No new buffer for visiting files
+  (put 'dired-find-alternate-file 'disabled nil)
+  (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file) ; was dired-advertised-find-file
+
+  (define-key dired-mode-map (kbd "^") (lambda () (interactive) (find-alternate-file "..")))  ; was dired-up-directory
 
   ;; Clear unused buffers
   (midnight-mode t)
