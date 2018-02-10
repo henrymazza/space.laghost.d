@@ -29,7 +29,7 @@
 
     :init
     (setq neo-auto-indent-point t)
-    (setq neo-autorefresh t)
+    (setq neo-autorefresh nil) ;; it crawls to a death in big dirs
     (setq neo-banner-message "")
     (setq neo-create-file-auto-open t)
     (setq neo-filepath-sort-function (lambda (f1 f2) (string< (downcase f1) (downcase f2))))
@@ -73,10 +73,28 @@
         (neo-buffer--node-list-set nil node)
         (neo-buffer--newline-and-begin)))
 
+    (defun neo-buffer--insert-file-entry (node depth)
+      (let ((node-short-name (neo-path--file-short-name node))
+            (vc (when neo-vc-integration (neo-vc-for-node node))))
+        (insert-char ?\s (* (- depth 0) 2)) ; indent
+
+        (neo-buffer--insert-fold-symbol 'leaf node-short-name)
+        (insert-char ?\s)
+        (insert-button node-short-name
+                       'follow-link t
+                       'face neo-file-link-face
+                       'neo-full-path node
+                       'keymap neotree-file-button-keymap
+                       'help-echo (neo-buffer--help-echo-message node-short-name))
+        (neo-buffer--node-list-set nil node)
+        (neo-buffer--newline-and-begin)))
+
     (defun neo-buffer--insert-fold-symbol (name &optional node-name)
       "Overriden to make it less noisy. Made to work with non-monospaced fonts."
       (let ((n-insert-image (lambda (n)
                               (insert-image (neo-buffer--get-icon n))))
+
+            (vc (when neo-vc-integration (neo-vc-for-node node)))
             (n-insert-symbol (lambda (n)
                                (neo-buffer--insert-with-face
                                 n 'neo-expand-btn-face))))
@@ -91,7 +109,7 @@
                     (propertize
                      (format "%s " (all-the-icons-octicon "triangle-down"))
                      'face `(:family ,(all-the-icons-octicon-family) :foreground "skyblue" :height 1.1)
-                     'display '(raise -0.1 width 2.0))
+                     'display '(raise -0.1))
                     ))
 
               (and (equal name 'close)
@@ -103,15 +121,21 @@
                     ))
 
               (and (equal name 'leaf)
-                   (insert
-                    (propertize
-                     (format "%s" "\u22EE")
-                     'face `(:height 1.1 :foreground "grey30")
-                     'display '(raise 0.0 width 40.0 space-width 200.0))))))
+                   (insert (propertize (char-to-string (car vc))
+                                       'face (if (memq 'face neo-vc-integration)
+                                                 (cdr vc)
+                                               neo-file-link-face)))
+
+                   ;; (insert
+                   ;;  (propertize
+
+                   ;;   (format "%s" (char-to-string (car vc)))
+                   ;;   'face `(:height 1.1 :foreground "grey30")
+                   ;;   'display '(raise 0.0)))
+                   )))
          (t
           (or (and (equal name 'open)  (funcall n-insert-symbol "- "))
               (and (equal name 'close) (funcall n-insert-symbol "+ ")))))))
-
 
     (defun neo-opens-outwards ()
       "Reveals Neotree expanding frame and tries to compensate internal size."
@@ -163,6 +187,36 @@
     (defadvice tabbar-cycle (after hmz-refresh-neotree-upon-cycle-tabs 1 () activate)
       (when (neo-global--window-exists-p)
         (neotree-refresh t )))
+
+    (defadvice next-buffer (after hmz-refresh-neotree-change-buffer 1 () activate)
+      (when (not (eq buffer-file-name " *NeoTree*"))
+        (if (buffer-file-name)
+            (neotree-refresh t)
+          (neotree-hide)
+          ))
+      )
+
+    (setq hmz-neotree-hidden true)
+
+    (defadvice previous-buffer (after hmz-refresh-neotree-change-buffer 1 () activate)
+      (when (not (eq buffer-file-name " *NeoTree*"))
+        (if (or buffer-file-name (not hmz-neotree-hidden))
+            (neotree-refresh t)
+          (neotree-hide)
+          ))
+      )
+
+    (require 'switch-buffer-functions)
+    (add-hook 'switch-buffer-functions
+              (lambda (prev cur)
+                (when (not (eq buffer-file-name " *NeoTree*"))
+                  (if (buffer-file-name)
+                      (neotree-refresh t)
+                    (neotree-hide)
+                    ))
+                ))
+
+
 
     (defun neo-global--do-autorefresh ()
       "Overriden version of neotree refresh function that doesn't try to refresh buffers that are not visiting a file and generating error and jumping cursor as result."
