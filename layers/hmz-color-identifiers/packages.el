@@ -45,10 +45,11 @@
       (+ 10 (* 85 (third
                    (apply #'color-rgb-to-hsl
                           (color-name-to-rgb
-                           (face-attribute 'default :foreground nil))
-                          )))))
+                           (face-attribute 'default :foreground nil)
+                           ))))))
 
     (defun hmz-color-identifiers/regenerate-rainbow-colors ()
+      (interactive)
       (use-package color)
       (setq ns-use-srgb-colorspace t)
       (loop for i from 1 to 15 do

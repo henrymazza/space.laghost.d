@@ -3,7 +3,20 @@
     neotree
     spaceline-all-the-icons
     indicators
+    switch-buffer-functions
     ))
+
+(defun hmz-misc/init-switch-buffer-functions ()
+    (use-package switch-buffer-functions
+      :config
+      (setq switch-buffer-functions nil)
+      (add-hook 'switch-buffer-functions
+                (lambda (prev cur)
+                  (unless (string= (buffer-name) neo-buffer-name)
+                    (if (and (not hmz-neotree-hidden) (buffer-file-name))
+                        (neotree-refresh t)
+                      (neotree-hide))
+                    )))))
 
 (defun hmz-misc/init-indicators ()
   (use-package indicators
@@ -28,8 +41,9 @@
     :ensure neotree
 
     :init
+    ;; I'm leaving most of these settings to customize
     (setq neo-auto-indent-point t)
-    (setq neo-autorefresh nil) ;; it crawls to a death in big dirs
+    (setq neo-autorefresh nil) ;;TODO: it crawls to a death in big dirs, going to bet on refreshing on buffer change. Possibly adding a timeout for it to occur.
     (setq neo-banner-message "")
     (setq neo-create-file-auto-open t)
     (setq neo-filepath-sort-function (lambda (f1 f2) (string< (downcase f1) (downcase f2))))
@@ -38,10 +52,8 @@
     (setq neo-show-updir-line nil)
     (setq neo-smart-open t)
     (setq neo-theme (if (display-graphic-p) (quote icons) (quote arrow)))
-    (setq neo-vc-integration (quote (char)))
     (setq neo-window-fixed-size nil)
     (setq neo-window-position (quote right))
-    (setq neo-window-width 24)
 
     :config
     ;; TODO find how to properly detect if a package is being used
@@ -50,7 +62,7 @@
        ((equal (buffer-name) "*Calculator*")
         9)
        ((string-match-p (buffer-name) ".*\\*NeoTree\\*.*")
-        0)
+        2)
        (t
         nil)))
 
@@ -121,10 +133,12 @@
                     ))
 
               (and (equal name 'leaf)
-                   (insert (propertize (char-to-string (car vc))
-                                       'face (if (memq 'face neo-vc-integration)
-                                                 (cdr vc)
-                                               neo-file-link-face)))
+                   (if (eq vc nil)
+                       (message "%s" vc)
+                     (insert (propertize (char-to-string (car vc))
+                                         'face (if (memq 'face neo-vc-integration)
+                                                   (cdr vc)
+                                                 neo-file-link-face))))
 
                    ;; (insert
                    ;;  (propertize
@@ -142,9 +156,11 @@
       (interactive)
       (if (neo-global--window-exists-p)
           (progn
+            (setq hmz-neotree-hidden t)
             (neotree-hide))
 
         (let ((origin-buffer-file-name (buffer-file-name)))
+          (setq hmz-neotree-hidden nil)
           (neotree-find (projectile-project-root))
           (neotree-find origin-buffer-file-name))))
 
@@ -196,7 +212,7 @@
           ))
       )
 
-    (setq hmz-neotree-hidden true)
+    (setq hmz-neotree-hidden t)
 
     (defadvice previous-buffer (after hmz-refresh-neotree-change-buffer 1 () activate)
       (when (not (eq buffer-file-name " *NeoTree*"))
@@ -205,18 +221,6 @@
           (neotree-hide)
           ))
       )
-
-    (require 'switch-buffer-functions)
-    (add-hook 'switch-buffer-functions
-              (lambda (prev cur)
-                (when (not (eq buffer-file-name " *NeoTree*"))
-                  (if (buffer-file-name)
-                      (neotree-refresh t)
-                    (neotree-hide)
-                    ))
-                ))
-
-
 
     (defun neo-global--do-autorefresh ()
       "Overriden version of neotree refresh function that doesn't try to refresh buffers that are not visiting a file and generating error and jumping cursor as result."

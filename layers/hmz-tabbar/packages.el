@@ -30,12 +30,12 @@ which require an initialization must be listed explicitly in the list.")
 
 
     ;; map mouse wheel events on header line
-    (global-set-key [header-line wheel-right] 'tabbar-press-scroll-right)
-    (global-set-key [header-line double-wheel-right] nil)
-    (global-set-key [header-line triple-wheel-right] nil)
-    (global-set-key [header-line wheel-left] 'tabbar-press-scroll-left)
-    (global-set-key [header-line double-wheel-left] nil)
-    (global-set-key [header-line triple-wheel-left] nil)
+    (global-set-key [header-line triple-wheel-right] 'tabbar-press-scroll-right)
+    (global-set-key [header-line double-wheel-right] 'tabbar-press-scroll-right)
+    (global-set-key [header-line wheel-right] nil)
+    (global-set-key [header-line triple-wheel-left] 'tabbar-press-scroll-left)
+    (global-set-key [header-line double-wheel-left] 'tabbar-press-scroll-left)
+    (global-set-key [header-line wheel-left] nil)
 
     (setq mouse-wheel-progessive-speed nil)
     (setq scroll-step 1)
@@ -78,14 +78,14 @@ which require an initialization must be listed explicitly in the list.")
                           :box nil
                           :foreground (face-attribute 'font-lock-builtin-face :foreground)
                           :inherit 'tabbar-selected
-                          :overline t
+                          :overline nil
                           :weight 'normal)
 
       (set-face-attribute 'tabbar-selected nil
                           :box nil
                           :foreground (face-attribute 'font-lock-function-name-face :foreground)
                           :inherit 'tabbar-default
-                          :overline t
+                          :overline nil
                           :weight 'normal)
 
       (set-face-attribute 'tabbar-highlight nil
@@ -93,7 +93,7 @@ which require an initialization must be listed explicitly in the list.")
                           :foreground (face-attribute
                                        'font-lock-keyword-face :foreground)
                           :underline nil
-                          :overline t
+                          :overline nil
                           :box nil)
 
       (set-face-attribute 'tabbar-modified nil
@@ -109,8 +109,17 @@ which require an initialization must be listed explicitly in the list.")
                           :inherit 'tabbar-default)
 
       (set-face-attribute 'tabbar-button nil
-                          :height 1.5
+                          :height 2.0
                           :inherit 'tabbar-default)
+
+      (defface tabbar-icon-unselected '((t
+                                         :foreground "#555555"
+                                         :box nil
+                                         :inherit 'tabbar-default
+                                         ))
+        "Unselected tab's icon foreground color."
+        :group 'tabbar)
+
       )
 
     (hmz-tabbar-refresh-faces)
@@ -164,11 +173,11 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
                  (plist-get (text-properties-at 0 the-icon) 'face)
                  `(:background ,(tabbar-background-color))
                  (if tab-is-active
-                     `(:overline ,(face-attribute tab-face :foreground nil 'default)
+                     `(:overline nil ;;,(face-attribute tab-face :foreground nil 'default)
                                   :foreground ,(hmz-lighten-if-too-dark icon-face))
-                   `(:foreground ,(face-attribute 'header-line :foreground nil 'default)))
+                   `(:foreground ,(face-attribute 'tabbar-icon-unselected :foreground nil 'default)))
                  )
-          'display (if tab-is-active '(raise 0.0) '(raise 0.0))
+          'display (if tab-is-active '(raise 0.2) '(raise 0.2))
           'tabbar-tab tab
           'local-map (tabbar-make-tab-keymap tab)
           'help-echo 'tabbar-help-on-tab
