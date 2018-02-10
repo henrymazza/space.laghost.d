@@ -12,9 +12,11 @@
       (setq switch-buffer-functions nil)
       (add-hook 'switch-buffer-functions
                 (lambda (prev cur)
-                  (unless (string= (buffer-name) neo-buffer-name)
+                  (unless (or (string= (buffer-name) "*Messages*")
+                           (string= (buffer-name) neo-buffer-name))
                     (if (and (not hmz-neotree-hidden) (buffer-file-name))
                         (neotree-refresh t)
+
                       (neotree-hide))
                     )))))
 
