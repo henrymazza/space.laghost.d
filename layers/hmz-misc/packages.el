@@ -75,7 +75,7 @@
       (let ((node-short-name (neo-path--file-short-name node)))
         (insert-char ?\s (* (- depth 1) 2)) ; indent
         (when (memq 'char neo-vc-integration)
-          (insert-char ?\s 2))
+          (insert-char ?\s 3))
         (neo-buffer--insert-fold-symbol
          (if expanded 'open 'close) node)
         (insert-button (concat node-short-name "")
@@ -90,10 +90,11 @@
     (defun neo-buffer--insert-file-entry (node depth)
       (let ((node-short-name (neo-path--file-short-name node))
             (vc (when neo-vc-integration (neo-vc-for-node node))))
-        (insert-char ?\s (* (- depth 0) 2)) ; indent
+        (insert-char ?\s (* (- depth 1) 2)) ; indent
 
+        (insert-char ?\s 1)
         (neo-buffer--insert-fold-symbol 'leaf node-short-name)
-        (insert-char ?\s)
+        (insert-char ?\s 1)
         (insert-button node-short-name
                        'follow-link t
                        'face neo-file-link-face
@@ -135,12 +136,14 @@
                     ))
 
               (and (equal name 'leaf)
-                   (if (eq vc nil)
-                       (message "%s" vc)
-                     (insert (propertize (char-to-string (car vc))
-                                         'face (if (memq 'face neo-vc-integration)
-                                                   (cdr vc)
-                                                 neo-file-link-face))))
+                   (if vc
+                       (insert (propertize (char-to-string (car vc))
+                                           'face (if (memq 'face neo-vc-integration)
+                                                     (cdr vc)
+                                                   neo-file-link-face)))
+                     (insert ""))
+
+
 
                    ;; (insert
                    ;;  (propertize
