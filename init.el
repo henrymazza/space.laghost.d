@@ -108,7 +108,7 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-  dotspacemacs-additional-packages '(itail bpr hlinum evil-matchit fic-mode zencoding-mode all-the-icons handlebars-sgml-mode ember-mode sublimity persistent-scratch)
+  dotspacemacs-additional-packages '(itail bpr hlinum evil-matchit fic-mode zencoding-mode all-the-icons handlebars-sgml-mode sublimity persistent-scratch)
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
@@ -384,10 +384,9 @@ you should place you code here."
     )
 
 
-  (add-hook 'js-mode-hook (lambda () (ember-mode t)))
 
   (add-hook 'sgml-mode-hook 'zencoding-mode)
-  (add-hook 'web-mode-hook (lambda () (ember-mode t)
+  (add-hook 'web-mode-hook (lambda ()
                              (zencoding-mode)
                              (snippet-mode 0)
                              (rainbow-identifiers t)))
@@ -902,7 +901,10 @@ Example:
  ;; If there is more than one, they won't work right.
  '(ansi-color-names-vector
    ["#2e3436" "#a40000" "#4e9a06" "#c4a000" "#204a87" "#5c3566" "#729fcf" "#eeeeec"])
- '(coffee-tab-width 2 t)
+ '(coffee-tab-width 2)
+ '(ember-completion-system (quote helm))
+ '(ember-serve-command "ember serve  --output-path dist")
+ '(ember-test-command "ember test --serve")
  '(evil-want-Y-yank-to-eol t)
  '(line-spacing 3)
  '(midnight-mode t)

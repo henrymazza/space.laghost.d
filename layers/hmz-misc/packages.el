@@ -4,7 +4,19 @@
     spaceline-all-the-icons
     indicators
     switch-buffer-functions
+    ember-mode
     ))
+
+(defun hmz-misc/init-ember-mode ()
+  (use-package ember-mode
+    :config
+    (defun ember--file-project-root (file)
+      "Overriden function so it come back to the old behavior and search by app dir."
+      (locate-dominating-file file "app"))
+
+    (add-hook 'coffee-mode-hook (lambda () (ember-mode t)))
+    (add-hook 'js-mode-hook (lambda () (ember-mode t)))
+    (add-hook 'web-mode-hook (lambda () (ember-mode t)))))
 
 (defun hmz-misc/init-switch-buffer-functions ()
     (use-package switch-buffer-functions
@@ -49,6 +61,8 @@
     (setq neo-banner-message "")
     (setq neo-create-file-auto-open t)
     (setq neo-filepath-sort-function (lambda (f1 f2) (string< (downcase f1) (downcase f2))))
+
+    (setq neo-vc-integration (quote (face char)))
     (setq neo-force-change-root t)
     (setq neo-show-hidden-files t)
     (setq neo-show-updir-line nil)
@@ -209,8 +223,8 @@
       (when (neo-global--window-exists-p)
         (neotree-refresh t )))
 
-    (defadvice next-buffer (after hmz-refresh-neotree-change-buffer 1 () activate)
-      (when (not (eq buffer-file-name " *NeoTree*"))
+    (defadvice next-buffer (after hmz-refresh-neotree-change-next-buffer 1 () activate)
+      (when (not (eq buffer-file-name neo-buffer-name))
         (if (buffer-file-name)
             (neotree-refresh t)
           (neotree-hide)
@@ -219,8 +233,8 @@
 
     (setq hmz-neotree-hidden t)
 
-    (defadvice previous-buffer (after hmz-refresh-neotree-change-buffer 1 () activate)
-      (when (not (eq buffer-file-name " *NeoTree*"))
+    (defadvice previous-buffer (after hmz-refresh-neotree-change-previous-buffer 1 () activate)
+      (when (not (eq buffer-file-name neo-buffer-name))
         (if (or buffer-file-name (not hmz-neotree-hidden))
             (neotree-refresh t)
           (neotree-hide)
