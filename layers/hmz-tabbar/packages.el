@@ -76,16 +76,16 @@ which require an initialization must be listed explicitly in the list.")
 
       (set-face-attribute 'tabbar-selected-modified nil
                           :box nil
-                          :foreground (face-attribute 'font-lock-builtin-face :foreground)
+                          :foreground (face-attribute 'font-lock-keyword-face :foreground)
                           :inherit 'tabbar-selected
-                          :overline nil
+                          :overline t
                           :weight 'normal)
 
       (set-face-attribute 'tabbar-selected nil
                           :box nil
                           :foreground (face-attribute 'font-lock-function-name-face :foreground)
                           :inherit 'tabbar-default
-                          :overline nil
+                          :overline t
                           :weight 'normal)
 
       (set-face-attribute 'tabbar-highlight nil
@@ -98,7 +98,7 @@ which require an initialization must be listed explicitly in the list.")
 
       (set-face-attribute 'tabbar-modified nil
                           :box nil
-                          :foreground (face-attribute 'font-lock-builtin-face :foreground)
+                          :foreground (face-attribute 'font-lock-keyword-face :foreground)
                           :background 'unspecified
                           :inherit 'tabbar-default)
 
@@ -173,7 +173,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
                  (plist-get (text-properties-at 0 the-icon) 'face)
                  `(:background ,(tabbar-background-color))
                  (if tab-is-active
-                     `(:overline nil ;;,(face-attribute tab-face :foreground nil 'default)
+                     `(:overline ,(face-attribute tab-face :foreground nil 'default)
                                   :foreground ,(hmz-lighten-if-too-dark icon-face))
                    `(:foreground ,(face-attribute 'tabbar-icon-unselected :foreground nil 'default)))
                  )
@@ -338,14 +338,20 @@ element."
       "Returns the name of the tab group names the current buffer belongs to.
       There are two groups: Emacs buffers (those whose name starts with '*', plus
       dired buffers), and the rest."
-      (list (cond
-             ((string-equal "*scratch*" (buffer-name)) "Scratch")
-             ((string-equal "*Messages*" (buffer-name)) "*Messages*")
-             ((string-equal "*" (substring (buffer-name) 0 1)) "emacs")
-             ((string-equal " " (substring (buffer-name) 0 1)) "hidden")
-             ((eq major-mode 'dired-mode) "emacs")
-             ((projectile-project-p) (projectile-project-name))
-             (t "other"))))
+      (list (if (member (buffer-name)
+                        (helm-skip-entries (mapcar #'buffer-name (buffer-list))
+                                           (append '("\\`[:\\*]")
+                                                   helm-boring-buffer-regexp-list)
+                                           helm-white-buffer-regexp-list))
+                (cond
+                 ((string-equal "*Messages*" (buffer-name)) "*Messages*")
+                 ((projectile-project-p) (projectile-project-name))
+                 ((string-equal "*scratch*" (buffer-name)) "Scratch")
+                 ((string-equal "*" (substring (buffer-name) 0 1)) "emacs")
+                 ((string-equal " " (substring (buffer-name) 0 1)) "hidden")
+                 ((eq major-mode 'dired-mode) "emacs")
+                 (t "other"))
+              "Ignored")))
 
 
     (defun hmz-tabbar-refresh-tabs ()

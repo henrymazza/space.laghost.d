@@ -108,7 +108,7 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-  dotspacemacs-additional-packages '(itail bpr hlinum evil-matchit fic-mode zencoding-mode all-the-icons handlebars-sgml-mode sublimity persistent-scratch)
+  dotspacemacs-additional-packages '(itail hlinum evil-matchit fic-mode zencoding-mode all-the-icons handlebars-sgml-mode sublimity persistent-scratch)
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
@@ -247,7 +247,7 @@ values."
    ;; `right-then-bottom'. right-then-bottom tries to display the frame to the
    ;; right; if there is insufficient space it displays it at the bottom.
    ;; (default 'bottom)
-   dotspacemacs-which-key-position 'bottom
+   dotspacemacs-which-key-position 'right-then-bottom
    ;; If non nil a progress bar is displayed when spacemacs is loading. This
    ;; may increase the boot time on some systems and emacs builds, set it to
    ;; nil to boost the loading time. (default t)
@@ -318,6 +318,12 @@ executes.
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
 
+  ;; keep scratch buffer throughout restarts
+  (persistent-scratch-setup-default)
+
+  ;; put save file on my own .spacemacs.d dir
+  (setq persistent-scratch-save-file "~/.spacemacs.d/.persistent-scratch")
+
   ;; Don't replace copied text with killed region
   (setq save-interprogram-paste-before-kill t)
 
@@ -367,14 +373,8 @@ you should place you code here."
   ;; space in between lines
   (setq-default line-spacing 2)
 
-  ;; keep scratch buffer throughout restarts
-  (persistent-scratch-setup-default)
-
   ;; More space to breath
   (setq line-spacing 5)
-
-  ;; put save file on my own .spacemacs.d dir
-  (setq persistent-scratch-save-file "~/.spacemacs.d/.persistent-scratch")
 
   ;; settings for window systems
   (when (window-system)
@@ -382,8 +382,6 @@ you should place you code here."
     (set-frame-height (selected-frame) 32)
     (set-frame-position (selected-frame) 250 30)
     )
-
-
 
   (add-hook 'sgml-mode-hook 'zencoding-mode)
   (add-hook 'web-mode-hook (lambda ()
@@ -394,6 +392,20 @@ you should place you code here."
   ;; Clear unused buffers
   (midnight-mode t)
   (add-to-list 'clean-buffer-list-kill-never-regexps ".*NeoTree.*")
+
+  ;; kill other windows buffer
+  (defun other-window-kill-buffer ()
+    "Kill the buffer in the other window"
+    (interactive)
+    ;; Window selection is used because point goes to a different window
+    ;; if more than 2 windows are present
+    (let ((win-curr (selected-window))
+          (win-other (next-window)))
+      (select-window win-other)
+      (kill-this-buffer)
+      (select-window win-curr)))
+
+  ;; (global-set-key (kbd "C-K") 'other-window-kill-buffer)
 
   ;; Find a better char for truncated lines
   (set-display-table-slot standard-display-table 0 ?\ )
@@ -445,6 +457,22 @@ you should place you code here."
   (global-vi-tilde-fringe-mode -1)
   (global-git-gutter+-mode t)
   (git-gutter-mode -1)
+
+  (defun hmz-markdown-mode-hook ()
+    "My customizations for markdown-mode."
+    (interactive)
+
+    ;;narrower columns
+    (make-variable-buffer-local 'sublimity-attractive-centering-width)
+    (setq sublimity-attractive-centering-width 60)
+
+    ;; variable width font in markdown-mode
+    (variable-pitch-mode t)
+
+    ;; essential
+    (visual-line-mode t))
+
+  (add-hook 'markdown-mode-hook 'hmz-markdown-mode-hook)
 
   ;; flycheck is ugly
   (global-flycheck-mode -1)
@@ -553,7 +581,7 @@ you should place you code here."
            (evil-replace-state-p)
            (evil-visual-state-p)) [escape])))
    (define-key key-translation-map (kbd "C-g") 'my-esc)
-   (define-key key-translation-map (kbd "C-c") 'my-esc)
+   ;; (define-key key-translation-map (kbd "C-c") 'my-esc)
 
    (defun hide-application ()
      "Hides Emacs if trying to close last frame."
@@ -601,7 +629,6 @@ you should place you code here."
 
    (setq hmz-messages-frame nil)
 
-
    (defun hmz-hide-mini-monitor ()
      (interactive)
      (setq hmz-neotree-hidden t)
@@ -627,21 +654,23 @@ you should place you code here."
                  (buffer-list . '("*Messages*"))
                  (unsplittable . t))))
 
-
         (with-selected-window (frame-selected-window hmz-messages-frame)
           ;;TODO: (handle-switch-frame)
           (spacemacs/enable-transparency hmz-messages-frame 90)
           (setq dotspacemacs-inactive-transparency 70)
           (tabbar-local-mode 0)
           (set-background-color "black")
+          (set-foreground-color "medium spring green")
 
           (switch-to-buffer "*Messages*")
           (setq mode-line-format nil)
           (setq buffer-face-mode-face `(:background "#333333"))
           (buffer-face-mode 1)
-          (text-scale-set -2)
+          (text-scale-set -1)
           (set-frame-parameter hmz-messages-frame 'unsplittable t)
           (set-window-dedicated-p (selected-window) t)
+
+          (spacemacs/toggle-maximize-buffer)
 
           (setq-local header-line-format nil) ;; disables tabbar completly for that window
           (setq left-fringe-width 0)
@@ -875,6 +904,7 @@ Example:
  '(all-the-icons-lmaroon ((t (:foreground "burlywood3"))))
  '(all-the-icons-maroon ((t (:foreground "burlywood3"))))
  '(anzu-match-2 ((t (:foreground "deep sky blue"))))
+ '(bold ((t (:weight semi-light))))
  '(custom-button ((t (:background "lightgrey" :foreground "black" :box 2))))
  '(custom-button-mouse ((t (:background "grey90" :foreground "black" :box 2))))
  '(custom-button-pressed ((t (:background "gray" :foreground "black" :box 2))))
@@ -900,13 +930,15 @@ Example:
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(ansi-color-names-vector
-   ["#2e3436" "#a40000" "#4e9a06" "#c4a000" "#204a87" "#5c3566" "#729fcf" "#eeeeec"])
+   ["dim gray" "orange red" "medium spring green" "gold" "dodger blue" "purple" "turquoise1" "#eeeeec"])
  '(coffee-tab-width 2)
  '(ember-completion-system (quote helm))
  '(ember-serve-command "ember serve  --output-path dist")
  '(ember-test-command "ember test --serve")
  '(evil-want-Y-yank-to-eol t)
  '(line-spacing 3)
+ '(markdown-hide-urls t)
+ '(markdown-italic-underscore t)
  '(midnight-mode t)
  '(mode-line-format nil)
  '(mode-line-in-non-selected-windows nil)
@@ -929,5 +961,6 @@ Example:
  '(neo-window-width 20)
  '(package-selected-packages
    (quote
-    (org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-download htmlize gnuplot itail bpr hlinum nginx-mode tide typescript-mode flycheck fic-mode zencoding-mode handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
- '(rbenv-installation-dir "/usr/local/opt/rbenv"))
+    (all-the-icons-dired diredful dired-single dired-sidebar hide-lines org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-download htmlize gnuplot itail bpr hlinum nginx-mode tide typescript-mode flycheck fic-mode zencoding-mode handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+ '(rbenv-installation-dir "/usr/local/opt/rbenv")
+ '(sublimity-mode t))

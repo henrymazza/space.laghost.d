@@ -5,6 +5,47 @@
     indicators
     switch-buffer-functions
     ember-mode
+    bpr
+    hide-lines
+    ))
+
+(defun hmz-misc/init-hide-lines ()
+  (use-package hide-lines
+    (add-hook 'after-change-major-mode-hook (lambda () (add-to-invisibility-spec 'hl)))
+    ))
+
+(defun hmz-misc/init-bpr ()
+  (use-package bpr
+    :config
+
+    (defun hmz-misc/colorize-buffer-filter (proc string)
+      (when (buffer-live-p (process-buffer proc))
+        (with-current-buffer (process-buffer proc)
+          (let ((moving (= (point) (process-mark proc))))
+            (save-excursiondevdocslook
+              ;; Insert the text, advancing the process marker.
+              ;; (setq buffer-face-mode-face `(:background "#111111"))
+              ;; (buffer-face-mode 1)
+              (hide-lines-matching "SELECT")
+              (goto-char (process-mark proc))
+              (insert string)
+              (ansi-color-apply-on-region (marker-position (process-mark proc)) (point))
+
+              (set-marker (process-mark proc) (point)))
+            (if moving (goto-char (process-mark proc)))))))
+
+    (defun hmz-rails-server ()
+      (interactive)
+      (let* (;; don't erase process output buffer before starting this process again.
+             (bpr-erase-process-buffer nil)
+             ;; don't show progress messages (only success/error messages will be displayed)
+             (bpr-show-progress nil)
+             ;; (bpr-process-mode #'compilation-mode)
+             (bpr-process-mode #'shell-mode)
+             (bpr-process-filter #'hmz-misc/colorize-buffer-filter))
+
+        (bpr-spawn "bin/rails s")))
+
     ))
 
 (defun hmz-misc/init-ember-mode ()
