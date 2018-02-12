@@ -22,7 +22,7 @@
       (when (buffer-live-p (process-buffer proc))
         (with-current-buffer (process-buffer proc)
           (let ((moving (= (point) (process-mark proc))))
-            (save-excursiondevdocslook
+            (save-excursion
               ;; Insert the text, advancing the process marker.
               ;; (setq buffer-face-mode-face `(:background "#111111"))
               ;; (buffer-face-mode 1)
@@ -130,6 +130,7 @@
       (let ((node-short-name (neo-path--file-short-name node)))
         (insert-char ?\s (* (- depth 1) 2)) ; indent
         (when (memq 'char neo-vc-integration)
+
           (insert-char ?\s 3))
         (neo-buffer--insert-fold-symbol
          (if expanded 'open 'close) node)

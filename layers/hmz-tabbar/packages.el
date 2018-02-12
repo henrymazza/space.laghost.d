@@ -84,6 +84,7 @@ which require an initialization must be listed explicitly in the list.")
       (set-face-attribute 'tabbar-selected nil
                           :box nil
                           :foreground (face-attribute 'font-lock-function-name-face :foreground)
+                          :background (face-attribute 'hl-line :background)
                           :inherit 'tabbar-default
                           :overline t
                           :weight 'normal)
@@ -167,14 +168,27 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
 
         (concat
          (propertize
+                     " "
+           (if tabbar-tab-label-function
+               (funcall tabbar-tab-label-function tab)
+             tab) " "
+          'tabbar-tab tab
+          'local-map (tabbar-make-tab-keymap tab)
+          'help-echo 'tabbar-help-on-tab
+          'mouse-face 'tabbar-highlight
+          'face tab-face
+          'display `(raise ,(symbol-value 'hmz-tabbar-raise-text))
+          'pointer 'hand)
+         (propertize
           the-icon
           'face (plist-merge
                  ;; (get icon-face 'foreground)
                  (plist-get (text-properties-at 0 the-icon) 'face)
-                 `(:background ,(tabbar-background-color))
+                 `(:background ,(face-attribute 'tabbar-default :background nil 'default))
                  (if tab-is-active
                      `(:overline ,(face-attribute tab-face :foreground nil 'default)
-                                  :foreground ,(hmz-lighten-if-too-dark icon-face))
+                                 :foreground ,(hmz-lighten-if-too-dark icon-face)
+                                 :background ,(face-attribute 'tabbar-selected :background nil 'default))
                    `(:foreground ,(face-attribute 'tabbar-icon-unselected :foreground nil 'default)))
                  )
           'display (if tab-is-active '(raise 0.2) '(raise 0.2))
@@ -188,7 +202,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
            " "
            (if tabbar-tab-label-function
                (funcall tabbar-tab-label-function tab)
-             tab))
+             tab) " ")
           'tabbar-tab tab
           'local-map (tabbar-make-tab-keymap tab)
           'help-echo 'tabbar-help-on-tab
@@ -345,13 +359,13 @@ element."
                                            helm-white-buffer-regexp-list))
                 (cond
                  ((string-equal "*Messages*" (buffer-name)) "*Messages*")
+                 ((eq major-mode 'dired-mode) "emacs")
                  ((projectile-project-p) (projectile-project-name))
                  ((string-equal "*scratch*" (buffer-name)) "Scratch")
                  ((string-equal "*" (substring (buffer-name) 0 1)) "emacs")
                  ((string-equal " " (substring (buffer-name) 0 1)) "hidden")
-                 ((eq major-mode 'dired-mode) "emacs")
                  (t "other"))
-              "Ignored")))
+              "emacs")))
 
 
     (defun hmz-tabbar-refresh-tabs ()
