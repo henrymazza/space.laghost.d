@@ -247,7 +247,7 @@ values."
    ;; `right-then-bottom'. right-then-bottom tries to display the frame to the
    ;; right; if there is insufficient space it displays it at the bottom.
    ;; (default 'bottom)
-   dotspacemacs-which-key-position 'right-then-bottom
+   dotspacemacs-which-key-position 'bottom
    ;; If non nil a progress bar is displayed when spacemacs is loading. This
    ;; may increase the boot time on some systems and emacs builds, set it to
    ;; nil to boost the loading time. (default t)
@@ -317,10 +317,6 @@ executes.
  This function is mostly useful for variables that need to be set
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
-
-  ;; keep scratch buffer throughout restarts
-  (persistent-scratch-setup-default)
-
   ;; put save file on my own .spacemacs.d dir
   (setq persistent-scratch-save-file "~/.spacemacs.d/.persistent-scratch")
 
@@ -358,6 +354,10 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loa,
 you should place you code here."
 
+
+  ;; keep scratch buffer throughout restarts
+  (persistent-scratch-setup-default)
+
   ;; Blink cursor so I know where I am!
   (blink-cursor-mode 1)
 
@@ -376,13 +376,6 @@ you should place you code here."
   ;; More space to breath
   (setq line-spacing 5)
 
-  ;; settings for window systems
-  (when (window-system)
-    ;;TODO make this conditional to screen size
-    (set-frame-height (selected-frame) 32)
-    (set-frame-position (selected-frame) 250 30)
-    )
-
   (add-hook 'sgml-mode-hook 'zencoding-mode)
   (add-hook 'web-mode-hook (lambda ()
                              (zencoding-mode)
@@ -393,19 +386,8 @@ you should place you code here."
   (midnight-mode t)
   (add-to-list 'clean-buffer-list-kill-never-regexps ".*NeoTree.*")
 
-  ;; kill other windows buffer
-  (defun other-window-kill-buffer ()
-    "Kill the buffer in the other window"
-    (interactive)
-    ;; Window selection is used because point goes to a different window
-    ;; if more than 2 windows are present
-    (let ((win-curr (selected-window))
-          (win-other (next-window)))
-      (select-window win-other)
-      (kill-this-buffer)
-      (select-window win-curr)))
-
-  ;; (global-set-key (kbd "C-K") 'other-window-kill-buffer)
+  ;; M-x with SPC - SPC
+  (spacemacs/set-leader-keys "SPC" 'helm-M-x)
 
   ;; Find a better char for truncated lines
   (set-display-table-slot standard-display-table 0 ?\ )
@@ -447,7 +429,7 @@ you should place you code here."
   (global-set-key (kbd "s-o") 'find-file)
 
   ;; my old pal C-k
-  (define-key evil-normal-state-map (kbd "C-k") 'kill-this-buffer)
+  ;; (define-key evil-normal-state-map (kbd "C-k") 'kill-this-buffer)
 
   ;; spacemacs as default git editor
   (global-git-commit-mode t)
@@ -489,7 +471,6 @@ you should place you code here."
 
     (rainbow-identifiers-mode t)
     (rainbow-delimiters-mode-enable)
-    (rainbow-mode t)
 
     (smartparens-global-mode t)
     (global-evil-matchit-mode 1)
@@ -546,17 +527,6 @@ you should place you code here."
   ;; Kill region on paste
   (delete-selection-mode 1)
 
-  ;; ;; set rainbow-mode
-  ;; (use-package rainbow-mode
-  ;;   :defer t
-  ;;   :init
-  ;;   (setq rainbow-html-colors-major-mode-list '(css-mode
-  ;;                                               less-css-mode
-  ;;                                               sass-mode
-  ;;                                               scss-mode))
-  ;;   (dolist (mode rainbow-html-colors-major-mode-list)
-  ;;     (add-hook (intern (format "%s-hook" mode)) 'rainbow-mode)))
-
   (defun bsl/filter-buffers (buffer-list)
     (delq nil (mapcar
                (lambda (buffer)
@@ -605,15 +575,6 @@ you should place you code here."
 
    (global-set-key (kbd "s-w") 'delete-window-or-frame)
 
-   ;; When running ‘projectile-switch-project’ (C-c p p), ‘neotree’ will
-   ;; change root automatically and avoid annoying Dired buffer.
-   (setq projectile-switch-project-action 'neotree-projectile-action)
-
-
-   ;; (add-hook 'minibuffer-inactive-mode-hook
-   ;;           (lambda ()
-   ;;             (message "fr: %S, active: %S"
-   ;;                      (selected-frame) (active-minibuffer-window))))
    (add-hook 'minibuffer-setup-hook
              (lambda ()
                ;; I don't know why minibuffer have this cursor color
@@ -912,6 +873,7 @@ Example:
  '(font-lock-warning-face ((t (:background "DeepSkyBlue" :foreground "#ffb86c"))))
  '(fringe ((t (:foreground "DeepSkyBlue" :background unspecified))))
  '(header-line ((t (:weight thin :family "San Francisco"))))
+ '(hl-line ((t (:background "#34374a"))))
  '(linum ((t (:family "San Francisco" :height 0.6))))
  '(linum-highlight-face ((t (:inherit linum :background "#424256" :foreground "#00FF7D"))))
  '(neo-banner-face ((t (:foreground "lightblue" :weight bold :family "san francisco"))))
@@ -929,6 +891,7 @@ Example:
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(alert-default-style (quote osx-notifier))
  '(ansi-color-names-vector
    ["dim gray" "orange red" "medium spring green" "gold" "dodger blue" "purple" "turquoise1" "#eeeeec"])
  '(coffee-tab-width 2)
@@ -961,6 +924,6 @@ Example:
  '(neo-window-width 20)
  '(package-selected-packages
    (quote
-    (all-the-icons-dired diredful dired-single dired-sidebar hide-lines org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-download htmlize gnuplot itail bpr hlinum nginx-mode tide typescript-mode flycheck fic-mode zencoding-mode handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+    (org-alert all-the-icons-dired diredful dired-single dired-sidebar hide-lines org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-download htmlize gnuplot itail bpr hlinum nginx-mode tide typescript-mode flycheck fic-mode zencoding-mode handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
  '(rbenv-installation-dir "/usr/local/opt/rbenv")
  '(sublimity-mode t))

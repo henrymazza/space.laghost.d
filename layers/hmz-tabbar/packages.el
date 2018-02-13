@@ -1,4 +1,4 @@
-;; -*- coding: utf-8; -*-           jujuba
+;; -*- coding: utf-8; -*-
 (defvar hmz-tabbar-packages
   '(
     tabbar
@@ -16,18 +16,12 @@ which require an initialization must be listed explicitly in the list.")
     (tabbar-mode 1)
 
     ;; safari like back and forward tabs
-    (global-set-key [(control tab)] 'tabbar-forward-tab)
-    (global-set-key [(control shift tab)] 'tabbar-backward-tab)
+    (global-set-key [(control tab)] 'tabbar-backward-group)
+    (global-set-key [(control shift tab)] 'tabbar-forward-group)
 
     ;; make tab and shift tab move between groups when in Evil Mode (tm)
-    (define-key evil-normal-state-map (kbd "<tab>") 'next-buffer)
-    (define-key evil-normal-state-map (kbd "<S-tab>") 'previous-buffer)
-
-    ;; Used some spacemacs space to cycle between tabbar groups
-    (spacemacs/set-leader-keys "SPC" 'helm-M-x
-      "[" 'tabbar-backward-group
-      "]" 'tabbar-forward-group)
-
+    (define-key evil-normal-state-map (kbd "<S-tab>") 'tabbar-backward-tab)
+    (define-key evil-normal-state-map (kbd "<tab>") 'tabbar-forward-tab)
 
     ;; map mouse wheel events on header line
     (global-set-key [header-line triple-wheel-right] 'tabbar-press-scroll-right)
@@ -78,16 +72,16 @@ which require an initialization must be listed explicitly in the list.")
                           :box nil
                           :foreground (face-attribute 'font-lock-keyword-face :foreground)
                           :inherit 'tabbar-selected
-                          :overline t
-                          :weight 'normal)
+                          :overline nil
+                          :weight 'bold)
 
       (set-face-attribute 'tabbar-selected nil
                           :box nil
-                          :foreground (face-attribute 'font-lock-function-name-face :foreground)
+                          :foreground 'unspecified
                           :background (face-attribute 'hl-line :background)
                           :inherit 'tabbar-default
-                          :overline t
-                          :weight 'normal)
+                          :overline nil
+                          :weight 'bold)
 
       (set-face-attribute 'tabbar-highlight nil
                           :inherit 'tabbar-default
@@ -101,6 +95,7 @@ which require an initialization must be listed explicitly in the list.")
                           :box nil
                           :foreground (face-attribute 'font-lock-keyword-face :foreground)
                           :background 'unspecified
+                          :weight 'normal
                           :inherit 'tabbar-default)
 
       (set-face-attribute 'tabbar-unselected nil
@@ -127,7 +122,6 @@ which require an initialization must be listed explicitly in the list.")
 
     (add-to-list 'all-the-icons-icon-alist
                  '("\\.lua$" all-the-icons-wicon "moon-waning-crescent-3" :face all-the-icons-cyan))
-
 
     (defun tabbar-buffer-help-on-tab (tab)
       "Return the help string shown when mouse is onto TAB. This function was overriden to show more useful information."
@@ -177,7 +171,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
           'help-echo 'tabbar-help-on-tab
           'mouse-face 'tabbar-highlight
           'face tab-face
-          'display `(raise ,(symbol-value 'hmz-tabbar-raise-text))
+          'display `(raise  0.0);;,(symbol-value 'hmz-tabbar-raise-text))
           'pointer 'hand)
          (propertize
           the-icon
@@ -186,12 +180,12 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
                  (plist-get (text-properties-at 0 the-icon) 'face)
                  `(:background ,(face-attribute 'tabbar-default :background nil 'default))
                  (if tab-is-active
-                     `(:overline ,(face-attribute tab-face :foreground nil 'default)
+                     `(:overline nil;; ,(face-attribute tab-face :foreground nil 'default)
                                  :foreground ,(hmz-lighten-if-too-dark icon-face)
                                  :background ,(face-attribute 'tabbar-selected :background nil 'default))
                    `(:foreground ,(face-attribute 'tabbar-icon-unselected :foreground nil 'default)))
                  )
-          'display (if tab-is-active '(raise 0.2) '(raise 0.2))
+          'display (if tab-is-active '(raise 0.0) '(raise 0.0))
           'tabbar-tab tab
           'local-map (tabbar-make-tab-keymap tab)
           'help-echo 'tabbar-help-on-tab
@@ -208,7 +202,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
           'help-echo 'tabbar-help-on-tab
           'mouse-face 'tabbar-highlight
           'face tab-face
-          'display `(raise ,(symbol-value 'hmz-tabbar-raise-text))
+          'display `(raise 0.2) ;;,(symbol-value 'hmz-tabbar-raise-text))
           'pointer 'hand)
          tabbar-separator-value)))
 
@@ -358,12 +352,8 @@ element."
                                                    helm-boring-buffer-regexp-list)
                                            helm-white-buffer-regexp-list))
                 (cond
-                 ((string-equal "*Messages*" (buffer-name)) "*Messages*")
                  ((eq major-mode 'dired-mode) "emacs")
                  ((projectile-project-p) (projectile-project-name))
-                 ((string-equal "*scratch*" (buffer-name)) "Scratch")
-                 ((string-equal "*" (substring (buffer-name) 0 1)) "emacs")
-                 ((string-equal " " (substring (buffer-name) 0 1)) "hidden")
                  (t "other"))
               "emacs")))
 
@@ -385,8 +375,6 @@ element."
         "Run `after-load-theme-hook'."
         (run-hooks 'after-load-theme-hook))
       )
-
     (add-hook 'after-load-theme-hook 'hmz-tabbar-refresh-tabs)
     (add-hook 'after-save-hook 'hmz-tabbar-refresh-tabs)
-    (add-hook 'first-change-hook 'hmz-tabbar-refresh-tabs)
-    ))
+    (add-hook 'first-change-hook 'hmz-tabbar-refresh-tabs)))
