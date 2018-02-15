@@ -5,10 +5,10 @@
     ember-mode
     hide-lines
     indicators
-    itail
     neotree
     spaceline-all-the-icons
     switch-buffer-functions
+    (itail :location local)
     (list-processes+ :location local)))
 
 (defun hmz-misc/init-itail ()
@@ -56,7 +56,7 @@
       (when (buffer-live-p (process-buffer proc))
         (with-current-buffer (process-buffer proc)
           ;; (let ((moving (= (point) (process-mark proc))))
-          (let ((is-current (eq (process-buffer proc) (current-buffer))))
+          (let (moving (= (poing) (point-max))))
             (save-excursion
               ;; Insert the text, advancing the process marker.
               ;; (setq buffer-face-mode-face `(:background "#111111"))
@@ -127,7 +127,7 @@
 
     ;; (add-to-list 'comint-output-filter-functions 'ansi-color-process-output)
 
-    ))
+    )
 
 (defun hmz-misc/init-ember-mode ()
   (use-package ember-mode
