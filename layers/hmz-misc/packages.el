@@ -5,11 +5,14 @@
     ember-mode
     hide-lines
     indicators
+    itail
     neotree
     spaceline-all-the-icons
     switch-buffer-functions
-    (list-processes+ :location local)
-    ))
+    (list-processes+ :location local)))
+
+(defun hmz-misc/init-itail ()
+  (use-package itail))
 
 (defun hmz-misc/init-alert ()
   (use-package alert))
@@ -46,29 +49,18 @@
       (defun hmz-misc/mac-notify (title &optional message)
         (alert message :title title)))
 
-    ;; (defun hmz-misc/bpr-process-filter (proc string)
-    ;;   (when (buffer-live-p (process-buffer proc))
-    ;;     (with-current-buffer (process-buffer proc)
-    ;;       (let ((moving (= (point) (process-mark proc))))
-    ;;         (save-excursion
-    ;;           (goto-char (process-mark proc))
-
-    ;;           (insert string)
-
-    ;;           (when (string-match-p "Error" string)
-    ;;             (hmz-misc/mac-notify "Filter got and Error!" string)))
-
-    ;;         (if moving (goto-char (process-mark proc)))))))
-
+    (defun hmz-misc/bpr-process-sentinel (proc string)
+      (message "Sentinel called")
+      )
     (defun hmz-misc/bpr-process-filter (proc string)
       (when (buffer-live-p (process-buffer proc))
         (with-current-buffer (process-buffer proc)
-          (let ((moving (= (point) (process-mark proc))))
+          ;; (let ((moving (= (point) (process-mark proc))))
+          (let ((is-current (eq (process-buffer proc) (current-buffer))))
             (save-excursion
               ;; Insert the text, advancing the process marker.
               ;; (setq buffer-face-mode-face `(:background "#111111"))
               ;; (buffer-face-mode 1)
-              (hide-lines-matching "SELECT")
               (goto-char (process-mark proc))
 
               (insert string)
@@ -78,40 +70,62 @@
 
               (ansi-color-apply-on-region (marker-position (process-mark proc)) (point))
 
-              (set-marker (process-mark proc) (point))))
+              (set-marker (process-mark proc) (point)))
 
-               (if moving (goto-char (process-mark proc)))))))
+            (unless is-current (goto-char (process-mark proc)))))))
+
+    (use-package itail
+      :init
+      (defun hmz-misc/bpr-clear-or-kill ()
+        "If process is running clear buffer, kills it otherwise."
+        (interactive)
+        (if (process-live-p (get-buffer-process (current-buffer)))
+            (clear-comint-buffer)
+          (kill-this-buffer))))
 
     (defun hmz-misc/bpr-on-error (process)
       (hmz-misc/mac-notify "Error" (process-name process)))
     (defun hmz-misc/bpr-on-success (process)
       (hmz-misc/mac-notify "Success" (process-name process)))
+
     (defun hmz-misc/bpr-on-start (process)
+      (setq tab-width 8)
+      (switch-to-buffer-other-window (process-buffer process))
+      (tabbar-local-mode -1) ;; often it gets hidden, I suppose this helps
       (set-process-filter process 'hmz-misc/bpr-process-filter)
+      (set-process-sentinel process 'hmz-misc/bpr-process-sentinel)
+      (with-current-buffer (process-buffer process)
+        (save-excursion
+          (local-set-key  (kbd "s-k") 'hmz-misc/bpr-clear-or-kill)
+          (text-scale-decrease 2)
+
+          (insert (format "%s" process))))
+
       (hmz-misc/mac-notify "Started" (process-name process)))
+
     (defun hmz-misc/bpr-on-completion (process)
       (hmz-misc/mac-notify (format "Ended with status %d" (process-exit-status process)) (process-name process)))
 
     (spacemacs/set-leader-keys "a b" 'bpr-spawn)
 
-    (setq bpr-on-error #'hmz-misc/bpr-on-error)
-    (setq bpr-on-success #'hmz-misc/bpr-on-success)
-    (setq bpr-on-completion #'hmz-misc/bpr-on-completion)
-    (setq bpr-on-start #'hmz-misc/bpr-on-start)
+    (setq bpr-on-error 'hmz-misc/bpr-on-error)
+    (setq bpr-on-success 'hmz-misc/bpr-on-success)
+    (setq bpr-on-completion 'hmz-misc/bpr-on-completion)
+    (setq bpr-on-start 'hmz-misc/bpr-on-start)
 
     ;; no showing progress on echo line
     (setq bpr-show-progress nil)
 
     ;; use ansi-color-apply-on-region function on output buffer
-    (setq bpr-colorize-output nil)
+    (setq bpr-colorize-output t)
 
     ;; use comint-mode for processes output buffers instead of shell-mode
-    (setq bpr-process-mode #'shell-mode)
+    (setq bpr-process-mode 'shell-mode)
 
-    (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
-    (add-hook 'comint-mode-hook 'ansi-color-for-comint-mode-on)
+    ;; (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+    ;; (add-hook 'comint-mode-hook 'ansi-color-for-comint-mode-on)
 
-    (add-to-list 'comint-output-filter-functions 'ansi-color-process-output)
+    ;; (add-to-list 'comint-output-filter-functions 'ansi-color-process-output)
 
     ))
 
@@ -143,8 +157,6 @@
 (defun hmz-misc/init-indicators ()
   (use-package indicators
     :config
-    ;; (set-face-attribute 'font-lock-warning-face nil
-    ;;  :background "gray50")
     (add-hook 'prog-mode
               (lambda ()
                 (ind-create-indicator

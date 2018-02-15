@@ -19,11 +19,9 @@
 
   (use-package rainbow-mode
     :config
-    (add-hook 'prog-mode-hook
-              (lambda ()
-                (rainbow-mode t)
-                )))
-  )
+    (add-hook 'css-mode-hook (lambda() (rainbow-mode t)))
+    (add-hook 'sgml-mode-hook (lambda() (rainbow-mode t)))
+    (add-hook 'web-mode-hook (lambda () (rainbow-mode t)))))
 
 
 (defun hmz-color-identifiers/init-rainbow-identifiers ()

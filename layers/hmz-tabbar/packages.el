@@ -73,7 +73,7 @@ which require an initialization must be listed explicitly in the list.")
                           :foreground (face-attribute 'font-lock-keyword-face :foreground)
                           :inherit 'tabbar-selected
                           :overline nil
-                          :weight 'bold)
+                          :weight 'normal)
 
       (set-face-attribute 'tabbar-selected nil
                           :box nil
@@ -81,7 +81,7 @@ which require an initialization must be listed explicitly in the list.")
                           :background (face-attribute 'hl-line :background)
                           :inherit 'tabbar-default
                           :overline nil
-                          :weight 'bold)
+                          :weight 'normal)
 
       (set-face-attribute 'tabbar-highlight nil
                           :inherit 'tabbar-default
@@ -142,6 +142,7 @@ which require an initialization must be listed explicitly in the list.")
 That is, a propertized string used as an `header-line-format' template
 element.
 Call `tabbar-tab-label-function' to obtain a label for TAB."
+
       (let*
           ((tab-face (cond ((and (tabbar-selected-p tab (tabbar-current-tabset))
                                  (tabbar-modified-p tab (tabbar-current-tabset)))
@@ -195,8 +196,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
           (concat
            " "
            (if tabbar-tab-label-function
-               (funcall tabbar-tab-label-function tab)
-             tab) " ")
+               (funcall tabbar-tab-label-function tab) tab) " ")
           'tabbar-tab tab
           'local-map (tabbar-make-tab-keymap tab)
           'help-echo 'tabbar-help-on-tab
@@ -213,10 +213,13 @@ element."
       (let* ((label (if tabbar-button-label-function
                         (funcall tabbar-button-label-function name)
                       (cons name name)))
-             (glyph (cond ((eq name 'home)
-                           (concat " "
-                                   (all-the-icons-wicon "alien"
-                                                        :face '(:inherit tabbar-default :height 1.2))))
+             (glyph
+              (cond ((eq name 'home)
+                     (concat " "
+                             (all-the-icons-wicon
+                              (nth (winum-get-number)
+                                   '("alien" "alien" "lightning" "barometer" "meteor" "earthquake" "snowflake-cold""fire" "raindrop" ))
+                              :face '(:inherit tabbar-default :height 1.2))))
                           ((eq name 'scroll-left) (all-the-icons-material "chevron_left"))
                           ((eq name 'scroll-right) (all-the-icons-material "chevron_right"))
                           (t "X")))
@@ -347,16 +350,18 @@ element."
       There are two groups: Emacs buffers (those whose name starts with '*', plus
       dired buffers), and the rest."
       (list (if (member (buffer-name)
-                        (helm-skip-entries (mapcar #'buffer-name (buffer-list))
-                                           (append '("\\`[:\\*]")
-                                                   helm-boring-buffer-regexp-list)
-                                           helm-white-buffer-regexp-list))
+                        (helm-skip-entries
+                         (mapcar #'buffer-name (buffer-list))
+                         (append '("\\`[:\\*]\\(Back\\|Help\\)")
+                                 helm-boring-buffer-regexp-list)
+                         helm-white-buffer-regexp-list))
                 (cond
-                 ((eq major-mode 'dired-mode) "emacs")
+                 ((string-match-p "*" (buffer-name))
+                  (if (get-buffer-process (current-buffer))
+                      "proc" "limbo"))
                  ((projectile-project-p) (projectile-project-name))
-                 (t "other"))
-              "emacs")))
-
+                 (t "limbo"))
+              "limbo")))
 
     (defun hmz-tabbar-refresh-tabs ()
       (tabbar-mode 0)
