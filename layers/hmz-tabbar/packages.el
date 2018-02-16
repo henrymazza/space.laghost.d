@@ -16,12 +16,12 @@ which require an initialization must be listed explicitly in the list.")
     (tabbar-mode 1)
 
     ;; safari like back and forward tabs
-    (global-set-key [(control tab)] 'tabbar-backward-group)
-    (global-set-key [(control shift tab)] 'tabbar-forward-group)
+    (global-set-key [(control shift tab)] 'tabbar-backward-tab)
+    (global-set-key [(control tab)] 'tabbar-forward-tab)
 
     ;; make tab and shift tab move between groups when in Evil Mode (tm)
-    (define-key evil-normal-state-map (kbd "<S-tab>") 'tabbar-backward-tab)
-    (define-key evil-normal-state-map (kbd "<tab>") 'tabbar-forward-tab)
+    (define-key evil-normal-state-map (kbd "<S-tab>") 'previous-buffer)
+    (define-key evil-normal-state-map (kbd "<tab>") 'next-buffer)
 
     ;; map mouse wheel events on header line
     (global-set-key [header-line triple-wheel-right] 'tabbar-press-scroll-right)
@@ -217,8 +217,8 @@ element."
               (cond ((eq name 'home)
                      (concat " "
                              (all-the-icons-wicon
-                              (nth (winum-get-number)
-                                   '("alien" "alien" "lightning" "barometer" "meteor" "earthquake" "snowflake-cold""fire" "raindrop" ))
+                              (nth (if winum-mode (winum-get-number) 1)
+                                   '("alien" "alien" "lightning" "barometer" "meteor" "earthquake" "snowflake-cold" "fire" "raindrop" ))
                               :face '(:inherit tabbar-default :height 1.2))))
                           ((eq name 'scroll-left) (all-the-icons-material "chevron_left"))
                           ((eq name 'scroll-right) (all-the-icons-material "chevron_right"))

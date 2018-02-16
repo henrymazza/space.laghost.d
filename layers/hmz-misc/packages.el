@@ -3,13 +3,26 @@
     alert
     bpr
     ember-mode
-    hide-lines
     indicators
     neotree
     spaceline-all-the-icons
-    switch-buffer-functions
+    (fringe-helper :location local)
+    (hide-lines :location local)
+    (indicators :location local)
     (itail :location local)
-    (list-processes+ :location local)))
+    (list-processes+ :location local)
+    (switch-buffer-functions :location local)))
+
+(defun hmz-misc/init-indicators ()
+  (use-package indicators
+    :config
+    (setq ind-indicator-height 19)
+    (add-hook 'after-change-major-mode-hook
+              (lambda()
+                (ind-create-indicator 'point
+                                      :managed t
+                                      :face 'font-lock-keyword-face)))
+                ))
 
 (defun hmz-misc/init-itail ()
   (use-package itail))
@@ -50,13 +63,13 @@
         (alert message :title title)))
 
     (defun hmz-misc/bpr-process-sentinel (proc string)
-      (message "Sentinel called")
-      )
+      (alert (process-name proc) :title string))
+
     (defun hmz-misc/bpr-process-filter (proc string)
       (when (buffer-live-p (process-buffer proc))
         (with-current-buffer (process-buffer proc)
           ;; (let ((moving (= (point) (process-mark proc))))
-          (let (moving (= (poing) (point-max))))
+          (let ((moving (= (point) (point-max))))
             (save-excursion
               ;; Insert the text, advancing the process marker.
               ;; (setq buffer-face-mode-face `(:background "#111111"))
@@ -72,7 +85,7 @@
 
               (set-marker (process-mark proc) (point)))
 
-            (unless is-current (goto-char (process-mark proc)))))))
+            (if moving (goto-char (process-mark proc)))))))
 
     (use-package itail
       :init
@@ -84,9 +97,19 @@
           (kill-this-buffer))))
 
     (defun hmz-misc/bpr-on-error (process)
-      (hmz-misc/mac-notify "Error" (process-name process)))
+      (hmz-misc/mac-notify "Error" (process-name process))
+      (with-current-buffer (process-buffer process)
+        (save-excursion
+          (rename-buffer
+           (replace-regexp-in-string "\[.*\]" "[ERROR]" (format "%s"(tabbar-tab-value tab)))))))
+
     (defun hmz-misc/bpr-on-success (process)
-      (hmz-misc/mac-notify "Success" (process-name process)))
+      (hmz-misc/mac-notify "Success" (process-name process))
+      (with-current-buffer (process-buffer process)
+        (save-excursion
+          (rename-buffer
+           (replace-regexp-in-string "\[.*\]" "[OK]" (buffer-name))))))
+
 
     (defun hmz-misc/bpr-on-start (process)
       (setq tab-width 8)
@@ -99,6 +122,8 @@
           (local-set-key  (kbd "s-k") 'hmz-misc/bpr-clear-or-kill)
           (text-scale-decrease 2)
 
+          (rename-buffer
+           (replace-regexp-in-string "\(.*\)" (concat "[" (format "%s" (process-id process)) "]") (buffer-name)))
           (insert (format "%s" process))))
 
       (hmz-misc/mac-notify "Started" (process-name process)))
@@ -127,7 +152,7 @@
 
     ;; (add-to-list 'comint-output-filter-functions 'ansi-color-process-output)
 
-    )
+    ))
 
 (defun hmz-misc/init-ember-mode ()
   (use-package ember-mode
@@ -196,9 +221,9 @@
     (defun hmz-winum-assign-func ()
       (cond
        ((equal (buffer-name) "*Calculator*")
-        9)
+        10)
        ((string-match-p (buffer-name) ".*\\*NeoTree\\*.*")
-        2)
+        9)
        (t
         nil)))
 

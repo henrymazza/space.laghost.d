@@ -473,7 +473,6 @@ you should place you code here."
 
     (global-hl-line-mode -1)
 
-    (global-auto-complete-mode t)
     (hlinum-activate)
 
     (flycheck-mode -1)
@@ -709,7 +708,8 @@ you should place you code here."
 
    ;; Stylize Echo Area (interestingly it ends up applying other faces styles)
    (with-current-buffer (get-buffer " *Echo Area 0*")   ; the leading space character is correct
-     (setq-local face-remapping-alist '((default (:height 1.2) variable-pitch)))) ; etc.
+     (setq-local face-remapping-alist
+                 '((default (:height 1.0 :foreground "gray75") variable-pitch)))) ; etc.
 
    ;; define hook unless already defined
    (unless (boundp 'after-load-theme-hook)
@@ -901,7 +901,7 @@ Example:
  '(alert-default-style (quote notifier))
  '(ansi-color-names-vector
    ["dim gray" "orange red" "medium spring green" "gold" "dodger blue" "purple" "turquoise1" "#eeeeec"])
- '(coffee-tab-width 2 t)
+ '(coffee-tab-width 2)
  '(ember-completion-system (quote helm))
  '(ember-serve-command "ember serve  --output-path dist")
  '(ember-test-command "ember test --serve")
@@ -931,7 +931,7 @@ Example:
  '(neo-window-width 20)
  '(package-selected-packages
    (quote
-    (projectile switch-buffer-functions itail makey dired-toggle dired-open dired-narrow dirtree direx dired-rainbow discover-my-major org-alert all-the-icons-dired diredful dired-single dired-sidebar hide-lines org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-download htmlize gnuplot hlinum nginx-mode tide typescript-mode flycheck fic-mode zencoding-mode handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+    (yascroll projectile switch-buffer-functions itail makey dired-toggle dired-open dired-narrow dirtree direx dired-rainbow discover-my-major org-alert all-the-icons-dired diredful dired-single dired-sidebar hide-lines org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-download htmlize gnuplot hlinum nginx-mode tide typescript-mode flycheck fic-mode zencoding-mode handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
  '(rbenv-installation-dir "/usr/local/opt/rbenv")
  '(sublimity-mode t)
  '(tooltip-use-echo-area t))
