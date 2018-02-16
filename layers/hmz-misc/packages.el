@@ -21,8 +21,7 @@
               (lambda()
                 (ind-create-indicator 'point
                                       :managed t
-                                      :face 'font-lock-keyword-face)))
-                ))
+                                      :face 'font-lock-keyword-face)))))
 
 (defun hmz-misc/init-itail ()
   (use-package itail))
@@ -145,7 +144,7 @@
     (setq bpr-colorize-output t)
 
     ;; use comint-mode for processes output buffers instead of shell-mode
-    (setq bpr-process-mode 'shell-mode)
+    (setq bpr-process-mode 'comint-mode)
 
     ;; (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
     ;; (add-hook 'comint-mode-hook 'ansi-color-for-comint-mode-on)
@@ -330,6 +329,7 @@
           (neotree-find origin-buffer-file-name))))
 
     (global-set-key (kbd "s-r") 'neo-opens-outwards)
+    (global-set-key (kbd "H-r") 'neo-opens-outwards)
 
     (defun hmz-neotree-mode-hook ()
         ;; (face-remap-add-relative 'default :background-color "white")

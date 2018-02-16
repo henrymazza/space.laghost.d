@@ -9,6 +9,10 @@
     ;; At this point the desktop.el hook in after-init-hook was
     ;; executed, so (desktop-read) is avoided.
     (when (not (eq (emacs-pid) (desktop-owner))) ; Check that emacs did not load a desktop yet
+
+      ;; Avoid error with "tty" font
+      (setq desktop-restore-frames nil)
+
       ;; Here we activate the desktop mode
       (desktop-save-mode 1)
 
