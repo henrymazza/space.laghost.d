@@ -64,27 +64,82 @@
     (defun hmz-misc/bpr-process-sentinel (proc string)
       (alert (process-name proc) :title string))
 
+    (setq my-ansi-escape-re
+      (rx (or
+          (and (or ?\233 (and ?\e ?\[))
+               (zero-or-more (char (?0 . ?\?)))
+               (zero-or-more (char ?\s ?- ?\/))
+               (char (?@ . ?~)))
+          (char ""))))
+
     (defun hmz-misc/bpr-process-filter (proc string)
       (when (buffer-live-p (process-buffer proc))
         (with-current-buffer (process-buffer proc)
-          ;; (let ((moving (= (point) (process-mark proc))))
-          (let ((moving (= (point) (point-max))))
-            (save-excursion
+
+          (let ((moving (= (point) (process-mark proc))))
+            (save-excursion  ;;TODO perhaps save-mark-and-excursion?
+
               ;; Insert the text, advancing the process marker.
-              ;; (setq buffer-face-mode-face `(:background "#111111"))
-              ;; (buffer-face-mode 1)
               (goto-char (process-mark proc))
 
-              (insert string)
+              (let ((str string)
+                    (ansi-code ""))
 
+                (while (string-match my-ansi-escape-re str)
+
+                  ;; send first part to the buffer
+                  (let ((content (substring str 0 (car (match-data)))))
+                    (insert content)
+                    (message "Insert: ")
+                    (when (< (point-max) (point))
+                      (kill-line)
+                      )
+                    (comment delete-char (length content)))
+
+                  ;; deal with special code
+                  (let ((ansi-code (substring str  (car (match-data))
+                                              (cadr (match-data)))))
+                     (cond
+                      ;; Color Code
+                      ((string-match-p "m$" ansi-code) (insert ansi-code))
+                      ;; D - Move Left N chars
+                      ((string-match "\\[\\(?1:.*\\)D" ansi-code)
+                       (let ((count (string-to-char
+                                     (match-string 1 ansi-code))))
+                         (if (> (current-column) count)
+                             (backward-char count)
+                           (message "overflown: %s : %s"
+                                    (current-column) count)
+                           (beginning-of-line))))
+                      ;; clear all to the right
+                      ((string-equal ansi-code "[0K") (kill-line))
+                      ;; clear vertical tabulation (?)
+                      ((string-equal ansi-code "[1G") (beginning-of-line))
+                      ((string-equal ansi-code "[2K") (beginning-of-line))
+                      ;; Show the cursor (duh!)
+                      ((string-equal ansi-code "[?25h") nil)
+                      ((string-equal ansi-code "[10A") (goto-char (point-min)))
+                      ((string-equal ansi-code "[2A") (erase-buffer))
+                      (t (insert ansi-code)))
+                     (message ">> %s" ansi-code)
+                  ;; process the rest
+                  (setq str (substring str (cadr (match-data))))
+                  ))
+
+                ;; insert piece after last code
+                (insert str))
+
+              (set-marker (process-mark proc) (point))
+
+              ;;TODO Try to detect errors and such
               (when (string-match-p "Error" string)
                 (hmz-misc/mac-notify "Filter got and Error!" string))
 
-              (ansi-color-apply-on-region (marker-position (process-mark proc)) (point))
+              ;; (ansi-color-apply-on-region (marker-position (process-mark proc)) (point))  )
+)
+            (if moving goto-char (process-mark proc))
 
-              (set-marker (process-mark proc) (point)))
-
-            (if moving (goto-char (process-mark proc)))))))
+            ))))
 
     (use-package itail
       :init
@@ -111,7 +166,9 @@
 
 
     (defun hmz-misc/bpr-on-start (process)
-      (setq tab-width 8)
+
+      ;; (setq buffer-face-mode-face `(:background "#111111"))
+      ;; (buffer-face-mode 1)
       (switch-to-buffer-other-window (process-buffer process))
       (tabbar-local-mode -1) ;; often it gets hidden, I suppose this helps
       (set-process-filter process 'hmz-misc/bpr-process-filter)
@@ -120,10 +177,10 @@
         (save-excursion
           (local-set-key  (kbd "s-k") 'hmz-misc/bpr-clear-or-kill)
           (text-scale-decrease 2)
-
+          (setq tab-width 8)
+          (setq overwrite-mode 'overwrite-mode-binary)
           (rename-buffer
-           (replace-regexp-in-string "\(.*\)" (concat "[" (format "%s" (process-id process)) "]") (buffer-name)))
-          (insert (format "%s" process))))
+           (replace-regexp-in-string "\(.*\)" (concat "[" (format "%s" (process-id process)) "]") (buffer-name)))))
 
       (hmz-misc/mac-notify "Started" (process-name process)))
 
@@ -137,15 +194,61 @@
     (setq bpr-on-completion 'hmz-misc/bpr-on-completion)
     (setq bpr-on-start 'hmz-misc/bpr-on-start)
 
+    (defun preamble-regexp-alternatives (regexps)
+      "Return the alternation of a list of regexps."
+      (mapconcat (lambda (regexp)
+                   (concat "\\(?:" regexp "\\)"))
+                 regexps "\\|"))
+
+    (defvar non-sgr-control-sequence-regexp nil
+      "Regexp that matches non-SGR control sequences.")
+
+    (defun regexp-alternatives (regexps)
+      (mapconcat (lambda (regexp) (concat "\\(" regexp "\\)")) regexps "\\|"))
+
+    (setq non-sgr-control-sequence-regexp
+          (regexp-alternatives
+           '(;; icon name escape sequences
+             "\033\\][0-2];.*?\007"
+             ;; non-SGR CSI escape sequences
+             "\033\\[\\??[0-9;]*[^0-9;m]"
+             ;; noop
+             "\012\033\\[2K\033\\[1F"
+             )))
+
+    (defun filter-non-sgr-control-sequences-in-region (begin end)
+      (save-excursion
+        (goto-char begin)
+        (while (re-search-forward
+                non-sgr-control-sequence-regexp end t)
+          (message (match-string))
+          (replace-match ""))))
+
+    (defun filter-non-sgr-control-sequences-in-output (ignored)
+      (let ((start-marker
+             (or comint-last-output-start
+                 (point-min-marker)))
+            (end-marker
+             (process-mark
+              (get-buffer-process (current-buffer)))))
+        (filter-non-sgr-control-sequences-in-region
+         start-marker
+         end-marker)))
+
+    ;; (setq    'comint-output-filter-functions nil  )
+    ;; (add-hook 'comint-output-filter-functions
+    ;;           'filter-non-sgr-control-sequences-in-output)
+
     ;; no showing progress on echo line
     (setq bpr-show-progress nil)
 
     ;; use ansi-color-apply-on-region function on output buffer
-    (setq bpr-colorize-output t)
+    (setq bpr-colorize-output nil)
 
     ;; use comint-mode for processes output buffers instead of shell-mode
-    (setq bpr-process-mode 'comint-mode)
+    (setq bpr-process-mode 'shell-mode)
 
+    (setq bpr-scroll-direction -1)
     ;; (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
     ;; (add-hook 'comint-mode-hook 'ansi-color-for-comint-mode-on)
 
