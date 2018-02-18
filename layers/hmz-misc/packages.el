@@ -76,8 +76,13 @@
       (when (buffer-live-p (process-buffer proc))
         (with-current-buffer (process-buffer proc)
 
-          (let ((moving (= (point) (process-mark proc))))
+          (let
+              ((moving (> 3 (abs (- (count-lines (point-min) (point-max)) (line-number-at-pos)))))
+               )
+
             (save-excursion  ;;TODO perhaps save-mark-and-excursion?
+              (message "%s %s" (count-lines (point-min) (point-max))
+                       (line-number-at-pos))
 
               ;; Insert the text, advancing the process marker.
               (goto-char (process-mark proc))
@@ -90,7 +95,6 @@
                   ;; send first part to the buffer
                   (let ((content (substring str 0 (car (match-data)))))
                     (insert content)
-                    (message "Insert: ")
                     (when (< (point-max) (point))
                       (kill-line)
                       )
@@ -99,45 +103,45 @@
                   ;; deal with special code
                   (let ((ansi-code (substring str  (car (match-data))
                                               (cadr (match-data)))))
-                     (cond
-                      ;; Color Code
-                      ((string-match-p "m$" ansi-code) (insert ansi-code))
-                      ;; D - Move Left N chars
-                      ((string-match "\\[\\(?1:.*\\)D" ansi-code)
-                       (let ((count (string-to-char
-                                     (match-string 1 ansi-code))))
-                         (if (> (current-column) count)
-                             (backward-char count)
-                           (message "overflown: %s : %s"
-                                    (current-column) count)
-                           (beginning-of-line))))
-                      ;; clear all to the right
-                      ((string-equal ansi-code "[0K") (kill-line))
-                      ;; clear vertical tabulation (?)
-                      ((string-equal ansi-code "[1G") (beginning-of-line))
-                      ((string-equal ansi-code "[2K") (beginning-of-line))
-                      ;; Show the cursor (duh!)
-                      ((string-equal ansi-code "[?25h") nil)
-                      ((string-equal ansi-code "[10A") (goto-char (point-min)))
-                      ((string-equal ansi-code "[2A") (erase-buffer))
-                      (t (insert ansi-code)))
-                     (message ">> %s" ansi-code)
-                  ;; process the rest
-                  (setq str (substring str (cadr (match-data))))
-                  ))
+                    (cond
+                     ;; Color Code
+                     ((string-match-p "m$" ansi-code) (insert ansi-code))
+                     ;; D - Move Left N chars
+                     ((string-match "\\[\\(?1:.*\\)D" ansi-code)
+                      (let ((count (string-to-char
+                                    (match-string 1 ansi-code))))
+                        (if (> (current-column) count)
+                            (backward-char count)
+                          (beginning-of-line))))
+                     ;; clear all to the right
+                     ((string-equal ansi-code "[0K") (kill-line))
+                     ;; clear vertical tabulation (?)
+                     ((string-equal ansi-code "[1G") (beginning-of-line))
+                     ((string-equal ansi-code "[2K") (beginning-of-line))
+                     ;; Show the cursor (duh!)
+                     ((string-equal ansi-code "[?25h") nil)
+                     ((string-equal ansi-code "[10A") (goto-char (point-min)))
+                     ((string-equal ansi-code "[2A") (erase-buffer))
+                     (t (insert ansi-code)))
+
+
+                    ;; process the rest
+                    (setq str (substring str (cadr (match-data))))
+                    ))
 
                 ;; insert piece after last code
                 (insert str))
 
-              (set-marker (process-mark proc) (point))
 
               ;;TODO Try to detect errors and such
               (when (string-match-p "Error" string)
                 (hmz-misc/mac-notify "Filter got and Error!" string))
 
-              ;; (ansi-color-apply-on-region (marker-position (process-mark proc)) (point))  )
-)
-            (if moving goto-char (process-mark proc))
+              (ansi-color-apply-on-region (marker-position (process-mark proc)) (point))
+
+              (set-marker (process-mark proc) (point)))
+
+            (if moving (goto-char (process-mark proc)))
 
             ))))
 
