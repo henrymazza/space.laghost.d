@@ -360,6 +360,7 @@ element."
                   (if (get-buffer-process (current-buffer))
                       "proc" "limbo"))
                  ((projectile-project-p) (projectile-project-name))
+                 ((buffer-file-name) "other")
                  (t "limbo"))
               "limbo")))
 
