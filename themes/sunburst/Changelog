@@ -1,2 +1,0 @@
-Version 1.0.0
-  * Ported to Emacs 24 deftheme, removing color-theme.el dependency
