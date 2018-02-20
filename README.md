@@ -1,4 +1,4 @@
-# spaceghost.d
+# space.laghost.d
 My Emacs files -- based on spacemacs 
 
 Includes some useful spacemacs layers for:
