@@ -49,7 +49,8 @@
               (lambda () (add-to-invisibility-spec 'hl)))))
 
 (defun hmz-misc/init-hidesearch ()
-  (use-package hidesearch))
+  (use-package hidesearch
+    ))
 
 (defun hmz-misc/init-bpr ()
   (use-package bpr

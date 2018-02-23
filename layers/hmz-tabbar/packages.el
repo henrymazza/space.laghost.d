@@ -32,14 +32,15 @@ which require an initialization must be listed explicitly in the list.")
     (seq-do (lambda (e)
               (global-set-key (kbd (concat "s-" (number-to-string e))) 'hmz-tabbar/goto-nth-group)
               )
-            (number-sequence 0 9))
+            (number-sequence 1 9))
 
     (defun hmz-tabbar/goto-nth-group ()
       (interactive)
       (let* ((vect (recent-keys))
              (last-keystroke (aref vect (1- (length vect))))
              (invoked-with-keys (key-description (vector last-keystroke)))
-             (integer-argument (- (aref invoked-with-keys (1- (length invoked-with-keys))) 48))
+             ;; start with zero
+             (integer-argument (- (aref invoked-with-keys (1- (length invoked-with-keys))) 49))
              (new-group-tab (nth integer-argument (tabbar-tabs (tabbar-get-tabsets-tabset)))))
 
         (when new-group-tab
@@ -234,19 +235,6 @@ element."
        (tabbar-current-tabset)
        (mapcar #'cdr
                (tabbar-tabs (tabbar-get-tabsets-tabset))))
-      (message "%s - %s [%s]"
-                               (tabbar-current-tabset)
-
-                (sort
-                 (mapcar #'cdr
-                         (tabbar-tabs (tabbar-get-tabsets-tabset)))
-                 #'string<)
-               (position
-                (tabbar-current-tabset)
-                (sort
-                 (mapcar #'cdr
-                         (tabbar-tabs (tabbar-get-tabsets-tabset)))
-                 #'string<)))
 
       (let* ((label (if tabbar-button-label-function
                         (funcall tabbar-button-label-function name)
@@ -408,7 +396,11 @@ element."
                          helm-white-buffer-regexp-list))
                 (cond
                  ((file-remote-p default-directory)
-                  (file-remote-p default-directory 'host))
+                  (string-join
+                   `( ,(file-remote-p default-directory 'user)
+                      ,(file-remote-p default-directory 'host))
+                   "@")
+                  )
 
                  ((string-match-p "*" (buffer-name))
                   (if (or (get-buffer-process (current-buffer))
