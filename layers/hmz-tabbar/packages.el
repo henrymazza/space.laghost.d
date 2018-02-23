@@ -11,7 +11,7 @@ which require an initialization must be listed explicitly in the list.")
   (use-package tabbar
     :defer t
 
-    :init
+    :config
     ;; init me!
     (tabbar-mode 1)
 
@@ -19,9 +19,30 @@ which require an initialization must be listed explicitly in the list.")
     (global-set-key [(control shift tab)] 'tabbar-backward-tab)
     (global-set-key [(control tab)] 'tabbar-forward-tab)
 
-    ;; make tab and shift tab move between groups when in Evil Mode (tm)
+    ;; make tab and shift tab move between MRU buffers
     (define-key evil-normal-state-map (kbd "<S-tab>") 'previous-buffer)
     (define-key evil-normal-state-map (kbd "<tab>") 'next-buffer)
+
+    ;; cycle groups
+    (define-key evil-normal-state-map (kbd "s-[") 'tabbar-backward-group)
+    (define-key evil-normal-state-map (kbd "s-]") 'tabbar-forward-group)
+
+    ;; Sets command + 1 up to command + 0 as jump to group
+    (seq-do (lambda (e)
+              (global-set-key (kbd (concat "s-" (number-to-string e))) 'hmz-tabbar/goto-nth-group)
+              )
+            (number-sequence 0 9))
+
+
+    (defun hmz-tabbar/goto-nth-group ()
+      (interactive)
+      (let* ((vect (recent-keys))
+             (last-keystroke (aref vect (1- (length vect))))
+             (invoked-with-keys (key-description (vector last-keystroke)))
+             (integer-argument (- (aref invoked-with-keys (1- (length invoked-with-keys))) 48)))
+
+        (tabbar-click-on-tab (nth integer-argument (tabbar-tabs (tabbar-get-tabsets-tabset))))
+        ))
 
     ;; map mouse wheel events on header line
     (global-set-key [header-line triple-wheel-right] 'tabbar-press-scroll-right)
@@ -78,7 +99,7 @@ which require an initialization must be listed explicitly in the list.")
       (set-face-attribute 'tabbar-selected nil
                           :box nil
                           :foreground 'unspecified
-                          :background (face-attribute 'hl-line :background)
+                          :background (face-attribute 'default :background)
                           :inherit 'tabbar-default
                           :overline nil
                           :weight 'normal)
@@ -114,9 +135,7 @@ which require an initialization must be listed explicitly in the list.")
                                          :inherit 'tabbar-default
                                          ))
         "Unselected tab's icon foreground color."
-        :group 'tabbar)
-
-      )
+        :group 'tabbar))
 
     (hmz-tabbar-refresh-faces)
 
