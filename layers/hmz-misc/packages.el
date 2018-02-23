@@ -6,15 +6,11 @@
     indicators
     neotree
     spaceline-all-the-icons
-    (fringe-helper :location local)
     (hide-lines :location local)
+    (hidesearch :location local)
     (indicators :location local)
-    (itail :location local)
     (list-processes+ :location local)
     (switch-buffer-functions :location local)))
-
-(defun hmz-misc/init-fringe-heper ()
-  (use-package fringe-helper))
 
 (defun hmz-misc/init-indicators ()
   (use-package indicators
@@ -25,11 +21,6 @@
                 (ind-create-indicator 'point
                                       :managed t
                                       :face 'font-lock-const-face)))))
-
-(defun hmz-misc/init-itail ()
-  (use-package itail
-    :config
-    (setq itail-was-loaded t)))
 
 (defun hmz-misc/init-alert ()
   (use-package alert))
@@ -56,6 +47,9 @@
     :config
     (add-hook 'after-change-major-mode-hook
               (lambda () (add-to-invisibility-spec 'hl)))))
+
+(defun hmz-misc/init-hidesearch ()
+  (use-package hidesearch))
 
 (defun hmz-misc/init-bpr ()
   (use-package bpr

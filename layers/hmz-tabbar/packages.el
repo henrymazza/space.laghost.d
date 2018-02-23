@@ -28,21 +28,22 @@ which require an initialization must be listed explicitly in the list.")
     (define-key evil-normal-state-map (kbd "s-]") 'tabbar-forward-group)
 
     ;; Sets command + 1 up to command + 0 as jump to group
+
     (seq-do (lambda (e)
               (global-set-key (kbd (concat "s-" (number-to-string e))) 'hmz-tabbar/goto-nth-group)
               )
             (number-sequence 0 9))
-
 
     (defun hmz-tabbar/goto-nth-group ()
       (interactive)
       (let* ((vect (recent-keys))
              (last-keystroke (aref vect (1- (length vect))))
              (invoked-with-keys (key-description (vector last-keystroke)))
-             (integer-argument (- (aref invoked-with-keys (1- (length invoked-with-keys))) 48)))
+             (integer-argument (- (aref invoked-with-keys (1- (length invoked-with-keys))) 48))
+             (new-group-tab (nth integer-argument (tabbar-tabs (tabbar-get-tabsets-tabset)))))
 
-        (tabbar-click-on-tab (nth integer-argument (tabbar-tabs (tabbar-get-tabsets-tabset))))
-        ))
+        (when new-group-tab
+          (tabbar-click-on-tab new-group-tab))))
 
     ;; map mouse wheel events on header line
     (global-set-key [header-line triple-wheel-right] 'tabbar-press-scroll-right)
@@ -229,16 +230,47 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
       "Return the display representation of button NAME.
 That is, a propertized string used as an `header-line-format' template
 element."
+      (position
+       (tabbar-current-tabset)
+       (mapcar #'cdr
+               (tabbar-tabs (tabbar-get-tabsets-tabset))))
+      (message "%s - %s [%s]"
+                               (tabbar-current-tabset)
+
+                (sort
+                 (mapcar #'cdr
+                         (tabbar-tabs (tabbar-get-tabsets-tabset)))
+                 #'string<)
+               (position
+                (tabbar-current-tabset)
+                (sort
+                 (mapcar #'cdr
+                         (tabbar-tabs (tabbar-get-tabsets-tabset)))
+                 #'string<)))
+
       (let* ((label (if tabbar-button-label-function
                         (funcall tabbar-button-label-function name)
                       (cons name name)))
+
              (glyph
               (cond ((eq name 'home)
                      (concat " "
                              (all-the-icons-wicon
-                              (nth (if winum-mode (winum-get-number) 1)
-                                   '("alien" "alien" "lightning" "barometer" "meteor" "earthquake" "snowflake-cold" "fire" "raindrop" ))
+                              (nth
+
+                               ;; Use current group to define icon
+                               (or (position
+                                    (tabbar-current-tabset)
+                                    (mapcar #'cdr
+                                            (tabbar-tabs (tabbar-get-tabsets-tabset)))
+                                    ) 7)
+
+                               ;; Use current window number to define the icon
+                               ;; (if winum-mode (winum-get-number) 1)
+
+                                   '("alien" "fire" "lightning" "barometer" "meteor" "earthquake" "snowflake-cold" "fire" "raindrop" ))
                               :face '(:inherit tabbar-default :height 1.2))))
+
                           ((eq name 'scroll-left) (all-the-icons-material "chevron_left"))
                           ((eq name 'scroll-right) (all-the-icons-material "chevron_right"))
                           (t "X")))
@@ -375,9 +407,14 @@ element."
                                  helm-boring-buffer-regexp-list)
                          helm-white-buffer-regexp-list))
                 (cond
+                 ((file-remote-p default-directory)
+                  (file-remote-p default-directory 'host))
+
                  ((string-match-p "*" (buffer-name))
-                  (if (get-buffer-process (current-buffer))
-                      "proc" "limbo"))
+                  (if (or (get-buffer-process (current-buffer))
+                          (eq major-mode 'eshell-mode))
+                      "proc"
+                    "limbo"))
                  ((projectile-project-p) (projectile-project-name))
                  ((buffer-file-name) "other")
                  (t "limbo"))
