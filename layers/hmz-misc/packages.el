@@ -1,12 +1,12 @@
 (defconst hmz-misc-packages
-  '(
-    alert
+  '(alert
     bpr
     ember-mode
     indicators
     neotree
     spaceline-all-the-icons
     (hide-lines :location local)
+    (itail :location local)
     (hidesearch :location local)
     (indicators :location local)
     (list-processes+ :location local)
@@ -81,9 +81,6 @@
                )
 
             (save-excursion  ;;TODO perhaps save-mark-and-excursion?
-              (message "%s %s" (count-lines (point-min) (point-max))
-                       (line-number-at-pos))
-
               ;; Insert the text, advancing the process marker.
               (goto-char (process-mark proc))
 

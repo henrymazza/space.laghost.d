@@ -12,8 +12,6 @@ which require an initialization must be listed explicitly in the list.")
     :defer t
 
     :config
-    ;; init me!
-    (tabbar-mode 1)
 
     ;; safari like back and forward tabs
     (global-set-key [(control shift tab)] 'tabbar-backward-tab)
@@ -431,4 +429,7 @@ element."
       )
     (add-hook 'after-load-theme-hook 'hmz-tabbar-refresh-tabs)
     (add-hook 'after-save-hook 'hmz-tabbar-refresh-tabs)
-    (add-hook 'first-change-hook 'hmz-tabbar-refresh-tabs)))
+    (add-hook 'first-change-hook 'hmz-tabbar-refresh-tabs))
+
+    ;; init me!
+    (tabbar-mode 1))
