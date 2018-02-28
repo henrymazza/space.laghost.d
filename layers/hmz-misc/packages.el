@@ -402,7 +402,7 @@
     (defun neo-buffer--insert-file-entry (node depth)
       (let ((node-short-name (neo-path--file-short-name node))
             (vc (when neo-vc-integration (neo-vc-for-node node))))
-        (insert-char ?\s (* (- depth 1) 2)) ; indent
+        (insert-char ?\s (* (- depth 1) 3)) ; indent
 
         (insert-char ?\s 1)
         (neo-buffer--insert-fold-symbol 'leaf node-short-name)
@@ -418,7 +418,7 @@
 
     (defun neo-buffer--insert-fold-symbol (name &optional node-name)
       "Overriden to make it less noisy. Made to work with non-monospaced fonts."
-      (let ((vc (when nil (neo-vc-for-node node)))
+      (let ((vc (when neo-vc-integration (neo-vc-for-node node)))
             (n-insert-symbol (lambda (n)
                                (neo-buffer--insert-with-face
                                 n 'neo-expand-btn-face))))

@@ -254,7 +254,7 @@ element."
                                ;; Use current window number to define the icon
                                ;; (if winum-mode (winum-get-number) 1)
 
-                                   '("alien" "fire" "lightning" "barometer" "meteor" "earthquake" "snowflake-cold" "fire" "raindrop" ))
+                                   '("alien" "fire" "lightning" "barometer" "meteor" "earthquake" "snowflake-cold" "fire" "raindrop" "solar-eclipse" "night-clear" "raindrops" "sprinkle"))
                               :face '(:inherit tabbar-default :height 1.2))))
 
                           ((eq name 'scroll-left) (all-the-icons-material "chevron_left"))
