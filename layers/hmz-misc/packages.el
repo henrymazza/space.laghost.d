@@ -75,56 +75,100 @@
     (defun hmz-misc/bpr-process-filter (proc string)
       (when (buffer-live-p (process-buffer proc))
         (with-current-buffer (process-buffer proc)
-
           (let
-              ((moving (> 3 (abs (- (count-lines (point-min) (point-max)) (line-number-at-pos)))))
-               )
+              ((moving (> 3 (abs (- (count-lines (point-min) (point-max)) (line-number-at-pos))))))
 
             (save-excursion  ;;TODO perhaps save-mark-and-excursion?
+
               ;; Insert the text, advancing the process marker.
               (goto-char (process-mark proc))
+              ;; (overwrite-mode overwrite-mode-textual)
 
-              (let ((str string)
-                    (ansi-code ""))
+
+              (let ((str
+                     ;; Ember test is throwing escaped \n, hope just now
+                     (replace-regexp-in-string "\\\\n" "\n" string)))
 
                 (while (string-match my-ansi-escape-re str)
-
                   ;; send first part to the buffer
                   (let ((content (substring str 0 (car (match-data)))))
                     (insert content)
-                    (when (< (point-max) (point))
-                      (kill-line)
-                      )
-                    (comment delete-char (length content)))
+                    (delete-char (min (- (point-max)
+                                         (point))
+                                      (length content))))
 
                   ;; deal with special code
                   (let ((ansi-code (substring str  (car (match-data))
                                               (cadr (match-data)))))
-                    (cond
-                     ;; Color Code
-                     ((string-match-p "m$" ansi-code) (insert ansi-code))
-                     ;; D - Move Left N chars
-                     ((string-match "\\[\\(?1:.*\\)D" ansi-code)
-                      (let ((count (string-to-char
-                                    (match-string 1 ansi-code))))
-                        (if (> (current-column) count)
-                            (backward-char count)
-                          (beginning-of-line))))
-                     ;; clear all to the right
-                     ((string-equal ansi-code "[0K") (kill-line))
-                     ;; clear vertical tabulation (?)
-                     ((string-equal ansi-code "[1G") (beginning-of-line))
-                     ((string-equal ansi-code "[2K") (beginning-of-line))
-                     ;; Show the cursor (duh!)
-                     ((string-equal ansi-code "[?25h") nil)
-                     ((string-equal ansi-code "[10A") (goto-char (point-min)))
-                     ((string-equal ansi-code "[2A") (erase-buffer))
-                     (t (insert ansi-code)))
 
+                    (condition-case nil
+                        (cond
+                         ;;TODO save re context
+                         ;; Color Code
+                         ;; ((string-equal "\\n" ansi-code) (insert "\n"))
+                         ((string-equal "" ansi-code)(beginning-of-line))
+                         ((string-match-p "m$" ansi-code) (insert ansi-code))
+
+                         ((string-match "\\[\\(?1:.*\\);\\(?2:.*\\)f" ansi-code)
+                          (let ((col (string-to-int (match-string 1 ansi-code)))
+                                (lin (string-to-int (match-string 2 ansi-code))))
+                            (goto-char (point-max))
+                            (while (< (count-lines (point-min) (point-max)) (lin))
+                              (newline))
+                            (goto-line lin)
+
+                            (end-of-line)
+                            (while (< (current-column) col)
+                              (insert " "))
+                            (beginning-of-line)
+                            (forward-char col)))
+
+                         ((string-match "\\[\\(?1:.*\\)\\(?2:[ABCD]\\)" ansi-code)
+                          (let ((count (string-to-int
+                                        (match-string 1 ansi-code)))
+                                (cmd (match-string 2 ansi-code)))
+
+                            (cond
+                             ;;TODO: does up and down command preserve columns(?)
+                             ;; Moves the cursor up by COUNT rows
+                             ((string-equal cmd "A")
+                              (forward-line ;; negative goes back
+                               (- (min
+                                   count
+                                   (count-lines (point-min)
+                                                (point))))))
+                             ;; moves the cursor down by COUNT rows
+                             ((string-equal cmd "B")
+                              (forward-line count))
+                             ;; moves the cursor forward by COUNT columns
+                             ((string-equal cmd "C")
+                              (forward-char count))
+                             ;; moves the cursor backward by COUNT columns
+                             ((string-equal cmd "D")
+                              (if (> (current-column) count)
+                                  (backward-char count)
+                                (beginning-of-line))))))
+
+                         ;; clear all to the right
+                         ((string-equal ansi-code "[0K") (kill-line))
+                         ;; idem
+                         ((string-equal ansi-code "[K") (kill-line))
+                         ;; Requests a Report Device Code response from the device. (WTF?)
+                         ((string-equal ansi-code "[c") nil)
+                         ;; erase all current line
+                         ((string-equal ansi-code "[2K") (kill-whole-line))
+                         ;; erase from cursor to begining of line
+                         ((string-equal ansi-code "[1K") (kill-backward-chars (- (current-column) 1)))
+                         ;; clear vertical tabulation (?)
+                         ((string-equal ansi-code "[1G") (beginning-of-line))
+                         ;; Show the cursor (duh!)
+                         ((string-equal ansi-code "[?25h") nil)
+                         ;; insert unrecognized
+                         (t (insert (format "[%s]"ansi-code))))
+                      (error "ERROR: %s" ansi-code))
 
                     ;; process the rest
-                    (setq str (substring str (cadr (match-data))))
-                    ))
+                    (setq str (substring str (cadr (match-data))))))
 
                 ;; insert piece after last code
                 (insert str))
@@ -134,9 +178,12 @@
               (when (string-match-p "Error" string)
                 (hmz-misc/mac-notify "Filter got and Error!" string))
 
-              (ansi-color-apply-on-region (marker-position (process-mark proc)) (point))
+              (if (< (process-mark proc) (point))
+                  (ansi-color-apply-on-region (marker-position (process-mark proc)) (point))
+                (ansi-color-apply-on-region (point-min) (marker-position (process-mark proc))))
 
-              (set-marker (process-mark proc) (point)))
+              (set-marker (process-mark proc) (point))
+              )
 
             (if moving (goto-char (process-mark proc)))
 
