@@ -106,7 +106,9 @@
                          ;;TODO save re context
                          ;; Color Code
                          ;; ((string-equal "\\n" ansi-code) (insert "\n"))
-                         ((string-equal "" ansi-code)(beginning-of-line))
+                         ((string-equal "" ansi-code)
+                          (beginning-of-line)
+                          (kill-line))
                          ((string-match-p "m$" ansi-code) (insert ansi-code))
 
                          ((string-match "\\[\\(?1:.*\\);\\(?2:.*\\)f" ansi-code)
@@ -367,17 +369,17 @@
     (setq neo-window-position (quote right))
 
     :config
-    ;; TODO find how to properly detect if a package is being used
-    (defun hmz-winum-assign-func ()
-      (cond
-       ((equal (buffer-name) "*Calculator*")
-        10)
-       ((string-match-p (buffer-name) ".*\\*NeoTree\\*.*")
-        9)
-       (t
-        nil)))
-
-    (setq winum-assign-func 'hmz-winum-assign-func)
+    (use-package winum
+                :config
+                (defun hmz-winum-assign-func ()
+                  (cond
+                   ((equal (buffer-name) "*Calculator*")
+                    10)
+                   ((string-match-p (buffer-name) ".*\\*NeoTree\\*.*")
+                    9)
+                   (t
+                    nil)))
+                (setq winum-assign-func 'hmz-winum-assign-func))
 
     (defun neo-buffer--insert-dir-entry (node depth expanded)
       "Overriden function to get rid of useless typography."
@@ -416,32 +418,28 @@
 
     (defun neo-buffer--insert-fold-symbol (name &optional node-name)
       "Overriden to make it less noisy. Made to work with non-monospaced fonts."
-      (let ((n-insert-image (lambda (n)
-                              (insert-image (neo-buffer--get-icon n))))
-
-            (vc (when neo-vc-integration (neo-vc-for-node node)))
+      (let ((vc (when nil (neo-vc-for-node node)))
             (n-insert-symbol (lambda (n)
                                (neo-buffer--insert-with-face
                                 n 'neo-expand-btn-face))))
         (cond
          ((and (display-graphic-p) (equal neo-theme 'icons))
-          (unless (require 'all-the-icons nil 'noerror)
-            (error "Package `all-the-icons' isn't installed"))
+
           (setq-local tab-width 1)
 
           (or (and (equal name 'open)
                    (insert
                     (propertize
-                     (format "%s " (all-the-icons-octicon "triangle-down"))
-                     'face `(:family ,(all-the-icons-octicon-family) :foreground "skyblue" :height 1.1)
+                     " - "
+                     'face `(:foreground "skyblue" :height 1.1)
                      'display '(raise -0.1))
                     ))
 
               (and (equal name 'close)
                    (insert
                     (propertize
-                     (format " %s " (all-the-icons-octicon "triangle-right"))
-                     'face `(:family ,(all-the-icons-octicon-family) :foreground  "grey40" :height 1.1 )
+                     " + "
+                     'face `(:foreground "gray70" :height 1.1)
                      'display '(raise 0.1))
                     ))
 
@@ -463,8 +461,8 @@
                    ;;   'display '(raise 0.0)))
                    )))
          (t
-          (or (and (equal name 'open)  (funcall n-insert-symbol "- "))
-              (and (equal name 'close) (funcall n-insert-symbol "+ ")))))))
+          (or (and (equal name 'open)  (funcall n-insert-symbol "▼ "))
+              (and (equal name 'close) (funcall n-insert-symbol "► ")))))))
 
     (defun neo-opens-outwards ()
       "Reveals Neotree expanding frame and tries to compensate internal size."
