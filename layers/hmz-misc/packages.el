@@ -369,17 +369,17 @@
     (setq neo-window-position (quote right))
 
     :config
-    (use-package winum
-                :config
-                (defun hmz-winum-assign-func ()
-                  (cond
-                   ((equal (buffer-name) "*Calculator*")
-                    10)
-                   ((string-match-p (buffer-name) ".*\\*NeoTree\\*.*")
-                    9)
-                   (t
-                    nil)))
-                (setq winum-assign-func 'hmz-winum-assign-func))
+    (defun hmz-winum-assign-func ()
+      (cond
+       ((equal (buffer-name) "*Calculator*")
+        10)
+       ((string-match-p (buffer-name) ".*\\*NeoTree\\*.*")
+        9)
+       (t
+        nil)))
+
+    (setq winum-assign-func 'hmz-winum-assign-func)
+
 
     (defun neo-buffer--insert-dir-entry (node depth expanded)
       "Overriden function to get rid of useless typography."
