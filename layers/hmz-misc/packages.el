@@ -112,8 +112,8 @@
                          ((string-match-p "m$" ansi-code) (insert ansi-code))
 
                          ((string-match "\\[\\(?1:.*\\);\\(?2:.*\\)f" ansi-code)
-                          (let ((col (string-to-int (match-string 1 ansi-code)))
-                                (lin (string-to-int (match-string 2 ansi-code))))
+                          (let ((col (string-to-number (match-string 1 ansi-code)))
+                                (lin (string-to-number (match-string 2 ansi-code))))
                             (goto-char (point-max))
                             (while (< (count-lines (point-min) (point-max)) (lin))
                               (newline))
@@ -175,7 +175,6 @@
                 ;; insert piece after last code
                 (insert str))
 
-
               ;;TODO Try to detect errors and such
               (when (string-match-p "Error" string)
                 (hmz-misc/mac-notify "Filter got and Error!" string))
@@ -184,12 +183,9 @@
                   (ansi-color-apply-on-region (marker-position (process-mark proc)) (point))
                 (ansi-color-apply-on-region (point-min) (marker-position (process-mark proc))))
 
-              (set-marker (process-mark proc) (point))
-              )
+              (set-marker (process-mark proc) (point)))
 
-            (if moving (goto-char (process-mark proc)))
-
-            ))))
+            (if moving (goto-char (process-mark proc)))))))
 
     (use-package itail
       :init
@@ -213,7 +209,6 @@
         (save-excursion
           (rename-buffer
            (replace-regexp-in-string "\[.*\]" "[OK]" (buffer-name))))))
-
 
     (defun hmz-misc/bpr-on-start (process)
 
@@ -384,10 +379,16 @@
     (defun neo-buffer--insert-dir-entry (node depth expanded)
       "Overriden function to get rid of useless typography."
       (let ((node-short-name (neo-path--file-short-name node)))
-        (insert-char ?\s (* (- depth 1) 2)) ; indent
+        (insert
+         (propertize " "
+                     'display `(space :width ,(* 2 (- depth 1)) )))
+
         (when (memq 'char neo-vc-integration)
 
-          (insert-char ?\s 3))
+          (insert
+           (propertize " "
+                       'display `(space :width 2))))
+
         (neo-buffer--insert-fold-symbol
          (if expanded 'open 'close) node)
         (insert-button (concat node-short-name "")
@@ -399,49 +400,99 @@
         (neo-buffer--node-list-set nil node)
         (neo-buffer--newline-and-begin)))
 
-    (defun neo-buffer--insert-file-entry (node depth)
-      (let ((node-short-name (neo-path--file-short-name node))
-            (vc (when neo-vc-integration (neo-vc-for-node node))))
-        (insert-char ?\s (* (- depth 1) 3)) ; indent
+ (defun neo-buffer--insert-tree (path depth)
+   (if (eq depth 1)
+       (neo-buffer--insert-root-entry path))
+   (let* ((contents (neo-buffer--get-nodes path))
+          (nodes (car contents))
+          (leafs (cdr contents))
+          (default-directory path))
+     (if (bound-and-true-p neo-sort-dir-with-files)
+       (let ((sorted (sort
+                      (append (car contents) (cdr contents))
+                      (lambda (s1 s2)
+                        (string< (upcase s1) (upcase s2) )
+                        ))))
+         (dolist (node sorted)
+           (if (file-directory-p node)
+               (let ((expanded (neo-buffer--expanded-node-p node)))
+                 (neo-buffer--insert-dir-entry
+                  node depth expanded)
+                 (if expanded (neo-buffer--insert-tree (concat node "/") (+ depth 1))))
 
-        (insert-char ?\s 1)
-        (neo-buffer--insert-fold-symbol 'leaf node-short-name)
-        (insert-char ?\s 1)
-        (insert-button node-short-name
-                       'follow-link t
-                       'face neo-file-link-face
-                       'neo-full-path node
-                       'keymap neotree-file-button-keymap
-                       'help-echo (neo-buffer--help-echo-message node-short-name))
-        (neo-buffer--node-list-set nil node)
-        (neo-buffer--newline-and-begin)))
+             (neo-buffer--insert-file-entry node depth))))
 
-    (defun neo-buffer--insert-fold-symbol (name &optional node-name)
-      "Overriden to make it less noisy. Made to work with non-monospaced fonts."
-      (let ((vc (when neo-vc-integration (neo-vc-for-node node)))
-            (n-insert-symbol (lambda (n)
-                               (neo-buffer--insert-with-face
-                                n 'neo-expand-btn-face))))
-        (cond
-         ((and (display-graphic-p) (equal neo-theme 'icons))
+         (dolist (node nodes)
+           (let ((expanded (neo-buffer--expanded-node-p node)))
+             (neo-buffer--insert-dir-entry
+              node depth expanded)
+             (if expanded (neo-buffer--insert-tree (concat node "/") (+ depth 1)))))
+       (dolist (leaf leafs)
+         (neo-buffer--insert-file-entry leaf depth)))))
 
-          (setq-local tab-width 1)
 
-          (or (and (equal name 'open)
-                   (insert
-                    (propertize
-                     " - "
-                     'face `(:foreground "skyblue" :height 1.1)
-                     'display '(raise -0.1))
-                    ))
+ (defun neo-buffer--insert-file-entry (node depth)
+   "Overriden so it can be configured to show files and directories together."
+
+   (let ((node-short-name (neo-path--file-short-name node))
+         (vc (when neo-vc-integration (neo-vc-for-node node))))
+
+
+     (insert
+      (propertize " "
+                  'display `(space :width ,(* 2 (- depth 1)))))
+
+     (neo-buffer--insert-fold-symbol 'leaf node-short-name)
+
+     (insert
+      (propertize " "
+                  'display `(space :width 1.15)))
+
+     (insert-button node-short-name
+                    'follow-link t
+                    'face neo-file-link-face
+                    'neo-full-path node
+                    'keymap neotree-file-button-keymap
+                    'help-echo (neo-buffer--help-echo-message node-short-name))
+     (neo-buffer--node-list-set nil node)
+     (neo-buffer--newline-and-begin)))
+
+ (defun neo-buffer--insert-fold-symbol (name &optional node-name)
+   "Overriden to make it less noisy. Made to work with non-monospaced fonts."
+   (let ((vc (when neo-vc-integration (neo-vc-for-node node)))
+         (n-insert-symbol (lambda (n)
+                            (neo-buffer--insert-with-face
+                             n 'neo-expand-btn-face))))
+     (cond
+      ((and (display-graphic-p) (equal neo-theme 'icons))
+
+       (or (and (equal name 'open)
+                (insert
+                 (propertize
+                  (all-the-icons-octicon "triangle-down")
+                  'face `(:family ,(all-the-icons-octicon-family) :foreground "skyblue" :height 1.2)
+                  'display '(raise -0.2))
+                 (propertize
+                  " "
+                  'display '((raise 0)
+                             (space :width 0.5)))))
 
               (and (equal name 'close)
                    (insert
+
                     (propertize
-                     " + "
-                     'face `(:foreground "gray70" :height 1.1)
+                     " "
+                     'display '((raise 0)
+                                (space :width 0.25)))
+                    (propertize
+                     (all-the-icons-octicon "triangle-right")
+                     'face `(:family ,(all-the-icons-octicon-family) :foreground  "grey40" :height 1.2 )
                      'display '(raise 0.1))
-                    ))
+
+                    (propertize
+                     " "
+                     'display '((raise 0)
+                                (space :width 1.00)))))
 
               (and (equal name 'leaf)
                    (if vc
@@ -460,9 +511,9 @@
                    ;;   'face `(:height 1.1 :foreground "grey30")
                    ;;   'display '(raise 0.0)))
                    )))
-         (t
-          (or (and (equal name 'open)  (funcall n-insert-symbol "▼ "))
-              (and (equal name 'close) (funcall n-insert-symbol "► ")))))))
+      (t
+       (or (and (equal name 'open)  (funcall n-insert-symbol "▼ "))
+           (and (equal name 'close) (funcall n-insert-symbol "► ")))))))
 
     (defun neo-opens-outwards ()
       "Reveals Neotree expanding frame and tries to compensate internal size."
