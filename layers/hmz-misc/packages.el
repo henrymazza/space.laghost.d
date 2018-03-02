@@ -62,6 +62,14 @@
         (alert message :title title)))
 
     (defun hmz-misc/bpr-process-sentinel (proc string)
+      (if (string-equal string "finished\n")
+          (run-with-timer 5 nil (lambda (p)
+                                (delete-window)
+                                ) (process-buffer proc))
+          (run-with-timer 60 nil (lambda (p)
+                                (kill-buffer p)
+                                (message "Killed buffer %s" p)
+                                ) (process-buffer proc)))
       (alert (process-name proc) :title string))
 
     (setq my-ansi-escape-re
@@ -387,7 +395,7 @@
 
           (insert
            (propertize " "
-                       'display `(space :width 2))))
+                       'display `(space :width 0.35))))
 
         (neo-buffer--insert-fold-symbol
          (if expanded 'open 'close) node)
