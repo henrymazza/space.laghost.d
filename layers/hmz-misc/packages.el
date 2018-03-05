@@ -408,35 +408,39 @@
         (neo-buffer--node-list-set nil node)
         (neo-buffer--newline-and-begin)))
 
- (defun neo-buffer--insert-tree (path depth)
-   (if (eq depth 1)
-       (neo-buffer--insert-root-entry path))
-   (let* ((contents (neo-buffer--get-nodes path))
-          (nodes (car contents))
-          (leafs (cdr contents))
-          (default-directory path))
-     (if (bound-and-true-p neo-sort-dir-with-files)
-       (let ((sorted (sort
-                      (append (car contents) (cdr contents))
-                      (lambda (s1 s2)
-                        (string< (upcase s1) (upcase s2) )
-                        ))))
-         (dolist (node sorted)
-           (if (file-directory-p node)
-               (let ((expanded (neo-buffer--expanded-node-p node)))
-                 (neo-buffer--insert-dir-entry
-                  node depth expanded)
-                 (if expanded (neo-buffer--insert-tree (concat node "/") (+ depth 1))))
+    (setq neo-sort-dir-with-files t)
 
-             (neo-buffer--insert-file-entry node depth))))
+    (defun neo-buffer--insert-tree (path depth)
+      (if (eq depth 1)
+          (neo-buffer--insert-root-entry path))
+      (unless (> (line-number-at-pos) 1000)
+      (let* ((contents (neo-buffer--get-nodes path))
+             (nodes (car contents))
+             (leafs (cdr contents))
+             (default-directory path))
 
-         (dolist (node nodes)
-           (let ((expanded (neo-buffer--expanded-node-p node)))
-             (neo-buffer--insert-dir-entry
-              node depth expanded)
-             (if expanded (neo-buffer--insert-tree (concat node "/") (+ depth 1)))))
-       (dolist (leaf leafs)
-         (neo-buffer--insert-file-entry leaf depth)))))
+        (unless (> (length nodes) 100)
+         (if (bound-and-true-p hmz-misc/neo-sort-dir-with-files)
+              (let ((sorted (sort
+                             (append (car contents) (cdr contents))
+                             (lambda (s1 s2)
+                               (string< (upcase s1) (upcase s2) )))))
+                (dolist (node sorted)
+                  (if (file-directory-p node)
+                      (let ((expanded (neo-buffer--expanded-node-p node)))
+                        (neo-buffer--insert-dir-entry
+                         node depth expanded)
+                        (if expanded (neo-buffer--insert-tree (concat node "/") (+ depth 1))))
+
+                    (neo-buffer--insert-file-entry node depth))))
+
+            (dolist (node nodes)
+              (let ((expanded (neo-buffer--expanded-node-p node)))
+                (neo-buffer--insert-dir-entry
+                 node depth expanded)
+                (if expanded (neo-buffer--insert-tree (concat node "/") (+ depth 1)))))
+            (dolist (leaf leafs)
+              (neo-buffer--insert-file-entry leaf depth)))))))
 
 
  (defun neo-buffer--insert-file-entry (node depth)
