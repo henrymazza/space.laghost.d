@@ -413,13 +413,13 @@
     (defun neo-buffer--insert-tree (path depth)
       (if (eq depth 1)
           (neo-buffer--insert-root-entry path))
-      (unless (> (line-number-at-pos) 1000)
       (let* ((contents (neo-buffer--get-nodes path))
              (nodes (car contents))
              (leafs (cdr contents))
              (default-directory path))
 
-        (unless (> (length nodes) 100)
+        (if (> (length nodes) 100)
+            (insert " * too many subdirectories * \n")
          (if (bound-and-true-p hmz-misc/neo-sort-dir-with-files)
               (let ((sorted (sort
                              (append (car contents) (cdr contents))
@@ -440,7 +440,7 @@
                  node depth expanded)
                 (if expanded (neo-buffer--insert-tree (concat node "/") (+ depth 1)))))
             (dolist (leaf leafs)
-              (neo-buffer--insert-file-entry leaf depth)))))))
+              (neo-buffer--insert-file-entry leaf depth))))))
 
 
  (defun neo-buffer--insert-file-entry (node depth)
