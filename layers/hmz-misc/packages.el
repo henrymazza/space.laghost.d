@@ -408,7 +408,7 @@
         (neo-buffer--node-list-set nil node)
         (neo-buffer--newline-and-begin)))
 
-    (setq neo-sort-dir-with-files t)
+    (setq hmz-misc/neo-sort-dir-with-files t)
 
     (defun neo-buffer--insert-tree (path depth)
       (if (eq depth 1)
@@ -419,7 +419,7 @@
              (default-directory path))
 
         (if (> (length nodes) 100)
-            (insert " * too many subdirectories * \n")
+            (insert " ··· \n")
          (if (bound-and-true-p hmz-misc/neo-sort-dir-with-files)
               (let ((sorted (sort
                              (append (car contents) (cdr contents))
