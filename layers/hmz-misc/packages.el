@@ -487,7 +487,7 @@
                  (propertize
                   " "
                   'display '((raise 0)
-                             (space :width 0.5)))))
+                             (space :width 0.3)))))
 
               (and (equal name 'close)
                    (insert
@@ -504,7 +504,7 @@
                     (propertize
                      " "
                      'display '((raise 0)
-                                (space :width 1.00)))))
+                                (space :width 0.70)))))
 
               (and (equal name 'leaf)
                    (if vc
