@@ -452,13 +452,9 @@
 
      (insert
       (propertize " "
-                  'display `(space :width ,(* 2 (- depth 1)))))
+                  'display `(space :width ,(+ 0.3 (* 2 (- depth 1))))))
 
      (neo-buffer--insert-fold-symbol 'leaf node-short-name)
-
-     (insert
-      (propertize " "
-                  'display `(space :width 1.15)))
 
      (insert-button node-short-name
                     'follow-link t
@@ -481,6 +477,10 @@
        (or (and (equal name 'open)
                 (insert
                  (propertize
+                  " "
+                  'display '((raise 0)
+                             (space :width 0.0)))
+                 (propertize
                   (all-the-icons-octicon "triangle-down")
                   'face `(:family ,(all-the-icons-octicon-family) :foreground "skyblue" :height 1.2)
                   'display '(raise -0.2))
@@ -494,25 +494,36 @@
 
                     (propertize
                      " "
-                     'display '((raise 0)
-                                (space :width 0.25)))
+                     'display '((raise 0.30)
+                                (space :width 0.50)))
                     (propertize
                      (all-the-icons-octicon "triangle-right")
                      'face `(:family ,(all-the-icons-octicon-family) :foreground  "grey40" :height 1.2 )
-                     'display '(raise 0.1))
+                     'display '(raise 0.0))
 
                     (propertize
                      " "
                      'display '((raise 0)
-                                (space :width 0.70)))))
+                                (space :width 0.5)))))
 
               (and (equal name 'leaf)
                    (if vc
-                       (insert (propertize (char-to-string (car vc))
+                       (let ((vc-string (char-to-string (car vc))))
+
+
+                         (insert (propertize vc-string
+                                           'display '(height 0.8)
                                            'face (if (memq 'face neo-vc-integration)
                                                      (cdr vc)
                                                    neo-file-link-face)))
-                     (insert ""))
+                         (if (string-equal vc-string " ")
+                             (insert
+                              (propertize " " 'display '(space :width 0.70)))
+                           (insert (propertize " " 'display '(space :width 0.50)))))
+
+                     (insert
+                      (propertize " "
+                                  'display `(space :width 1.00))))
 
 
 
