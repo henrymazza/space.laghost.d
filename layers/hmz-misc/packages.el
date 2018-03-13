@@ -483,7 +483,7 @@
                  (propertize
                   (all-the-icons-octicon "triangle-down")
                   'face `(:family ,(all-the-icons-octicon-family) :foreground "skyblue" :height 1.2)
-                  'display '(raise -0.2))
+                  'display '(raise -0.0))
                  (propertize
                   " "
                   'display '((raise 0)
@@ -494,7 +494,7 @@
 
                     (propertize
                      " "
-                     'display '((raise 0.30)
+                     'display '((raise 0.00)
                                 (space :width 0.50)))
                     (propertize
                      (all-the-icons-octicon "triangle-right")
