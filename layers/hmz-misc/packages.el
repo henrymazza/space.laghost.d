@@ -510,16 +510,15 @@
                    (if vc
                        (let ((vc-string (char-to-string (car vc))))
 
-
                          (insert (propertize vc-string
-                                           'display '(height 0.8)
+                                           'display '(height 0.80)
                                            'face (if (memq 'face neo-vc-integration)
                                                      (cdr vc)
                                                    neo-file-link-face)))
                          (if (string-equal vc-string " ")
                              (insert
-                              (propertize " " 'display '(space :width 0.70)))
-                           (insert (propertize " " 'display '(space :width 0.50)))))
+                              (propertize " " 'display '(space :width 0.90)))
+                           (insert (propertize " " 'display '(space :width 0.70)))))
 
                      (insert
                       (propertize " "
@@ -527,12 +526,6 @@
 
 
 
-                   ;; (insert
-                   ;;  (propertize
-
-                   ;;   (format "%s" (char-to-string (car vc)))
-                   ;;   'face `(:height 1.1 :foreground "grey30")
-                   ;;   'display '(raise 0.0)))
                    )))
       (t
        (or (and (equal name 'open)  (funcall n-insert-symbol "▼ "))
