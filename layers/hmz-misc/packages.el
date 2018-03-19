@@ -4,9 +4,7 @@
     ember-mode
     indicators
     neotree
-    spaceline-all-the-icons
     (hide-lines :location local)
-    (itail :location local)
     (hidesearch :location local)
     (indicators :location local)
     (list-processes+ :location local)
@@ -14,6 +12,7 @@
 
 (defun hmz-misc/init-indicators ()
   (use-package indicators
+    :defer t
     :config
     (setq ind-indicator-height 19)
     (add-hook 'after-change-major-mode-hook
@@ -27,6 +26,7 @@
 
 (defun hmz-misc/init-list-processes+ ()
   (use-package list-processes+
+    :defer t
     :config
 
     (spacemacs/set-leader-keys "a p" 'list-processes+)
@@ -54,6 +54,7 @@
 
 (defun hmz-misc/init-bpr ()
   (use-package bpr
+    :requires alert
     :config
 
     (use-package alert
@@ -195,14 +196,14 @@
 
             (if moving (goto-char (process-mark proc)))))))
 
-    (use-package itail
-      :init
-      (defun hmz-misc/bpr-clear-or-kill ()
-        "If process is running clear buffer, kills it otherwise."
-        (interactive)
-        (if (process-live-p (get-buffer-process (current-buffer)))
-            (clear-comint-buffer)
-          (kill-this-buffer))))
+    (defun hmz-misc/bpr-clear-or-kill ()
+      "If process is running clear buffer, kills it otherwise."
+      (interactive)
+      (if (process-live-p (get-buffer-process (current-buffer)))
+          (if (zerop (buffer-size))
+              (kill-this-buffer)
+            (erase-buffer))
+        (kill-this-buffer)))
 
     (defun hmz-misc/bpr-on-error (process)
       (hmz-misc/mac-notify "Error" (process-name process))
@@ -343,16 +344,9 @@
                  'point
                  :managed t)))))
 
-(defun hmz-misc/init-spaceline-all-the-icons ()
-  "Spaceline customizations"
-  (use-package spaceline-all-the-icons
-    :ensure spaceline
-    :config
-    (spaceline-all-the-icons-theme)))
-
 (defun hmz-misc/post-init-neotree ()
   (use-package neotree
-    :ensure neotree
+    :ensure all-the-icons
 
     :init
     ;; I'm leaving most of these settings to customize

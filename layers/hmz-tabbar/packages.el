@@ -1,4 +1,7 @@
 ;; -*- coding: utf-8; -*-
+
+;;(require 'req-package)
+
 (defvar hmz-tabbar-packages
   '(
     tabbar
@@ -9,10 +12,9 @@ which require an initialization must be listed explicitly in the list.")
 (defun hmz-tabbar/init-tabbar ()
   "Tabbar customizations"
   (use-package tabbar
-    :defer t
+    :ensure all-the-icons
 
     :config
-
     ;; safari like back and forward tabs
     (global-set-key [(control shift tab)] 'tabbar-backward-tab)
     (global-set-key [(control tab)] 'tabbar-forward-tab)
@@ -139,8 +141,10 @@ which require an initialization must be listed explicitly in the list.")
 
     (hmz-tabbar-refresh-faces)
 
-    (add-to-list 'all-the-icons-icon-alist
-                 '("\\.lua$" all-the-icons-wicon "moon-waning-crescent-3" :face all-the-icons-cyan))
+    (use-package all-the-icons
+      :config
+      (add-to-list 'all-the-icons-icon-alist
+                   '("\\.lua$" all-the-icons-wicon "moon-waning-crescent-3" :face all-the-icons-cyan)))
 
     (defun tabbar-buffer-help-on-tab (tab)
       "Return the help string shown when mouse is onto TAB. This function was overriden to show more useful information."
