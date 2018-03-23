@@ -409,6 +409,7 @@ element."
                           (eq major-mode 'eshell-mode))
                       "proc"
                     "limbo"))
+                 ((eq major-mode 'dired-mode) "dired")
                  ((projectile-project-p) (projectile-project-name))
                  ((buffer-file-name) "other")
                  (t "limbo"))
