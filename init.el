@@ -1,5 +1,4 @@
 ;; -*- mode: emacs-lisp -*-
-
 ;; This file is loaded by Spacemacs at startup.
 ;; It must be stored in your home directory.
 
@@ -1014,7 +1013,7 @@ Example:
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((((type nil)) (:background "#000000" :foreground "#f8f8f2")) (((class color) (min-colors 89)) (:background "#282a36" :foreground "#f8f8f2"))))
+ '(default ((t (:inherit nil :stipple nil :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 161 :width normal :foundry "nil" :family "Fira Code"))))
  '(all-the-icons-dorange ((t (:foreground "tan3"))))
  '(all-the-icons-lmaroon ((t (:foreground "burlywood3"))))
  '(all-the-icons-maroon ((t (:foreground "burlywood3"))))
@@ -1023,17 +1022,20 @@ Example:
  '(custom-button ((t (:background "lightgrey" :foreground "black" :box 2))))
  '(custom-button-mouse ((t (:background "grey90" :foreground "black" :box 2))))
  '(custom-button-pressed ((t (:background "gray" :foreground "black" :box 2))))
+ '(eshell-ls-executable ((t (:foreground "Green" :weight normal))))
+ '(eshell-ls-symlink ((t (:foreground "Cyan" :weight normal))))
  '(evil-search-highlight-persist-highlight-face ((t (:inherit lazy-highlight))))
- '(font-lock-warning-face ((t (:underline "tomato"))))
+ '(font-lock-warning-face ((t (:background "DeepSkyBlue" :foreground "#ffb86c"))))
  '(fringe ((t (:foreground "DeepSkyBlue" :background unspecified))))
  '(header-line ((t (:weight thin :family "San Francisco"))))
- '(hl-line ((t (:background "#34374a"))))
- '(linum ((t (:background "#282a36" :foreground "#565761" :slant italic :height 100 :family "San Francisco"))))
- '(linum-highlight-face ((t (:inherit linum :background "dim gray" :foreground "medium spring green"))))
+ '(hl-line ((t (:inherit highlight))))
+ '(linum ((t (:family "San Francisco" :height 0.7))))
+ '(linum-highlight-face ((t (:inherit linum :foreground "#00FF7D"))))
+ '(minibuffer-prompt ((t (:foreground "#ff79c6" :weight bold :height 1.2))))
  '(neo-banner-face ((t (:foreground "lightblue" :weight bold :family "san francisco"))))
- '(neo-dir-link-face ((t (:foreground "DeepSkyBlue" :family "San Francisco"))))
+ '(neo-dir-link-face ((t (:inherit font-lock-function-name-face :foreground "DeepSkyBlue" :family "san francisco"))))
  '(neo-expand-btn-face ((t (:foreground "SkyBlue" :family "San Francisco"))))
- '(neo-file-link-face ((t (:foreground "White" :family "San Francisco"))))
+ '(neo-file-link-face ((t (:foreground "light gray" :family "San Francisco"))))
  '(neo-root-dir-face ((t (:foreground "gray40" :weight bold))))
  '(neo-vc-added-face ((t (:foreground "#50fa7b"))))
  '(neo-vc-conflict-face ((t (:foreground "dark red"))))
@@ -1045,17 +1047,44 @@ Example:
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(alert-default-style (quote notifier))
  '(ansi-color-names-vector
-   ["#0a0814" "#f2241f" "#67b11d" "#b1951d" "#4f97d7" "#a31db1" "#28def0" "#b2b2b2"])
+    ["dim gray" "orange red" "medium spring green" "gold" "dodger blue" "purple" "turquoise1" "#eeeeec"])
  '(coffee-tab-width 2)
- '(desktop-locals-to-save nil)
- '(desktop-minor-mode-table nil)
- '(desktop-save-mode t)
- '(global-linum-mode t)
- '(linum-format "%4d ")
+ '(ember-completion-system (quote helm))
+ '(ember-serve-command "ember serve  --output-path dist")
+ '(ember-test-command "ember test --serve")
+ '(evil-want-Y-yank-to-eol nil)
+ '(line-spacing 3)
+ '(markdown-hide-urls t)
+ '(markdown-italic-underscore t)
+ '(midnight-mode t)
+ '(mode-line-format nil)
+ '(mode-line-in-non-selected-windows nil)
+ '(neo-theme (quote icons))
+ '(neo-vc-integration (quote (face char)))
+ '(neo-vc-state-char-alist
+    (quote
+     ((up-to-date . 32)
+      (edited . 10041)
+      (added . 10029)
+      (removed . 10006)
+      (missing . 33)
+      (needs-merge . 77)
+      (conflict . 9552)
+      (unlocked-changes . 33)
+      (needs-update . 85)
+      (ignored . 32)
+      (user . 85)
+      (unregistered . 32)
+      (nil . 8942))))
+ '(neo-window-width 20)
  '(package-selected-packages
-   (quote
-    (typescript-mode flycheck rake inflections pcre2el spinner org-category-capture org-plus-contrib markdown-mode skewer-mode simple-httpd json-snatcher json-reformat multiple-cursors js2-mode hydra parent-mode projectile pkg-info epl request haml-mode gitignore-mode git-gutter+ git-gutter fringe-helper flyspell-correct flx magit magit-popup git-commit ghub let-alist with-editor iedit smartparens paredit anzu evil goto-chg undo-tree highlight makey web-completion-data dash-functional tern company inf-ruby bind-map bind-key yasnippet packed anaconda-mode pythonic f dash s memoize alert log4e gntp helm avy helm-core async auto-complete popup vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails popwin pip-requirements persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file nginx-mode neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize hlinum hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile all-the-icons aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))))
+    (quote
+     (ht counsel-tramp wgrep smex ivy-hydra flyspell-correct-ivy counsel-projectile counsel swiper ivy neotree highlight-indent-guides bpr simpleclip yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode helm-pydoc cython-mode company-anaconda anaconda-mode pythonic spaceline powerline rake inflections multiple-cursors hydra f bind-key all-the-icons avy inf-ruby dash-functional tern company paredit iedit smartparens highlight evil goto-chg flyspell-correct yasnippet helm helm-core markdown-mode epl org-plus-contrib magit magit-popup git-commit ghub let-alist with-editor async haml-mode js2-mode simple-httpd dash s yascroll projectile switch-buffer-functions itail makey dired-toggle dired-open dired-narrow dirtree direx dired-rainbow discover-my-major org-alert all-the-icons-dired diredful dired-single dired-sidebar hide-lines org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-download htmlize gnuplot hlinum nginx-mode tide typescript-mode flycheck fic-mode zencoding-mode handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+ '(rbenv-installation-dir "/usr/local/")
+ '(sublimity-mode t)
+ '(tooltip-use-echo-area t))
 (defun dotspacemacs/emacs-custom-settings ()
   "Emacs custom settings.
 This is an auto-generated function, do not modify its content directly, use
@@ -1066,11 +1095,42 @@ This function is called at the very end of Spacemacs initialization."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(alert-default-style (quote notifier))
  '(ansi-color-names-vector
-   ["#0a0814" "#f2241f" "#67b11d" "#b1951d" "#4f97d7" "#a31db1" "#28def0" "#b2b2b2"])
+   ["dim gray" "orange red" "medium spring green" "gold" "dodger blue" "purple" "turquoise1" "#eeeeec"])
+ '(coffee-tab-width 2)
+ '(ember-completion-system (quote helm))
+ '(ember-serve-command "ember serve  --output-path dist")
+ '(ember-test-command "ember test --serve")
+ '(evil-want-Y-yank-to-eol t)
+ '(line-spacing 3)
+ '(markdown-hide-urls t)
+ '(markdown-italic-underscore t)
+ '(midnight-mode t)
+ '(mode-line-format nil)
+ '(mode-line-in-non-selected-windows nil)
+ '(neo-vc-integration (quote (face char)))
+ '(neo-vc-state-char-alist
+   (quote
+    ((up-to-date . 32)
+     (edited . 10041)
+     (added . 10029)
+     (removed . 10006)
+     (missing . 33)
+     (needs-merge . 77)
+     (conflict . 9552)
+     (unlocked-changes . 33)
+     (needs-update . 85)
+     (ignored . 32)
+     (user . 85)
+     (unregistered . 32)
+     (nil . 8942))))
+ '(neo-window-width 20)
  '(package-selected-packages
    (quote
-    (yasnippet-snippets symon string-inflection ruby-refactor ruby-hash-syntax pippel pipenv password-generator overseer org-brain nameless importmagic epc ctable concurrent deferred impatient-mode helm-xref helm-purpose window-purpose imenu-list evil-org evil-lion editorconfig counsel-projectile counsel swiper ivy company-lua centered-cursor-mode browse-at-remote font-lock+ typescript-mode flycheck rake inflections pcre2el spinner org-category-capture org-plus-contrib markdown-mode skewer-mode simple-httpd json-snatcher json-reformat multiple-cursors js2-mode hydra parent-mode projectile pkg-info epl request haml-mode gitignore-mode git-gutter+ git-gutter fringe-helper flyspell-correct flx magit magit-popup git-commit ghub let-alist with-editor iedit smartparens paredit anzu evil goto-chg undo-tree highlight makey web-completion-data dash-functional tern company inf-ruby bind-map bind-key yasnippet packed anaconda-mode pythonic f dash s memoize alert log4e gntp helm avy helm-core async auto-complete popup vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails popwin pip-requirements persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file nginx-mode neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize hlinum hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile all-the-icons aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))))
+    (yasnippet-snippets symon string-inflection spaceline powerline ruby-refactor ruby-hash-syntax rake inflections pcre2el password-generator spinner overseer org-mime org-brain nameless markdown-mode skewer-mode json-snatcher json-reformat multiple-cursors js2-mode impatient-mode simple-httpd parent-mode helm-purpose window-purpose imenu-list request haml-mode gitignore-mode fringe-helper git-gutter+ git-gutter flyspell-correct flx evil-org magit magit-popup git-commit ghub let-alist with-editor evil-lion iedit smartparens paredit anzu highlight editorconfig counsel-projectile counsel swiper ivy pkg-info epl web-completion-data dash-functional tern company-lua company centered-cursor-mode inf-ruby browse-at-remote f dash s bpr yasnippet packed all-the-icons memoize helm avy helm-core auto-complete popup org-plus-contrib hydra font-lock+ evil goto-chg undo-tree diminish bind-map bind-key async yascroll projectile switch-buffer-functions itail makey dired-toggle dired-open dired-narrow dirtree direx dired-rainbow discover-my-major org-alert all-the-icons-dired diredful dired-single dired-sidebar hide-lines org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-download htmlize gnuplot hlinum nginx-mode tide typescript-mode flycheck fic-mode zencoding-mode handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+ '(sublimity-mode t)
+ '(tooltip-use-echo-area t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
