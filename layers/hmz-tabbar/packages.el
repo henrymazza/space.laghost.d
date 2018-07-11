@@ -309,13 +309,15 @@ element."
                )))))
 
     (defadvice tabbar-line-format (after tabbar-button-cache-clearer 1 (tabset) activate)
-      "Clear cached button values each time `tabbar-line-format' is called so tabbset name gets refreshed."
+      "Clear cached button values each time `tabbar-line-format' is called
+       so tabbset name gets refreshed."
       (setq tabbar-scroll-left-button-value nil)
       (setq tabbar-scroll-right-button-value nil)
       (setq tabbar-home-button-value nil))
 
     (defun tabbar-buffer-tab-label (tab)
-      "Return a label for TAB. That is, a string used to represent it on the tab bar. This was overriden to clean up unwanted chars."
+      "Return a label for TAB. That is, a string used to represent it on the
+       tab bar. This was overriden to clean up unwanted chars."
 
       (let ((label (if tabbar--buffer-show-groups
                        (replace-regexp-in-string

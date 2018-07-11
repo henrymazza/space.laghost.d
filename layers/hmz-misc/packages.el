@@ -314,7 +314,8 @@
   (use-package ember-mode
     :config
     (defun ember--file-project-root (file)
-      "Overriden function so it come back to the old behavior and search by app dir."
+      "Overriden function so it come back to the old behavior and
+       search by app dir."
       (locate-dominating-file file "app"))
 
     (add-hook 'coffee-mode-hook (lambda () (ember-mode t)))
@@ -351,10 +352,13 @@
     :init
     ;; I'm leaving most of these settings to customize
     (setq neo-auto-indent-point t)
-    (setq neo-autorefresh nil) ;;TODO: it crawls to a death in big dirs, going to bet on refreshing on buffer change. Possibly adding a timeout for it to occur.
+    (setq neo-autorefresh nil)
+    ;;TODO: it crawls to a death in big dirs, going to bet on refreshing on
+    ;;      buffer change. Possibly adding a timeout for it to occur.
     (setq neo-banner-message "")
     (setq neo-create-file-auto-open t)
-    (setq neo-filepath-sort-function (lambda (f1 f2) (string< (downcase f1) (downcase f2))))
+    (setq neo-filepath-sort-function (lambda (f1 f2) (string< (downcase f1)
+                                                              (downcase f2))))
 
     (setq neo-vc-integration (quote (face char)))
     (setq neo-force-change-root t)
@@ -398,7 +402,8 @@
                        'face neo-dir-link-face
                        'neo-full-path node
                        'keymap neotree-dir-button-keymap
-                       'help-echo (neo-buffer--help-echo-message node-short-name))
+                       'help-echo
+                         (neo-buffer--help-echo-message node-short-name))
         (neo-buffer--node-list-set nil node)
         (neo-buffer--newline-and-begin)))
 
@@ -424,7 +429,8 @@
                       (let ((expanded (neo-buffer--expanded-node-p node)))
                         (neo-buffer--insert-dir-entry
                          node depth expanded)
-                        (if expanded (neo-buffer--insert-tree (concat node "/") (+ depth 1))))
+                        (if expanded (neo-buffer--insert-tree (concat node "/")
+                                                              (+ depth 1))))
 
                     (neo-buffer--insert-file-entry node depth))))
 
@@ -432,7 +438,8 @@
               (let ((expanded (neo-buffer--expanded-node-p node)))
                 (neo-buffer--insert-dir-entry
                  node depth expanded)
-                (if expanded (neo-buffer--insert-tree (concat node "/") (+ depth 1)))))
+                (if expanded (neo-buffer--insert-tree (concat node "/")
+                                                      (+ depth 1)))))
             (dolist (leaf leafs)
               (neo-buffer--insert-file-entry leaf depth))))))
 

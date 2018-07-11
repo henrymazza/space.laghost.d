@@ -4,9 +4,12 @@
 
 ;; Pre Window Initialization code
 
+(setq auth-sources
+  '((:source "~/.authinfo.gpg")))
+
 (unless (bound-and-true-p mac-auto-operator-composition-mode)
     (let ((alist '((33 . ".\\(?:\\(?:==\\|!!\\)\\|[!=]\\)")
-                   (35 . ".\\(?:###\\|##\\|_(\\|[#(?[_{]\\)")
+                   ;; (35 . ".\\(?:###\\|##\\|_(\\|[#(?[_{]\\)")
                    (36 . ".\\(?:>\\)")
                    (37 . ".\\(?:\\(?:%%\\)\\|%\\)")
                    (38 . ".\\(?:\\(?:&&\\)\\|&\\)")
@@ -221,10 +224,11 @@ values."
    ;; Default font. `powerline-scale' allows to quickly tweak the mode-line
    ;; size to make separators look not too crappy.
    dotspacemacs-default-font '("Fira Code"
+                               ;; "Inconsolata"
                                ;; "Anonymous Pro Minus"
                               :size 16
-                              :height 210
-                              :weight normal
+                              ;; :height 180
+                              :weight light
                               :width normal
                               :powerline-scale 0.7)
    ;; The leader key
@@ -1013,12 +1017,13 @@ Example:
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 161 :width normal :foundry "nil" :family "Fira Code"))))
+ ;;'(default ((t (:inherit nil :stipple nil :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 161 :width normal :foundry "nil" :family "Fira Code"))))
  '(all-the-icons-dorange ((t (:foreground "tan3"))))
  '(all-the-icons-lmaroon ((t (:foreground "burlywood3"))))
  '(all-the-icons-maroon ((t (:foreground "burlywood3"))))
  '(anzu-match-2 ((t (:foreground "deep sky blue"))))
  '(bold ((t (:weight semi-light))))
+ '(comint-highlight-prompt ((t (:inherit minibuffer-prompt :height 1.0))))
  '(custom-button ((t (:background "lightgrey" :foreground "black" :box 2))))
  '(custom-button-mouse ((t (:background "grey90" :foreground "black" :box 2))))
  '(custom-button-pressed ((t (:background "gray" :foreground "black" :box 2))))
@@ -1049,7 +1054,7 @@ Example:
  ;; If there is more than one, they won't work right.
  '(alert-default-style (quote notifier))
  '(ansi-color-names-vector
-    ["dim gray" "orange red" "medium spring green" "gold" "dodger blue" "purple" "turquoise1" "#eeeeec"])
+   ["dim gray" "orange red" "medium spring green" "gold" "dodger blue" "purple" "turquoise1" "#eeeeec"])
  '(coffee-tab-width 2)
  '(ember-completion-system (quote helm))
  '(ember-serve-command "ember serve  --output-path dist")
@@ -1064,24 +1069,24 @@ Example:
  '(neo-theme (quote icons))
  '(neo-vc-integration (quote (face char)))
  '(neo-vc-state-char-alist
-    (quote
-     ((up-to-date . 32)
-      (edited . 10041)
-      (added . 10029)
-      (removed . 10006)
-      (missing . 33)
-      (needs-merge . 77)
-      (conflict . 9552)
-      (unlocked-changes . 33)
-      (needs-update . 85)
-      (ignored . 32)
-      (user . 85)
-      (unregistered . 32)
-      (nil . 8942))))
+   (quote
+    ((up-to-date . 32)
+     (edited . 10041)
+     (added . 10029)
+     (removed . 10006)
+     (missing . 33)
+     (needs-merge . 77)
+     (conflict . 9552)
+     (unlocked-changes . 33)
+     (needs-update . 85)
+     (ignored . 32)
+     (user . 85)
+     (unregistered . 32)
+     (nil . 8942))))
  '(neo-window-width 20)
  '(package-selected-packages
-    (quote
-     (ht counsel-tramp wgrep smex ivy-hydra flyspell-correct-ivy counsel-projectile counsel swiper ivy neotree highlight-indent-guides bpr simpleclip yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode helm-pydoc cython-mode company-anaconda anaconda-mode pythonic spaceline powerline rake inflections multiple-cursors hydra f bind-key all-the-icons avy inf-ruby dash-functional tern company paredit iedit smartparens highlight evil goto-chg flyspell-correct yasnippet helm helm-core markdown-mode epl org-plus-contrib magit magit-popup git-commit ghub let-alist with-editor async haml-mode js2-mode simple-httpd dash s yascroll projectile switch-buffer-functions itail makey dired-toggle dired-open dired-narrow dirtree direx dired-rainbow discover-my-major org-alert all-the-icons-dired diredful dired-single dired-sidebar hide-lines org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-download htmlize gnuplot hlinum nginx-mode tide typescript-mode flycheck fic-mode zencoding-mode handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+   (quote
+    (ht counsel-tramp wgrep smex ivy-hydra flyspell-correct-ivy counsel-projectile counsel swiper ivy neotree highlight-indent-guides bpr simpleclip yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode helm-pydoc cython-mode company-anaconda anaconda-mode pythonic spaceline powerline rake inflections multiple-cursors hydra f bind-key all-the-icons avy inf-ruby dash-functional tern company paredit iedit smartparens highlight evil goto-chg flyspell-correct yasnippet helm helm-core markdown-mode epl org-plus-contrib magit magit-popup git-commit ghub let-alist with-editor async haml-mode js2-mode simple-httpd dash s yascroll projectile switch-buffer-functions itail makey dired-toggle dired-open dired-narrow dirtree direx dired-rainbow discover-my-major org-alert all-the-icons-dired diredful dired-single dired-sidebar hide-lines org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-download htmlize gnuplot hlinum nginx-mode tide typescript-mode flycheck fic-mode zencoding-mode handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
  '(rbenv-installation-dir "/usr/local/")
  '(sublimity-mode t)
  '(tooltip-use-echo-area t))
@@ -1136,7 +1141,7 @@ This function is called at the very end of Spacemacs initialization."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 161 :width normal :foundry "nil" :family "Fira Code"))))
+ ;; '(default ((t (:inherit nil :stipple nil :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 161 :width normal :foundry "nil" :family "Fira Code"))))
  '(all-the-icons-dorange ((t (:foreground "tan3"))))
  '(all-the-icons-lmaroon ((t (:foreground "burlywood3"))))
  '(all-the-icons-maroon ((t (:foreground "burlywood3"))))
