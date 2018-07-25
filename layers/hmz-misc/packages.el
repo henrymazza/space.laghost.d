@@ -4,6 +4,7 @@
     ember-mode
     indicators
     neotree
+    prodigy
     (hide-lines :location local)
     (hidesearch :location local)
     (indicators :location local)
