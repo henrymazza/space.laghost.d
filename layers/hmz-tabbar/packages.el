@@ -15,6 +15,60 @@ which require an initialization must be listed explicitly in the list.")
     :ensure all-the-icons
 
     :config
+      (defun ido-switch-tab-group ()
+        "Switch tab groups using ido."
+      (interactive)
+        (let* (
+            (tab-buffer-list (mapcar
+                #'(lambda (b)
+                    (with-current-buffer b
+                      (list (current-buffer)
+                            (buffer-name)
+                            (funcall tabbar-buffer-groups-function) )))
+                    (funcall tabbar-buffer-list-function)))
+            (groups (delete-dups
+              (mapcar #'(lambda (group)
+                (car (car (cdr (cdr group))))) tab-buffer-list)))
+            (group-name (ido-completing-read "Groups: " groups)) )
+          (catch 'done
+            (mapc
+              #'(lambda (group)
+                (when (equal group-name (car (car (cdr (cdr group)))))
+                  (throw 'done (switch-to-buffer (car (cdr group))))))
+              tab-buffer-list) )))
+
+      (defun switch-tab-group (group-name)
+        "Switch to a specific tab group."
+        (let ((tab-buffer-list (mapcar
+                #'(lambda (b)
+                    (with-current-buffer b
+                      (list (current-buffer)
+                            (buffer-name)
+                            (funcall tabbar-buffer-groups-function) )))
+                    (funcall tabbar-buffer-list-function))))
+          (catch 'done
+            (mapc
+              #'(lambda (group)
+                (when (equal group-name (format "%s" (car (car (cdr (cdr group))))))
+                  (throw 'done (switch-to-buffer (car (cdr group))))))
+              tab-buffer-list) )))
+
+      (defun switch-to-tab-group-n ()
+      "Switch to a predefined existing tab group named `N`."
+      (interactive)
+        (switch-tab-group "N"))
+
+      (defun switch-to-tab-group-a ()
+      "Switch to a predefined existing tab group named `A`."
+      (interactive)
+        (switch-tab-group "A"))
+
+      (global-set-key [(control ";")] 'switch-tab-group)
+
+      (define-key evil-normal-state-map (kbd "C-;") 'ido-switch-tab-group)
+
+    ;; END SWITCH BUFFER
+
     ;; safari like back and forward tabs
     (global-set-key [(control shift tab)] 'tabbar-backward-tab)
     (global-set-key [(control tab)] 'tabbar-forward-tab)
@@ -26,6 +80,8 @@ which require an initialization must be listed explicitly in the list.")
     ;; cycle groups
     (define-key evil-normal-state-map (kbd "s-[") 'tabbar-backward-group)
     (define-key evil-normal-state-map (kbd "s-]") 'tabbar-forward-group)
+    (define-key evil-normal-state-map (kbd "{") 'tabbar-backward-group)
+    (define-key evil-normal-state-map (kbd "}") 'tabbar-forward-group)
 
     ;; Sets command + 1 up to command + 0 as jump to group
 
@@ -434,6 +490,7 @@ element."
         "Run `after-load-theme-hook'."
         (run-hooks 'after-load-theme-hook))
       )
+
     (add-hook 'after-load-theme-hook 'hmz-tabbar-refresh-tabs)
     (add-hook 'after-save-hook 'hmz-tabbar-refresh-tabs)
     (add-hook 'first-change-hook 'hmz-tabbar-refresh-tabs))

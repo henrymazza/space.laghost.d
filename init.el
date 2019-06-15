@@ -130,6 +130,7 @@ values."
    ;; configuration in `dotspacemacs/user-config'.
   dotspacemacs-additional-packages
   '(all-the-icons
+    exec-path-from-shell
     highlight-indent-guides
     simpleclip
     fringe-helper
@@ -141,6 +142,7 @@ values."
     zencoding-mode
     all-the-icons
     handlebars-sgml-mode
+    prodigy
     sublimity
     persistent-scratch)
 
@@ -397,6 +399,10 @@ executes.
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
 
+  (if (not (getenv "TERM_PROGRAM"))
+      (setenv "PATH"
+              (shell-command-to-string "source $HOME/.zshrc && printf $PATH")))
+
   ;; UTF-8 snippet from msteringemacs.org -- don't know how useful
   ;; it is.
   (prefer-coding-system 'utf-8)
@@ -466,6 +472,19 @@ you should place you code here."
     :kill-process-buffer-on-stop t)
 
   (prodigy-define-service
+    :name "Uni Chef Recipe on Weberver"
+    :command "ssh"
+    :args '("sampa3.officina.me"
+            "-t"
+            "sudo"
+            "chef-client"
+            "-o"
+            "\"recipe[uni]\"")
+    :cwd "/Users/HMz/Development/uni/"
+    :tags '(work)
+    :kill-process-buffer-on-stop t)
+
+  (prodigy-define-service
     :name "Uni Frontend Build Server"
     :command "ember"
     :args '("serve")
@@ -479,7 +498,7 @@ you should place you code here."
   (prodigy-define-service
     :name "Uni Test Server"
     :command "ember"
-    :args '("test" "--serve")
+    :args '("test" "--serve" "--watcher" "node")
     :cwd "/Users/HMz/Development/uni-fe/"
     :tags '(work)
     :stop-signal 'sigkill
@@ -664,14 +683,14 @@ you should place you code here."
 
     (smartparens-global-mode t)
     (global-evil-matchit-mode 1)
-    (setq mode-line-format nil)
-    (hidden-mode-line-mode 1)
+    ;; (setq mode-line-format nil)
+    ;; (hidden-mode-line-mode 1)
 
     (visual-line-mode t))
 
   (add-hook 'prog-mode-hook 'hmz-prog-mode-hook)
 
-  (setq-default mode-line-format nil)
+  ;; (setq-default mode-line-format nil)
 
   ;; Unix Style C-h
   (global-set-key (kbd "C-?") 'help-command) ;; this isn't working...
@@ -688,19 +707,23 @@ you should place you code here."
   ;; Coffeescript specific tabbing requirements
   (custom-set-variables '(coffee-tab-width 2))
 
-  (defun hmz-dotfile/setup-indent (n)
-    ;; java/c/c++
-    (setq c-basic-offset n)
-    ;; web development
-    (setq coffee-tab-width n) ; coffeescript
-    (setq javascript-indent-level n) ; javascript-mode
-    (setq js-indent-level n) ; js-mode
-    (setq js2-basic-offset n) ; js2-mode, in latest js2-mode, it's alias of js-indent-level
-    (setq web-mode-markup-indent-offset n) ; web-mode, html tag in html file
-    (setq html-mode-markup-indent-offset n) ; web-mode, html tag in html file
-    (setq web-mode-css-indent-offset n) ; web-mode, css in html file
-    (setq web-mode-code-indent-offset n) ; web-mode, js code in html file
-    (setq css-indent-offset n)) ; css-mode
+  (defun hmz-dotfile/setup-indent (&optional n)
+    (interactive
+      (unless n (setq n 2))
+      (setq web-mode-markup-indent-offset n)
+      ;; java/c/c++
+      (setq c-basic-offset n)
+      ;; web development
+      (setq coffee-tab-width n) ; coffeescript
+      (setq javascript-indent-level n) ; javascript-mode
+      (setq js-indent-level n) ; js-mode
+      (setq js2-basic-offset n) ; js2-mode, in latest js2-mode, it's alias of js-indent-level
+      (setq-default indent-tabs-mode nil)
+      (setq web-mode-markup-indent-offset n) ; web-mode, html tag in html file
+      (setq html-mode-markup-indent-offset n) ; web-mode, html tag in html file
+      (setq web-mode-css-indent-offset n) ; web-mode, css in html file
+      (setq web-mode-code-indent-offset n) ; web-mode, js code in html file
+      (setq css-indent-offset n))) ; css-mode
 
   (hmz-dotfile/setup-indent 2)
 
@@ -814,6 +837,7 @@ you should place you code here."
 
           (switch-to-buffer "*Messages*")
           (setq mode-line-format nil)
+
           (setq buffer-face-mode-face `(:background "#333333"))
           (buffer-face-mode 1)
           (text-scale-set -1)
@@ -1079,6 +1103,7 @@ Example:
  '(neo-vc-conflict-face ((t (:foreground "dark red"))))
  '(neo-vc-edited-face ((t (:foreground "#ff79c6"))))
  '(tabbar-default ((t (:inherit header-line :background "gray25" :box nil :underline nil :weight light :height 0.9))))
+ '(whitespace-indentation ((t (:background "yellow" :foreground "firebrick"))))
  '(window-divider ((t (:foreground "black")))))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -1087,42 +1112,56 @@ Example:
  ;; If there is more than one, they won't work right.
  '(alert-default-style (quote notifier))
  '(ansi-color-names-vector
-    ["dim gray" "orange red" "medium spring green" "gold" "dodger blue" "purple" "turquoise1" "#eeeeec"])
- '(coffee-tab-width 2 t)
+   ["dim gray" "orange red" "medium spring green" "gold" "dodger blue" "purple" "turquoise1" "#eeeeec"])
+ '(clean-aindent-mode t)
+ '(coffee-tab-width 2)
+ '(css-indent-offset 2)
  '(ember-completion-system (quote helm))
  '(ember-serve-command "ember serve  --output-path dist")
  '(ember-test-command "ember test --serve")
  '(evil-want-Y-yank-to-eol nil)
+ '(indent-guide-delay 0.3 t)
+ '(indent-tabs-mode nil)
+ '(js-indent-level 2)
  '(line-spacing 3)
  '(markdown-hide-urls t)
  '(markdown-italic-underscore t)
  '(midnight-mode t)
  '(mode-line-format nil)
- '(mode-line-in-non-selected-windows nil)
+ '(mode-line-in-non-selected-windows t)
+ '(neo-auto-indent-point t)
  '(neo-theme (quote icons))
  '(neo-vc-integration (quote (face char)))
  '(neo-vc-state-char-alist
-    (quote
-     ((up-to-date . 32)
-      (edited . 10041)
-      (added . 10029)
-      (removed . 10006)
-      (missing . 33)
-      (needs-merge . 77)
-      (conflict . 9552)
-      (unlocked-changes . 33)
-      (needs-update . 85)
-      (ignored . 32)
-      (user . 85)
-      (unregistered . 32)
-      (nil . 8942))))
+   (quote
+    ((up-to-date . 32)
+     (edited . 10041)
+     (added . 10029)
+     (removed . 10006)
+     (missing . 33)
+     (needs-merge . 77)
+     (conflict . 9552)
+     (unlocked-changes . 33)
+     (needs-update . 85)
+     (ignored . 32)
+     (user . 85)
+     (unregistered . 32)
+     (nil . 8942))))
  '(neo-window-width 20)
  '(package-selected-packages
-    (quote
-     (prodigy ht counsel-tramp wgrep smex ivy-hydra flyspell-correct-ivy counsel-projectile counsel swiper ivy neotree highlight-indent-guides bpr simpleclip yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode helm-pydoc cython-mode company-anaconda anaconda-mode pythonic spaceline powerline rake inflections multiple-cursors hydra f bind-key all-the-icons avy inf-ruby dash-functional tern company paredit iedit smartparens highlight evil goto-chg flyspell-correct yasnippet helm helm-core markdown-mode epl org-plus-contrib magit magit-popup git-commit ghub let-alist with-editor async haml-mode js2-mode simple-httpd dash s yascroll projectile switch-buffer-functions itail makey dired-toggle dired-open dired-narrow dirtree direx dired-rainbow discover-my-major org-alert all-the-icons-dired diredful dired-single dired-sidebar hide-lines org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-download htmlize gnuplot hlinum nginx-mode tide typescript-mode flycheck fic-mode zencoding-mode handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+   (quote
+    (org-mime skewer-mode json-snatcher json-reformat gitignore-mode web-completion-data packed auto-complete request pcre2el spinner parent-mode pkg-info git-gutter+ git-gutter fringe-helper flx anzu undo-tree diminish bind-map memoize popup evil-nerd-commenter define-word csv prodigy ht counsel-tramp wgrep smex ivy-hydra flyspell-correct-ivy counsel-projectile counsel swiper ivy neotree highlight-indent-guides bpr simpleclip yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode helm-pydoc cython-mode company-anaconda anaconda-mode pythonic spaceline powerline rake inflections multiple-cursors hydra f bind-key all-the-icons avy inf-ruby dash-functional tern company paredit iedit smartparens highlight evil goto-chg flyspell-correct yasnippet helm helm-core markdown-mode epl org-plus-contrib magit magit-popup git-commit ghub let-alist with-editor async haml-mode js2-mode simple-httpd dash s yascroll projectile switch-buffer-functions itail makey dired-toggle dired-open dired-narrow dirtree direx dired-rainbow discover-my-major org-alert all-the-icons-dired diredful dired-single dired-sidebar hide-lines org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-download htmlize gnuplot hlinum nginx-mode tide typescript-mode flycheck fic-mode zencoding-mode handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
  '(rbenv-installation-dir "/usr/local/")
+ '(smie-indent-basic 2)
+ '(standard-indent 2)
  '(sublimity-mode t)
- '(tooltip-use-echo-area t))
+ '(tab-always-indent (quote complete))
+ '(tooltip-use-echo-area t)
+ '(web-mode-code-indent-offset 2)
+ '(web-mode-css-indent-offset 2)
+ '(web-mode-enable-auto-indentation nil)
+ '(web-mode-markup-indent-offset 2)
+ '(zencoding-indentation 2))
 (defun dotspacemacs/emacs-custom-settings ()
   "Emacs custom settings.
 This is an auto-generated function, do not modify its content directly, use
@@ -1146,7 +1185,7 @@ This function is called at the very end of Spacemacs initialization."
  '(markdown-italic-underscore t)
  '(midnight-mode t)
  '(mode-line-format nil)
- '(mode-line-in-non-selected-windows nil)
+ '(mode-line-in-non-selected-windows t)
  '(neo-vc-integration (quote (face char)))
  '(neo-vc-state-char-alist
    (quote
