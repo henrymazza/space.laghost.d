@@ -550,7 +550,7 @@
 
     (defun hmz-neotree-mode-hook ()
         ;; (face-remap-add-relative 'default :background-color "white")
-        (hidden-mode-line-mode t)
+        ;; (hidden-mode-line-mode t)
 
         ;; custom doesn't work, neither does setting on init file
         (setq neo-buffer--show-hidden-file-p nil)

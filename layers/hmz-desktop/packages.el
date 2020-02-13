@@ -54,8 +54,8 @@
     (setq desktop-base-lock-name
           (convert-standard-filename (format ".emacs.desktop.lock-%d" (emacs-pid))))
 
-    (add-hook 'after-change-major-mode-hook
-              (lambda () (setq mode-line-format nil)))
+    ;; (add-hook 'after-change-major-mode-hook
+    ;;           (lambda () (setq mode-line-format nil)))
 
     ;; If the *scratch* buffer is the current one, then create a new
     ;; empty untitled buffer to hide *scratch*

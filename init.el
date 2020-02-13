@@ -149,9 +149,11 @@ values."
 
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages
-   '(spaceline
+   '(
+     powerline
+     spaceline
      spaceline-all-the-icons
-     flycheck
+     ;; flycheck
      vi-tilde-fringe )
 
    ;; Defines the behaviour of Spacemacs when installing packages.
@@ -234,7 +236,7 @@ values."
                               :height 160
                               :weight normal
                               :width normal
-                              :powerline-scale 0.7)
+                              :powerline-scale 0.5)
    ;; The leader key
    dotspacemacs-leader-key "SPC"
    ;; The key used for Emacs commands (M-x) (after pressing on the leader key).
@@ -451,6 +453,10 @@ before packages are loaded. If you are unsure, you should try in setting them in
 
   ;; disable smooth scroll on railwaycat's emacs fork
   (setq mac-mouse-wheel-smooth-scroll nil)
+
+  ;; reduce eye sore by reducing mode-line size,
+  ;; powerline isn't well configured
+  (set-face-attribute 'mode-line nil :height 130)
 )
 
 (defun dotspacemacs/user-config ()
@@ -837,7 +843,7 @@ you should place you code here."
           (set-foreground-color "medium spring green")
 
           (switch-to-buffer "*Messages*")
-          (setq mode-line-format nil)
+          ;; (setq mode-line-format nil)
 
           (setq buffer-face-mode-face `(:background "#333333"))
           (buffer-face-mode 1)
@@ -1128,7 +1134,7 @@ Example:
  '(markdown-hide-urls t)
  '(markdown-italic-underscore t)
  '(midnight-mode t)
- '(mode-line-format nil)
+ ;; '(mode-line-format nil)
  '(mode-line-in-non-selected-windows t)
  '(neo-auto-indent-point t)
  '(neo-theme (quote icons))
@@ -1186,7 +1192,7 @@ This function is called at the very end of Spacemacs initialization."
  '(markdown-hide-urls t)
  '(markdown-italic-underscore t)
  '(midnight-mode t)
- '(mode-line-format nil)
+ ;; '(mode-line-format nil)
  '(mode-line-in-non-selected-windows t)
  '(neo-vc-integration (quote (face char)))
  '(neo-vc-state-char-alist
