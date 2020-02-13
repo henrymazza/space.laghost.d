@@ -1,8 +1,8 @@
-# spaceghost.d
-My Emacs files -- based on spacemacs 
+# space.laghost.d
+My Emacs files -- based on spacemacs
 
 Includes some useful spacemacs layers for:
-* prettier Tabbar 
+* prettier Tabbar
 * tweaked Neotree
 * more to come
 
