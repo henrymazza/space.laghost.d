@@ -1,0 +1,15 @@
+[submodule "layers/hmz-misc/local/fira-code-mode"]
+	path = layers/hmz-misc/local/fira-code-mode
+	url = https://github.com/jming422/fira-code-mode.git
+[submodule "layers/hmz-misc/local/rubocopfmt.el"]
+	path = layers/hmz-misc/local/rubocopfmt.el
+	url = https://github.com/jimeh/rubocopfmt.el.git
+[submodule "gcmh"]
+	path = layers/hmz-misc/local/gcmh
+	url = https://github.com/emacsmirror/gcmh.git
+[submodule "layers/hmz-misc/local/evil-ruby-text-objects"]
+	path = layers/hmz-misc/local/evil-ruby-text-objects
+	url = https://github.com/porras/evil-ruby-text-objects.git
+[submodule "layers/hmz-misc/local/rotate-text.el"]
+	path = layers/hmz-misc/local/rotate-text.el
+	url = https://github.com/nschum/rotate-text.el.git

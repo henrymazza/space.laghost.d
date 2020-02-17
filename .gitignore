@@ -1,3 +1,4 @@
 /undo/**
 /.persistent-scratch
 /.DS_Store
+/.spacemacs.env

@@ -2,14 +2,22 @@
   '(alert
     bpr
     ember-mode
+    evil-ruby-text-object
+    fira-code-mode
+    gcmh
     indicators
     neotree
+    rubocopfmt
     (hide-lines :location local)
     (hidesearch :location local)
     (indicators :location local)
     (list-processes+ :location local)
     (switch-buffer-functions :location local)))
 
+(defun hmz-misc/init-evil-ruby-text-object ()
+  (add-hook 'ruby-mode-hook 'evil-ruby-text-objects-mode)
+  (add-hook 'enh-ruby-mode-hook 'evil-ruby-text-objects-mode)
+  )
 (defun hmz-misc/init-indicators ()
   (use-package indicators
     :defer t
@@ -20,6 +28,22 @@
                 (ind-create-indicator 'point
                                       :managed t
                                       :face 'font-lock-const-face)))))
+
+(defun hmz-misc/init-rubocopfmt ()
+  (add-to-list 'load-path "~/.spacemacs.d/layers/hmz-misc/local")
+  (add-hook 'ruby-mode-hook #'rubocopfmt-mode))
+
+(defun hmz-misc/init-fira-code-mode ()
+  (use-package fira-code-mode
+    :load-path "~/.spacemacs.d/layers/hmz-misc/local/fira-code-mode/"
+    :hook prog-mode
+    ))
+
+(defun hmz-misc/init-gcmh ()
+  (use-package gcmh
+    :config
+    (gcmh-mode 1)
+    ))
 
 (defun hmz-misc/init-alert ()
   (use-package alert))
@@ -353,6 +377,11 @@
     ;; I'm leaving most of these settings to customize
     (setq neo-auto-indent-point t)
     (setq neo-autorefresh nil)
+
+    ;; hide line number in Neotree buffer
+    (display-line-numbers-mode nil)
+    (linum-mode nil)
+
     ;;TODO: it crawls to a death in big dirs, going to bet on refreshing on
     ;;      buffer change. Possibly adding a timeout for it to occur.
     (setq neo-banner-message "")

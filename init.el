@@ -4,40 +4,7 @@
 
 ;; Pre Window Initialization code
 
-(setq auth-sources
-  '((:source "~/.authinfo.gpg")))
-
-(unless (bound-and-true-p mac-auto-operator-composition-mode)
-    (let ((alist '((33 . ".\\(?:\\(?:==\\|!!\\)\\|[!=]\\)")
-                   ;; (35 . ".\\(?:###\\|##\\|_(\\|[#(?[_{]\\)")
-                   (36 . ".\\(?:>\\)")
-                   (37 . ".\\(?:\\(?:%%\\)\\|%\\)")
-                   (38 . ".\\(?:\\(?:&&\\)\\|&\\)")
-                   (42 . ".\\(?:\\(?:\\*\\*/\\)\\|\\(?:\\*[*/]\\)\\|[*/>]\\)")
-                   (43 . ".\\(?:\\(?:\\+\\+\\)\\|[+>]\\)")
-                   (45 . ".\\(?:\\(?:-[>-]\\|<<\\|>>\\)\\|[<>}~-]\\)")
-                   ;; (46 . ".\\(?:\\(?:\\.[.<]\\)\\|[.=-]\\)")
-                   (47 . ".\\(?:\\(?:\\*\\*\\|//\\|==\\)\\|[*/=>]\\)")
-                   (48 . ".\\(?:x[a-zA-Z]\\)")
-                   (58 . ".\\(?:::\\|[:=]\\)")
-                   (59 . ".\\(?:;;\\|;\\)")
-                   (60 . ".\\(?:\\(?:!--\\)\\|\\(?:~~\\|->\\|\\$>\\|\\*>\\|\\+>\\|--\\|<[<=-]\\|=[<=>]\\||>\\)\\|[*$+~/<=>|-]\\)")
-                   (61 . ".\\(?:\\(?:/=\\|:=\\|<<\\|=[=>]\\|>>\\)\\|[<=>~]\\)")
-                   (62 . ".\\(?:\\(?:=>\\|>[=>-]\\)\\|[=>-]\\)")
-                   (63 . ".\\(?:\\(\\?\\?\\)\\|[:=?]\\)")
-                   (91 . ".\\(?:]\\)")
-                   (92 . ".\\(?:\\(?:\\\\\\\\\\)\\|\\\\\\)")
-                   (94 . ".\\(?:=\\)")
-                   (119 . ".\\(?:ww\\)")
-                   (123 . ".\\(?:-\\)")
-                   (124 . ".\\(?:\\(?:|[=|]\\)\\|[=>|]\\)")
-                   (126 . ".\\(?:~>\\|~~\\|[>=@~-]\\)")
-                   )
-                 ))
-      (dolist (char-regexp alist)
-        (set-char-table-range composition-function-table (car char-regexp)
-                              `([,(cdr char-regexp) 0 font-shape-gstring])))))
-
+(require 'iso-transl)
 
 (defun dotspacemacs/layers ()
   "Configuration Layers declaration.
@@ -70,6 +37,7 @@ values."
   ;; of a list then all discovered layers will be installed.
   dotspacemacs-configuration-layers
   '(
+    html
     rust
     python
     nginx
@@ -100,13 +68,17 @@ values."
     emacs-lisp
     evil-cleverparens
     evil-commentary
-    git
-    html
+    (git :variables
+         magit-diff-refine-hunk 'all
+         magit-diff-adjust-tab-width t
+         magit-diff-paint-whitespace t
+         magit-diff-highlight-trailing t
+      ; <magit-diff-highlight-indentation options -- see below>
+         )
     javascript
     lua
     markdown
     org
-    osx
     prodigy
     ruby-on-rails
     (ruby :variables ruby-version-manager 'rbenv)
@@ -124,6 +96,7 @@ values."
            shell-enable-smart-eshell t
            shell-default-shell 'eshell
            shell-default-full-span nil)
+    osx
     )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -131,21 +104,25 @@ values."
    ;; configuration in `dotspacemacs/user-config'.
   dotspacemacs-additional-packages
   '(all-the-icons
-    exec-path-from-shell
-    highlight-indent-guides
-    simpleclip
-    fringe-helper
-    itail
+    ;; exec-path-from-shell
+    all-the-icons
     discover-my-major
-    hlinum
+    doom-modeline
+    doom-themes
+    dracula-theme
     evil-matchit
     fic-mode
-    zencoding-mode
-    all-the-icons
+    fringe-helper
     handlebars-sgml-mode
+    highlight-indent-guides
+    itail
+    ns-auto-titlebar
+    persistent-scratch
     prodigy
+    simpleclip
     sublimity
-    persistent-scratch)
+    zencoding-mode
+    )
 
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages
@@ -175,7 +152,7 @@ values."
   ;; spacemacs settings.
   (setq-default
    ;; Default theme
-   dotspacemacs-default-theme 'dracula
+   dotspacemacs-default-theme 'doom-dracula
    ;; If non nil ELPA repositories are contacted via HTTPS whenever it's
    ;; possible. Set it to nil if you have no way to use HTTPS in your
    ;; environment, otherwise it is strongly recommended to let it set to t.
@@ -232,8 +209,8 @@ values."
    dotspacemacs-default-font '("Fira Code"
                                ;; "Inconsolata"
                                ;; "Anonymous Pro Minus"
-                              :size 16
-                              :height 160
+                              :size 13
+                              :height 140
                               :weight normal
                               :width normal
                               :powerline-scale 0.5)
@@ -402,9 +379,54 @@ executes.
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
 
-  (if (not (getenv "TERM_PROGRAM"))
-      (setenv "PATH"
-              (shell-command-to-string "source $HOME/.zshrc && printf $PATH")))
+  ;; (if (not (getenv "TERM_PROGRAM"))
+  ;;     (setenv "PATH"
+  ;;             (shell-command-to-string "source $HOME/.zshrc && printf $PATH")))
+
+  ;; Monkey Patch (or use functional magic) to show only first name of the
+  ;; author in magit-log, as well abbrev. date.
+  (use-package magit-log
+  :init
+  (progn
+    ;; (setq magit-log-margin '(t age magit-log-margin-width t 18)) ;Default value
+    (setq magit-log-margin '(t age-abbreviated magit-log-margin-width :author 11)))
+  :config
+  (progn
+    ;; Abbreviate author name. I added this so that I can view Magit log without
+    ;; too much commit message truncation even on narrow screens (like on phone).
+    (defun modi/magit-log--abbreviate-author (&rest args)
+      "The first arg is AUTHOR, abbreviate it.
+      First Last  -> F Last
+      First.Last  -> F Last
+      Last, First -> F Last
+      First       -> First (no change).
+
+      It is assumed that the author has only one or two names."
+      ;; ARGS               -> '((REV AUTHOR DATE))
+      ;; (car ARGS)         -> '(REV AUTHOR DATE)
+      ;; (nth 1 (car ARGS)) -> AUTHOR
+      (let* ((author (nth 1 (car args)))
+             (author-abbr (if (string-match-p "," author)
+                              ;; Last, First -> F Last
+                              (replace-regexp-in-string "\\(.*?\\), *\\(.*\\)" "\\1" author)
+                            ;; First Last -> F Last
+                            (replace-regexp-in-string "\\(.*\\)[. ]+\\(.*\\)" "\\1" author))))
+        (message "Author %s" author-abbr)
+        (setf (nth 1 (car args)) author-abbr))
+      (car args))                       ;'(REV AUTHOR-ABBR DATE)
+    (advice-add 'magit-log-format-margin :filter-args #'modi/magit-log--abbreviate-author)))
+
+  ;; init for doom-modeline
+  (require 'doom-modeline)
+  (doom-modeline-mode 1)
+
+  ;; magit
+  (setq-default
+   magit-diff-refine-hunk 'all
+   magit-diff-adjust-tab-width t
+   magit-diff-paint-whitespace 'all
+   magit-diff-highlight-trailing 'all
+   magit-diff-highlight-indentation 'all)
 
   ;; UTF-8 snippet from msteringemacs.org -- don't know how useful
   ;; it is.
@@ -440,7 +462,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
 
   ;; Hide title bar
   ;; (setq initial-frame-alist '((undecorated . t)))
-  (add-to-list 'default-frame-alist '(undecorated . t))
+  ;; (add-to-list 'default-frame-alist '(undecorated . t))
 
   ;; perhaps it reduces errors with undo-tree
   (setq undo-tree-enable-undo-in-region nil)
@@ -454,9 +476,6 @@ before packages are loaded. If you are unsure, you should try in setting them in
   ;; disable smooth scroll on railwaycat's emacs fork
   (setq mac-mouse-wheel-smooth-scroll nil)
 
-  ;; reduce eye sore by reducing mode-line size,
-  ;; powerline isn't well configured
-  (set-face-attribute 'mode-line nil :height 130)
 )
 
 (defun dotspacemacs/user-config ()
@@ -466,6 +485,46 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loa,
 you should place you code here."
+
+  ;; show me some lines, the modern way
+  (global-display-line-numbers-mode t)
+  (global-linum-mode 0)
+  (linum-mode 0)
+
+  ;; cycle throgh frames (macOS's windows)
+  ;; * in insert mode it reads command +
+   (global-set-key (kbd "s-1") 'next-multiframe-window)
+
+  ;; hilight current line
+  (hl-line-mode t)
+
+  ;; Initialize title bar appearence manager
+  (when (eq system-type 'darwin) (ns-auto-titlebar-mode))
+
+  ;; TODO IT DOESN'T WORK!!!
+  ;; disable mode-line in helm
+  (setq helm-display-header-line nil)
+  (setq helm-mode-line-string nil)
+  (redraw-display)
+
+  ;; set mode-line's font
+  (set-face-attribute 'mode-line nil :family "San Francisco" :height 0.8)
+
+  ;; avoid leaving stall branch information by VC
+  (setq auto-revert-check-vc-info t)
+
+  ;; magit config
+  (setq magit-diff-highlight-trailing t)
+  (setq magit-diff-highlight-indentation t)
+
+  (prodigy-define-service
+    :name "Vavato's Angular Frontend"
+    :command "ng"
+    :args '("serve")
+    :cwd "/Users/HMz/Development/Vavato/vavato-frontend/"
+    :tags '(work)
+    :stop-signal 'sigkill
+    :kill-process-buffer-on-stop t)
 
   (prodigy-define-service
     :name "Uni Webserver"
@@ -638,7 +697,7 @@ you should place you code here."
   ;; command-T
   (global-set-key (kbd "s-t") 'helm-projectile-find-file)
   (global-set-key (kbd "H-t") 'helm-projectile-find-file)
-  (setq projectile-enable-caching t)
+  (setq projectile-enable-caching nil)
 
   ;; open files with command + o
   (global-set-key (kbd "s-o") 'find-file)
@@ -679,9 +738,14 @@ you should place you code here."
   (defun hmz-prog-mode-hook ()
     (interactive)
 
-    (global-hl-line-mode -1)
+    (global-company-mode t)
 
-    (hlinum-activate)
+    ;; FIXME: make me work
+    ;; BUG: it's not activating when prog-mode fires
+    ;; TODO: fix all that garbage
+    (fic-mode t)
+
+    (global-hl-line-mode -1)
 
     (flycheck-mode -1)
 
@@ -893,18 +957,18 @@ you should place you code here."
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
        (message "Garbage Collections During Startup: %s" gcs-done)
+       ;; should be handled by gcmh from now on
        ;; Go back to sane values
-       (run-with-idle-timer
-        5 nil
-        (lambda ()
-          (setq gc-cons-threshold 1000000)
-          (message "Init took %s secs, GC ran %s times. gc-cons-threshold restored to %S."
-                   (emacs-init-time)
-                   gcs-done
-                   gc-cons-threshold)))
+       ;; (run-with-idle-timer
+       ;;  15 nil
+       ;;  (lambda ()
+       ;;    (setq gc-cons-threshold 1000000)
+       ;;    (message "Init took %s secs, GC ran %s times. gc-cons-threshold restored to %S."
+       ;;             (emacs-init-time)
+       ;;             gcs-done
+       ;;             gc-cons-threshold)))
 
-   (face-remap-add-relative 'linum :family "San Francisco" :height 0.6)
-   (face-remap-add-relative 'header-line :family "San Francisco" :height 1.0)
+   ;; (face-remap-add-relative 'header-line :family "San Francisco" :height 1.0)
 
    ;; smooth scroll when jumping
    (require 'sublimity)
@@ -913,11 +977,7 @@ you should place you code here."
    (setq sublimity-attractive-centering-width 110)
    (sublimity-mode t)
 
-   ;; larger linum column to compensate italics
-   (setq linum-format "%4d ")
-
    ;; keep these configs here once customize loves to screw up
-   (set-face-attribute 'linum nil :family "San Francisco" :height 0.6)
    (set-face-attribute 'header-line nil :family "San Francisco" :height 1.0)
 
    ;; Stylize Echo Area (interestingly it ends up applying other faces styles)
@@ -942,6 +1002,7 @@ you should place you code here."
        ('tango ())
        ('dracula (message "Yeah!"))))
 
+
    (add-hook 'after-load-theme-hook 'customize-theme-after-load)
    (add-hook 'after-init-hook 'customize-theme-after-load))
 
@@ -954,6 +1015,7 @@ you should place you code here."
     ("width" "height")
     ("enable" "disable")
     ("enabled" "disabled")
+    ("describe" "context" "it")
     ("t" "nil")
     ("if" "unless")
     ("top" "bottom")
@@ -1081,95 +1143,29 @@ Example:
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((((type nil)) (:background "#000000" :foreground "#f8f8f2")) (((class color) (min-colors 89)) (:background "#282a36" :foreground "#f8f8f2"))))
- '(all-the-icons-dorange ((t (:foreground "tan3"))))
- '(all-the-icons-lmaroon ((t (:foreground "burlywood3"))))
- '(all-the-icons-maroon ((t (:foreground "burlywood3"))))
- '(anzu-match-2 ((t (:foreground "deep sky blue"))))
- '(bold ((t (:weight semi-light))))
- '(comint-highlight-prompt ((t (:inherit minibuffer-prompt :height 1.0))))
- '(custom-button ((t (:background "lightgrey" :foreground "black" :box 2))))
- '(custom-button-mouse ((t (:background "grey90" :foreground "black" :box 2))))
- '(custom-button-pressed ((t (:background "gray" :foreground "black" :box 2))))
- '(eshell-ls-executable ((t (:foreground "Green" :weight normal))))
- '(eshell-ls-symlink ((t (:foreground "Cyan" :weight normal))))
- '(evil-search-highlight-persist-highlight-face ((t (:inherit lazy-highlight))))
- '(font-lock-warning-face ((t (:background "DeepSkyBlue" :foreground "#ffb86c"))))
- '(fringe ((t (:foreground "DeepSkyBlue" :background unspecified))))
- '(header-line ((t (:background "#434353" :weight thin :height 1.0 :family "San Francisco"))))
- '(hl-line ((t (:inherit highlight))))
- '(linum ((t (:family "San Francisco" :height 0.7))))
- '(linum-highlight-face ((t (:inherit linum :foreground "#00FF7D"))))
- '(minibuffer-prompt ((t (:foreground "#ff79c6" :weight bold :height 1.2))))
- '(neo-banner-face ((t (:foreground "lightblue" :weight bold :family "san francisco"))))
- '(neo-dir-link-face ((t (:inherit font-lock-function-name-face :foreground "DeepSkyBlue" :family "san francisco"))))
- '(neo-expand-btn-face ((t (:foreground "SkyBlue" :family "San Francisco"))))
- '(neo-file-link-face ((t (:foreground "light gray" :family "San Francisco"))))
- '(neo-root-dir-face ((t (:foreground "gray40" :weight bold))))
- '(neo-vc-added-face ((t (:foreground "#50fa7b"))))
- '(neo-vc-conflict-face ((t (:foreground "dark red"))))
- '(neo-vc-edited-face ((t (:foreground "#ff79c6"))))
- '(tabbar-default ((t (:inherit header-line :background "gray25" :box nil :underline nil :weight light :height 0.9))))
- '(whitespace-indentation ((t (:background "yellow" :foreground "firebrick"))))
- '(window-divider ((t (:foreground "black")))))
+ '(default ((((min-colors 16777216)) (:background "#282a36" :foreground "#f8f8f2" :family "Fira Code" :foundry "nil" :slant normal :weight normal :height 160 :width normal)) (t (:background nil :foreground "#f8f8f2" :family "Fira Code" :foundry "nil" :slant normal :weight normal :height 160 :width normal))))
+ '(fic-face ((t (:foreground "sienna3" :weight bold :family "San Francisco"))))
+ '(line-number ((t (:background "#282a36" :foreground "#565761" :slant italic :height 0.7))))
+ '(line-number-current-line ((t (:inherit line-number :background "thistle4" :foreground "black" :weight extra-bold))))
+ '(magit-blame-margin ((t (:inherit magit-blame-highlight :slant normal :weight normal :height 0.7 :family "San Francisco"))))
+ '(magit-diff-file-heading ((t (:foreground "#f8f8f2" :height 1.1 :family "San Francisco"))))
+ '(magit-diff-file-heading-highlight ((t (:inherit magit-section-highlight :height 1.1 :family "san fransisco"))))
+ '(magit-log-author ((t (:foreground "#ccccc7" :height 0.8 :family "San Francisco"))))
+ '(magit-log-date ((t (:foreground "grey80" :height 0.8 :family "San Francisco")))))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(alert-default-style (quote notifier))
- '(ansi-color-names-vector
-   ["dim gray" "orange red" "medium spring green" "gold" "dodger blue" "purple" "turquoise1" "#eeeeec"])
- '(clean-aindent-mode t)
  '(coffee-tab-width 2)
- '(css-indent-offset 2)
- '(ember-completion-system (quote helm))
- '(ember-serve-command "ember serve  --output-path dist")
- '(ember-test-command "ember test --serve")
+ '(custom-safe-themes
+    '("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "99ea831ca79a916f1bd789de366b639d09811501e8c092c85b2cb7d697777f93" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "e074be1c799b509f52870ee596a5977b519f6d269455b84ed998666cf6fc802a" "777a3a89c0b7436e37f6fa8f350cbbff80bcc1255f0c16ab7c1e82041b06fccd" "5f1bd7f67dc1598977e69c6a0aed3c926f49581fdf395a6246f9bc1df86cb030" "e1ecb0536abec692b5a5e845067d75273fe36f24d01210bf0aa5842f2a7e029f" "fa3bdd59ea708164e7821574822ab82a3c51e262d419df941f26d64d015c90ee" default))
+ '(doom-modeline-height 14)
  '(evil-want-Y-yank-to-eol nil)
- '(indent-guide-delay 0.3 t)
- '(indent-tabs-mode nil)
- '(js-indent-level 2)
- '(line-spacing 3)
- '(markdown-hide-urls t)
- '(markdown-italic-underscore t)
- '(midnight-mode t)
- ;; '(mode-line-format nil)
- '(mode-line-in-non-selected-windows t)
- '(neo-auto-indent-point t)
- '(neo-theme (quote icons))
- '(neo-vc-integration (quote (face char)))
- '(neo-vc-state-char-alist
-   (quote
-    ((up-to-date . 32)
-     (edited . 10041)
-     (added . 10029)
-     (removed . 10006)
-     (missing . 33)
-     (needs-merge . 77)
-     (conflict . 9552)
-     (unlocked-changes . 33)
-     (needs-update . 85)
-     (ignored . 32)
-     (user . 85)
-     (unregistered . 32)
-     (nil . 8942))))
- '(neo-window-width 20)
- '(nginx-indent-level 2)
+ '(fic-highlighted-words '("FIXME" "TODO" "BUG" "FEATURE" "TASK"))
+ '(magit-log-margin '(t age-abbreviated magit-log-margin-width :author 11))
  '(package-selected-packages
-   (quote
-    (toml-mode racer pos-tip cargo rust-mode org-mime skewer-mode json-snatcher json-reformat gitignore-mode web-completion-data packed auto-complete request pcre2el spinner parent-mode pkg-info git-gutter+ git-gutter fringe-helper flx anzu undo-tree diminish bind-map memoize popup evil-nerd-commenter define-word csv prodigy ht counsel-tramp wgrep smex ivy-hydra flyspell-correct-ivy counsel-projectile counsel swiper ivy neotree highlight-indent-guides bpr simpleclip yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode helm-pydoc cython-mode company-anaconda anaconda-mode pythonic spaceline powerline rake inflections multiple-cursors hydra f bind-key all-the-icons avy inf-ruby dash-functional tern company paredit iedit smartparens highlight evil goto-chg flyspell-correct yasnippet helm helm-core markdown-mode epl org-plus-contrib magit magit-popup git-commit ghub let-alist with-editor async haml-mode js2-mode simple-httpd dash s yascroll projectile switch-buffer-functions itail makey dired-toggle dired-open dired-narrow dirtree direx dired-rainbow discover-my-major org-alert all-the-icons-dired diredful dired-single dired-sidebar hide-lines org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-download htmlize gnuplot hlinum nginx-mode tide typescript-mode flycheck fic-mode zencoding-mode handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
- '(rbenv-installation-dir "/usr/local/")
- '(smie-indent-basic 2)
- '(standard-indent 2)
- '(sublimity-mode t)
- '(tab-always-indent (quote complete))
- '(tooltip-use-echo-area t)
- '(web-mode-code-indent-offset 2)
- '(web-mode-css-indent-offset 2)
- '(web-mode-enable-auto-indentation nil)
- '(web-mode-markup-indent-offset 2)
- '(zencoding-indentation 2))
+    '(string-utils back-button button-lock ucs-utils smartrep nav-flash persistent-soft pcache fixmee wcheck-mode haml-mode web-completion-data doom-themes doom-modeline shrink-path rubocopfmt gcmh ns-auto-titlebar vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toml-mode toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails prodigy popwin pip-requirements persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file nginx-mode neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode link-hint less-css-mode launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby cargo bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile all-the-icons aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
 (defun dotspacemacs/emacs-custom-settings ()
   "Emacs custom settings.
 This is an auto-generated function, do not modify its content directly, use
@@ -1213,7 +1209,7 @@ This function is called at the very end of Spacemacs initialization."
  '(neo-window-width 20)
  '(package-selected-packages
    (quote
-    (yasnippet-snippets symon string-inflection spaceline powerline ruby-refactor ruby-hash-syntax rake inflections pcre2el password-generator spinner overseer org-mime org-brain nameless markdown-mode skewer-mode json-snatcher json-reformat multiple-cursors js2-mode impatient-mode simple-httpd parent-mode helm-purpose window-purpose imenu-list request haml-mode gitignore-mode fringe-helper git-gutter+ git-gutter flyspell-correct flx evil-org magit magit-popup git-commit ghub let-alist with-editor evil-lion iedit smartparens paredit anzu highlight editorconfig counsel-projectile counsel swiper ivy pkg-info epl web-completion-data dash-functional tern company-lua company centered-cursor-mode inf-ruby browse-at-remote f dash s bpr yasnippet packed all-the-icons memoize helm avy helm-core auto-complete popup org-plus-contrib hydra font-lock+ evil goto-chg undo-tree diminish bind-map bind-key async yascroll projectile switch-buffer-functions itail makey dired-toggle dired-open dired-narrow dirtree direx dired-rainbow discover-my-major org-alert all-the-icons-dired diredful dired-single dired-sidebar hide-lines org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-download htmlize gnuplot hlinum nginx-mode tide typescript-mode flycheck fic-mode zencoding-mode handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode linum-relative link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+    (yasnippet-snippets symon string-inflection spaceline powerline ruby-refactor ruby-hash-syntax rake inflections pcre2el password-generator spinner overseer org-mime org-brain nameless markdown-mode skewer-mode json-snatcher json-reformat multiple-cursors js2-mode impatient-mode simple-httpd parent-mode helm-purpose window-purpose imenu-list request haml-mode gitignore-mode fringe-helper git-gutter+ git-gutter flyspell-correct flx evil-org magit magit-popup git-commit ghub let-alist with-editor evil-lion iedit smartparens paredit anzu highlight editorconfig counsel-projectile counsel swiper ivy pkg-info epl web-completion-data dash-functional tern company-lua company centered-cursor-mode inf-ruby browse-at-remote f dash s bpr yasnippet packed all-the-icons memoize helm avy helm-core auto-complete popup org-plus-contrib hydra font-lock+ evil goto-chg undo-tree diminish bind-map bind-key async yascroll projectile switch-buffer-functions itail makey dired-toggle dired-open dired-narrow dirtree direx dired-rainbow discover-my-major org-alert all-the-icons-dired diredful dired-single dired-sidebar hide-lines org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-download htmlize gnuplot nginx-mode tide typescript-mode flycheck fic-mode zencoding-mode handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
  '(sublimity-mode t)
  '(tooltip-use-echo-area t))
 (custom-set-faces
@@ -1235,8 +1231,6 @@ This function is called at the very end of Spacemacs initialization."
  '(fringe ((t (:foreground "DeepSkyBlue" :background unspecified))))
  '(header-line ((t (:weight thin :family "San Francisco"))))
  '(hl-line ((t (:background "#34374a"))))
- '(linum ((t (:family "San Francisco" :height 0.6))))
- '(linum-highlight-face ((t (:inherit linum :background "#424256" :foreground "#00FF7D"))))
  '(neo-banner-face ((t (:foreground "lightblue" :weight bold :family "san francisco"))))
  '(neo-dir-link-face ((t (:foreground "DeepSkyBlue" :family "san francisco"))))
  '(neo-expand-btn-face ((t (:foreground "SkyBlue" :family "San Francisco"))))
