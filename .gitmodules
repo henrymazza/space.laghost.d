@@ -1,0 +1,9 @@
+[submodule "layers/hmz-misc/local/fira-code-mode"]
+	path = layers/hmz-misc/local/fira-code-mode
+	url = https://github.com/jming422/fira-code-mode.git
+[submodule "layers/hmz-misc/local/rubocopfmt.el"]
+	path = layers/hmz-misc/local/rubocopfmt.el
+	url = https://github.com/jimeh/rubocopfmt.el.git
+[submodule "gcmh"]
+	path = layers/hmz-misc/local/gcmh
+	url = https://github.com/emacsmirror/gcmh.git

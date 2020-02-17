@@ -2,8 +2,13 @@
   '(alert
     bpr
     ember-mode
+    fira-code-mode
+    ;; linum
+    ;; linum+
+    gcmh
     indicators
     neotree
+    rubocopfmt
     (hide-lines :location local)
     (hidesearch :location local)
     (indicators :location local)
@@ -20,6 +25,43 @@
                 (ind-create-indicator 'point
                                       :managed t
                                       :face 'font-lock-const-face)))))
+
+(defun hmz-misc/init-linum ()
+  (use-package linum
+    :ensure nil ;; loaded from emacs built-ins
+
+    :hook
+    (prog-mode . linum-mode)))
+
+(defun hmz-misc/init-linum+ ()
+  (use-package linum+
+    ;; :load-path "~/.spacemacs.d/layers/hmz-misc/local/linum+/"
+    :ensure nil ;; loaded from vendor
+    :after linum
+
+    :custom
+    ;; Customize line numbers - In GUI mode the fringe is the spacer between line
+    ;; numbers and code, while in console mode we add an extra space for it.
+    (linum+-dynamic-format (if window-system " %%%dd" " %%%dd "))
+
+  :config
+  (setq linum-format 'dynamic)))
+
+(defun hmz-misc/init-rubocopfmt ()
+  (add-to-list 'load-path "~/.spacemacs.d/layers/hmz-misc/local")
+  (add-hook 'ruby-mode-hook #'rubocopfmt-mode))
+
+(defun hmz-misc/init-fira-code-mode ()
+  (use-package fira-code-mode
+    :load-path "~/.spacemacs.d/layers/hmz-misc/local/fira-code-mode/"
+    :hook prog-mode
+    ))
+
+(defun hmz-misc/init-gcmh ()
+  (use-package gcmh
+    :config
+    (gcmh-mode 1)
+    ))
 
 (defun hmz-misc/init-alert ()
   (use-package alert))
