@@ -4,11 +4,8 @@
 
 ;; Pre Window Initialization code
 
-<<<<<<< HEAD
 (require 'iso-transl)
 
-=======
->>>>>>> 56bb6afbda79ce740f81d3b8770903a0155571dd
 (defun dotspacemacs/layers ()
   "Configuration Layers declaration.
 You should not put any user code in this function besides modifying the variable
@@ -60,7 +57,7 @@ values."
 
     ;; custom layers
     hmz-tabbar
-    hmz-misc
+    ;; hmz-misc
     (hmz-color-identifiers
      :variables hmz-color-identifiers-saturation 20)
     hmz-desktop
@@ -71,13 +68,7 @@ values."
     emacs-lisp
     evil-cleverparens
     evil-commentary
-    (git :variables
-         magit-diff-refine-hunk 'all
-         magit-diff-adjust-tab-width t
-         magit-diff-paint-whitespace t
-         magit-diff-highlight-trailing t
-      ; <magit-diff-highlight-indentation options -- see below>
-         )
+    git
     javascript
     lua
     markdown
@@ -112,11 +103,6 @@ values."
     discover-my-major
     doom-modeline
     doom-themes
-<<<<<<< HEAD
-=======
-    ;; nlinum
-    ;; nlinum-hl
->>>>>>> 56bb6afbda79ce740f81d3b8770903a0155571dd
     dracula-theme
     evil-matchit
     fic-mode
@@ -390,8 +376,6 @@ before packages are loaded. If you are unsure, you should try in setting them in
   ;; (if (not (getenv "TERM_PROGRAM"))
   ;;     (setenv "PATH"
   ;;             (shell-command-to-string "source $HOME/.zshrc && printf $PATH")))
-
-<<<<<<< HEAD
   ;; Monkey Patch (or use functional magic) to show only first name of the
   ;; author in magit-log, as well abbrev. date.
   (use-package magit-log
@@ -430,17 +414,18 @@ before packages are loaded. If you are unsure, you should try in setting them in
   (doom-modeline-mode 1)
 
   ;; magit
-  (setq-default
+  (setq;;-default
    magit-diff-refine-hunk 'all
    magit-diff-adjust-tab-width t
    magit-diff-paint-whitespace 'all
    magit-diff-highlight-trailing 'all
-   magit-diff-highlight-indentation 'all)
-=======
+   ;; magit config
+   magit-diff-highlight-indentation nil
+   )
+
   ;; init for doom-modeline
   (require 'doom-modeline)
   (doom-modeline-mode 1)
->>>>>>> 56bb6afbda79ce740f81d3b8770903a0155571dd
 
   ;; UTF-8 snippet from msteringemacs.org -- don't know how useful
   ;; it is.
@@ -500,18 +485,15 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loa,
 you should place you code here."
 
-<<<<<<< HEAD
   ;; show me some lines, the modern way
   (global-display-line-numbers-mode t)
-  (global-linum-mode 0)
-  (linum-mode 0)
+  (global-linum-mode -1)
+  (linum-mode -1)
 
   ;; cycle throgh frames (macOS's windows)
   ;; * in insert mode it reads command +
    (global-set-key (kbd "s-1") 'next-multiframe-window)
 
-=======
->>>>>>> 56bb6afbda79ce740f81d3b8770903a0155571dd
   ;; hilight current line
   (hl-line-mode t)
 
@@ -524,19 +506,11 @@ you should place you code here."
   (setq helm-mode-line-string nil)
   (redraw-display)
 
-<<<<<<< HEAD
   ;; set mode-line's font
-=======
-  ;; set
->>>>>>> 56bb6afbda79ce740f81d3b8770903a0155571dd
   (set-face-attribute 'mode-line nil :family "San Francisco" :height 0.8)
 
   ;; avoid leaving stall branch information by VC
   (setq auto-revert-check-vc-info t)
-
-  ;; magit config
-  (setq magit-diff-highlight-trailing t)
-  (setq magit-diff-highlight-indentation t)
 
   (prodigy-define-service
     :name "Vavato's Angular Frontend"
@@ -1024,11 +998,6 @@ you should place you code here."
        ('dracula (message "Yeah!"))))
 
 
-<<<<<<< HEAD
-=======
-   (face-remap-add-relative 'linum :family "San Francisco" :height 1.6)
-
->>>>>>> 56bb6afbda79ce740f81d3b8770903a0155571dd
    (add-hook 'after-load-theme-hook 'customize-theme-after-load)
    (add-hook 'after-init-hook 'customize-theme-after-load))
 
@@ -1169,29 +1138,15 @@ Example:
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((((min-colors 16777216)) (:background "#282a36" :foreground "#f8f8f2" :family "Fira Code" :foundry "nil" :slant normal :weight normal :height 160 :width normal)) (t (:background nil :foreground "#f8f8f2" :family "Fira Code" :foundry "nil" :slant normal :weight normal :height 160 :width normal))))
- '(fic-face ((t (:foreground "sienna3" :weight bold :family "San Francisco"))))
- '(line-number ((t (:background "#282a36" :foreground "#565761" :slant italic :height 0.7))))
- '(line-number-current-line ((t (:inherit line-number :background "thistle4" :foreground "black" :weight extra-bold))))
- '(magit-blame-margin ((t (:inherit magit-blame-highlight :slant normal :weight normal :height 0.7 :family "San Francisco"))))
- '(magit-diff-file-heading ((t (:foreground "#f8f8f2" :height 1.1 :family "San Francisco"))))
- '(magit-diff-file-heading-highlight ((t (:inherit magit-section-highlight :height 1.1 :family "san fransisco"))))
- '(magit-log-author ((t (:foreground "#ccccc7" :height 0.8 :family "San Francisco"))))
- '(magit-log-date ((t (:foreground "grey80" :height 0.8 :family "San Francisco")))))
+ )
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(coffee-tab-width 2)
- '(custom-safe-themes
-    '("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "99ea831ca79a916f1bd789de366b639d09811501e8c092c85b2cb7d697777f93" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "e074be1c799b509f52870ee596a5977b519f6d269455b84ed998666cf6fc802a" "777a3a89c0b7436e37f6fa8f350cbbff80bcc1255f0c16ab7c1e82041b06fccd" "5f1bd7f67dc1598977e69c6a0aed3c926f49581fdf395a6246f9bc1df86cb030" "e1ecb0536abec692b5a5e845067d75273fe36f24d01210bf0aa5842f2a7e029f" "fa3bdd59ea708164e7821574822ab82a3c51e262d419df941f26d64d015c90ee" default))
- '(doom-modeline-height 14)
- '(evil-want-Y-yank-to-eol nil)
- '(fic-highlighted-words '("FIXME" "TODO" "BUG" "FEATURE" "TASK"))
- '(magit-log-margin '(t age-abbreviated magit-log-margin-width :author 11))
  '(package-selected-packages
-    '(string-utils back-button button-lock ucs-utils smartrep nav-flash persistent-soft pcache fixmee wcheck-mode haml-mode web-completion-data doom-themes doom-modeline shrink-path rubocopfmt gcmh ns-auto-titlebar vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toml-mode toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails prodigy popwin pip-requirements persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file nginx-mode neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode link-hint less-css-mode launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby cargo bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile all-the-icons aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+   (quote
+    (vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toml-mode toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocopfmt rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails prodigy popwin pip-requirements persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file ns-auto-titlebar nginx-mode neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-gutter-fringe git-gutter-fringe+ gh-md gcmh fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme doom-themes doom-modeline discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby cargo bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))))
 (defun dotspacemacs/emacs-custom-settings ()
   "Emacs custom settings.
 This is an auto-generated function, do not modify its content directly, use
