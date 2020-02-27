@@ -4,8 +4,11 @@
 
 ;; Pre Window Initialization code
 
+<<<<<<< HEAD
 (require 'iso-transl)
 
+=======
+>>>>>>> 56bb6afbda79ce740f81d3b8770903a0155571dd
 (defun dotspacemacs/layers ()
   "Configuration Layers declaration.
 You should not put any user code in this function besides modifying the variable
@@ -109,6 +112,11 @@ values."
     discover-my-major
     doom-modeline
     doom-themes
+<<<<<<< HEAD
+=======
+    ;; nlinum
+    ;; nlinum-hl
+>>>>>>> 56bb6afbda79ce740f81d3b8770903a0155571dd
     dracula-theme
     evil-matchit
     fic-mode
@@ -383,6 +391,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
   ;;     (setenv "PATH"
   ;;             (shell-command-to-string "source $HOME/.zshrc && printf $PATH")))
 
+<<<<<<< HEAD
   ;; Monkey Patch (or use functional magic) to show only first name of the
   ;; author in magit-log, as well abbrev. date.
   (use-package magit-log
@@ -427,6 +436,11 @@ before packages are loaded. If you are unsure, you should try in setting them in
    magit-diff-paint-whitespace 'all
    magit-diff-highlight-trailing 'all
    magit-diff-highlight-indentation 'all)
+=======
+  ;; init for doom-modeline
+  (require 'doom-modeline)
+  (doom-modeline-mode 1)
+>>>>>>> 56bb6afbda79ce740f81d3b8770903a0155571dd
 
   ;; UTF-8 snippet from msteringemacs.org -- don't know how useful
   ;; it is.
@@ -486,6 +500,7 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loa,
 you should place you code here."
 
+<<<<<<< HEAD
   ;; show me some lines, the modern way
   (global-display-line-numbers-mode t)
   (global-linum-mode 0)
@@ -495,6 +510,8 @@ you should place you code here."
   ;; * in insert mode it reads command +
    (global-set-key (kbd "s-1") 'next-multiframe-window)
 
+=======
+>>>>>>> 56bb6afbda79ce740f81d3b8770903a0155571dd
   ;; hilight current line
   (hl-line-mode t)
 
@@ -507,7 +524,11 @@ you should place you code here."
   (setq helm-mode-line-string nil)
   (redraw-display)
 
+<<<<<<< HEAD
   ;; set mode-line's font
+=======
+  ;; set
+>>>>>>> 56bb6afbda79ce740f81d3b8770903a0155571dd
   (set-face-attribute 'mode-line nil :family "San Francisco" :height 0.8)
 
   ;; avoid leaving stall branch information by VC
@@ -1003,6 +1024,11 @@ you should place you code here."
        ('dracula (message "Yeah!"))))
 
 
+<<<<<<< HEAD
+=======
+   (face-remap-add-relative 'linum :family "San Francisco" :height 1.6)
+
+>>>>>>> 56bb6afbda79ce740f81d3b8770903a0155571dd
    (add-hook 'after-load-theme-hook 'customize-theme-after-load)
    (add-hook 'after-init-hook 'customize-theme-after-load))
 
