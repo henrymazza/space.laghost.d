@@ -592,6 +592,11 @@ you should place you code here."
   (defalias 'ff 'find-file)
   (defalias 'ffo 'find-file-other-window)
 
+  ;; disable sublimity mode in magit-log buffers
+  (add-hook 'magit-log-mode-hook
+            (lambda ()
+              (sublimity-mode -1)))
+
   ;; increase term buffer size
   (add-hook 'term-mode-hook
             (lambda ()
