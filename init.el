@@ -107,7 +107,6 @@ values."
     fic-mode
     fringe-helper
     handlebars-sgml-mode
-    highlight-indent-guides
     itail
     ns-auto-titlebar
     persistent-scratch
@@ -480,12 +479,12 @@ you should place you code here."
   (global-linum-mode -1)
   (linum-mode -1)
 
+  ;; hilight current line
+  (global-hl-line-mode t)
+
   ;; cycle throgh frames (macOS's windows)
   ;; * in insert mode it reads command +
    (global-set-key (kbd "s-1") 'next-multiframe-window)
-
-  ;; hilight current line
-  (hl-line-mode t)
 
   ;; Initialize title bar appearence manager
   (when (eq system-type 'darwin) (ns-auto-titlebar-mode))
@@ -581,9 +580,9 @@ you should place you code here."
   (add-hook 'after-make-frame-functions 'spacemacs/enable-transparency)
   (spacemacs/enable-transparency)
 
-  ;; highlight indent
-  ;; (setq highlight-indent-guides-method 'character)
-  ;; (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
+  ;; highlight inent
+  (setq highlight-indent-guides-method 'character)
+  (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
 
   ;; separate system clipboard from kill ring
   (simpleclip-mode 1)
@@ -615,9 +614,6 @@ you should place you code here."
 
   ;; Blink cursor so I know where I am!
   (blink-cursor-mode 1)
-
-  ;; disable current line highlight
-  (global-hl-line-mode -1)
 
   ;; Make insert cursor a vertical Bar. Keep default color.
   (setq evil-emacs-state-cursor '("SkyBlue2" bar))
@@ -735,8 +731,6 @@ you should place you code here."
     ;; TODO: fix all that garbage
     (fic-mode t)
 
-    (global-hl-line-mode -1)
-
     (flycheck-mode -1)
 
     (rainbow-identifiers-mode t)
@@ -744,8 +738,6 @@ you should place you code here."
 
     (smartparens-global-mode t)
     (global-evil-matchit-mode 1)
-    ;; (setq mode-line-format nil)
-    ;; (hidden-mode-line-mode 1)
 
     (visual-line-mode t))
 
@@ -1133,14 +1125,20 @@ Example:
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(evil-search-highlight-persist-highlight-face ((t (:inherit lazy-highlight))))
+ '(highlight-indent-guides-character-face ((t (:foreground "#3df1410a539f"))))
+ '(line-number ((t (:background "#282a36" :foreground "#565761" :box nil :slant normal :height 0.9 :family "san francisco")))))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(coffee-tab-width 2)
+ '(highlight-indent-guides-character 183)
+ '(highlight-indent-guides-method 'character)
+ '(highlight-indentation-offset 4)
  '(package-selected-packages
-   '(evil-ruby-text-objects vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toml-mode toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocopfmt rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails prodigy popwin pip-requirements persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file ns-auto-titlebar nginx-mode neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-gutter-fringe git-gutter-fringe+ gh-md gcmh fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme doom-themes doom-modeline discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby cargo bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+   '(indent-guide-mode highlight-indent-guides-mode evil-ruby-text-objects vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toml-mode toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocopfmt rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails prodigy popwin pip-requirements persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file ns-auto-titlebar nginx-mode neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-gutter-fringe git-gutter-fringe+ gh-md gcmh fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme doom-themes doom-modeline discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby cargo bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
 (defun dotspacemacs/emacs-custom-settings ()
   "Emacs custom settings.
 This is an auto-generated function, do not modify its content directly, use

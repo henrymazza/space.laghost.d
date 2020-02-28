@@ -3,8 +3,10 @@
   '(alert
     bpr
     ember-mode
+    ;; highlight-indent-guides
     (gcmh :location local)
     indicators
+    indent-guide-mode
     neotree
     rubocopfmt
     (fira-code-mode :location local)
@@ -12,6 +14,22 @@
     (indicators :location local)
     (list-processes+ :location local)
     (switch-buffer-functions :location local)))
+
+(defun hmz-misc/init-indent-guide ()
+  (use-package indent-guide
+    :ensure t
+    :config
+    (indent-guide-mode)
+    (setq indent-guide-delay 0.3)
+    (setq indent-guide-char "·")
+    ))
+
+(defun hmz-misc/init-highlight-indent-guides ()
+  (use-package highlight-indent-guides
+    :ensure t
+    :init
+    (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
+    (setq highlight-indent-guides-method 'character)))
 
 (defun hmz-misc/init-doom-todo-ivy ()
   (use-package doom-todo-ivy
