@@ -9,18 +9,27 @@
     indent-guide-mode
     neotree
     rubocopfmt
+    (evil-ruby-text-objects :location local)
     (fira-code-mode :location local)
     (hide-lines :location local)
     (indicators :location local)
     (list-processes+ :location local)
     (switch-buffer-functions :location local)))
 
+(defun hmz-misc/init-evil-ruby-text-objects ()
+  (use-package evil-ruby-text-objects
+    :ensure t
+    :init
+    (add-hook 'ruby-mode-hook 'evil-ruby-text-objects-mode)
+    (add-hook 'enh-ruby-mode-hook 'evil-ruby-text-objects-mode)
+    ))
+
 (defun hmz-misc/init-indent-guide ()
   (use-package indent-guide
     :ensure t
-    :config
-    (indent-guide-mode)
-    (setq indent-guide-delay 0.3)
+    :init
+    (indent-guide-mode t)
+    (setq indent-guide-delay 0.5)
     (setq indent-guide-char "·")
     ))
 

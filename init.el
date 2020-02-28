@@ -1127,6 +1127,7 @@ Example:
  ;; If there is more than one, they won't work right.
  '(evil-search-highlight-persist-highlight-face ((t (:inherit lazy-highlight))))
  '(highlight-indent-guides-character-face ((t (:foreground "#3df1410a539f"))))
+ '(indent-guide-face ((t (:inherit font-lock-constant-face :slant normal))))
  '(line-number ((t (:background "#282a36" :foreground "#565761" :box nil :slant normal :height 0.9 :family "san francisco")))))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
