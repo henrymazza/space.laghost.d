@@ -36,8 +36,8 @@
       ;;                               (desktop-save user-emacs-directory)))))
 
       ;; Read default desktop
-      (if (file-exists-p (concat desktop-dirname desktop-base-file-name))
-          (desktop-read desktop-dirname))
+      ;; (if (file-exists-p (concat desktop-dirname desktop-base-file-name))
+      ;;     (desktop-read desktop-dirname))
 
       ;; Add a hook when emacs is closed to we reset the desktop
       ;; modification time (in this way the user does not get a warning
