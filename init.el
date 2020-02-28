@@ -57,14 +57,12 @@ values."
 
     ;; custom layers
     hmz-tabbar
-    ;; hmz-misc
+    hmz-misc
     (hmz-color-identifiers
      :variables hmz-color-identifiers-saturation 20)
     hmz-desktop
 
     better-defaults
-    ;; cb-yasnippet
-    ;; (colors :variables colors-colorize-identifiers 'all)
     emacs-lisp
     evil-cleverparens
     evil-commentary
@@ -105,6 +103,7 @@ values."
     doom-themes
     dracula-theme
     evil-matchit
+    evil-ruby-text-objects
     fic-mode
     fringe-helper
     handlebars-sgml-mode
@@ -373,59 +372,14 @@ executes.
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
 
-  ;; (if (not (getenv "TERM_PROGRAM"))
-  ;;     (setenv "PATH"
-  ;;             (shell-command-to-string "source $HOME/.zshrc && printf $PATH")))
-  ;; Monkey Patch (or use functional magic) to show only first name of the
-  ;; author in magit-log, as well abbrev. date.
-  (use-package magit-log
-  :init
-  (progn
-    ;; (setq magit-log-margin '(t age magit-log-margin-width t 18)) ;Default value
-    (setq magit-log-margin '(t age-abbreviated magit-log-margin-width :author 11)))
-  :config
-  (progn
-    ;; Abbreviate author name. I added this so that I can view Magit log without
-    ;; too much commit message truncation even on narrow screens (like on phone).
-    (defun modi/magit-log--abbreviate-author (&rest args)
-      "The first arg is AUTHOR, abbreviate it.
-      First Last  -> F Last
-      First.Last  -> F Last
-      Last, First -> F Last
-      First       -> First (no change).
-
-      It is assumed that the author has only one or two names."
-      ;; ARGS               -> '((REV AUTHOR DATE))
-      ;; (car ARGS)         -> '(REV AUTHOR DATE)
-      ;; (nth 1 (car ARGS)) -> AUTHOR
-      (let* ((author (nth 1 (car args)))
-             (author-abbr (if (string-match-p "," author)
-                              ;; Last, First -> F Last
-                              (replace-regexp-in-string "\\(.*?\\), *\\(.*\\)" "\\1" author)
-                            ;; First Last -> F Last
-                            (replace-regexp-in-string "\\(.*\\)[. ]+\\(.*\\)" "\\1" author))))
-        (message "Author %s" author-abbr)
-        (setf (nth 1 (car args)) author-abbr))
-      (car args))                       ;'(REV AUTHOR-ABBR DATE)
-    (advice-add 'magit-log-format-margin :filter-args #'modi/magit-log--abbreviate-author)))
-
-  ;; init for doom-modeline
-  (require 'doom-modeline)
-  (doom-modeline-mode 1)
-
   ;; magit
   (setq;;-default
    magit-diff-refine-hunk 'all
    magit-diff-adjust-tab-width t
    magit-diff-paint-whitespace 'all
    magit-diff-highlight-trailing 'all
-   ;; magit config
-   magit-diff-highlight-indentation nil
-   )
-
-  ;; init for doom-modeline
-  (require 'doom-modeline)
-  (doom-modeline-mode 1)
+   ;; BUG magit can't commit if the following var is t
+   magit-diff-highlight-indentation nil)
 
   ;; UTF-8 snippet from msteringemacs.org -- don't know how useful
   ;; it is.
@@ -484,6 +438,42 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loa,
 you should place you code here."
+
+  ;; init for doom-modeline
+  (doom-modeline-mode 1)
+
+  ;; Monkey Patch (or use functional magic) to show only first name of the
+  ;; author in magit-log, as well abbrev. date.
+  (use-package magit-log
+  :init
+  (progn
+    ;; (setq magit-log-margin '(t age magit-log-margin-width t 18)) ;Default value
+    (setq magit-log-margin '(t age-abbreviated magit-log-margin-width :author 11)))
+  :config
+  (progn
+    ;; Abbreviate author name. I added this so that I can view Magit log without
+    ;; too much commit message truncation even on narrow screens (like on phone).
+    (defun modi/magit-log--abbreviate-author (&rest args)
+      "The first arg is AUTHOR, abbreviate it.
+      First Last  -> F Last
+      First.Last  -> F Last
+      Last, First -> F Last
+      First       -> First (no change).
+
+      It is assumed that the author has only one or two names."
+      ;; ARGS               -> '((REV AUTHOR DATE))
+      ;; (car ARGS)         -> '(REV AUTHOR DATE)
+      ;; (nth 1 (car ARGS)) -> AUTHOR
+      (let* ((author (nth 1 (car args)))
+             (author-abbr (if (string-match-p "," author)
+                              ;; Last, First -> F Last
+                              (replace-regexp-in-string "\\(.*?\\), *\\(.*\\)" "\\1" author)
+                            ;; First Last -> F Last
+                            (replace-regexp-in-string "\\(.*\\)[. ]+\\(.*\\)" "\\1" author))))
+        (message "Author %s" author-abbr)
+        (setf (nth 1 (car args)) author-abbr))
+      (car args))                       ;'(REV AUTHOR-ABBR DATE)
+    (advice-add 'magit-log-format-margin :filter-args #'modi/magit-log--abbreviate-author)))
 
   ;; show me some lines, the modern way
   (global-display-line-numbers-mode t)
@@ -1145,8 +1135,7 @@ Example:
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   (quote
-    (vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toml-mode toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocopfmt rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails prodigy popwin pip-requirements persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file ns-auto-titlebar nginx-mode neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-gutter-fringe git-gutter-fringe+ gh-md gcmh fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme doom-themes doom-modeline discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby cargo bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))))
+   '(evil-ruby-text-objects vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toml-mode toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocopfmt rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails prodigy popwin pip-requirements persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file ns-auto-titlebar nginx-mode neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-gutter-fringe git-gutter-fringe+ gh-md gcmh fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme doom-themes doom-modeline discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby cargo bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
 (defun dotspacemacs/emacs-custom-settings ()
   "Emacs custom settings.
 This is an auto-generated function, do not modify its content directly, use

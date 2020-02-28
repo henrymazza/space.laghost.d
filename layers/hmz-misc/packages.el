@@ -1,26 +1,27 @@
 (defconst hmz-misc-packages
+  ;; default behaviour is to install from melpa.org
   '(alert
     bpr
     ember-mode
-    evil-ruby-text-object
-    fira-code-mode
-    gcmh
+    (gcmh :location local)
     indicators
     neotree
     rubocopfmt
+    (fira-code-mode :location local)
     (hide-lines :location local)
-    (hidesearch :location local)
     (indicators :location local)
     (list-processes+ :location local)
     (switch-buffer-functions :location local)))
 
-(defun hmz-misc/init-evil-ruby-text-object ()
-  (add-hook 'ruby-mode-hook 'evil-ruby-text-objects-mode)
-  (add-hook 'enh-ruby-mode-hook 'evil-ruby-text-objects-mode)
-  )
+(defun hmz-misc/init-doom-todo-ivy ()
+  (use-package doom-todo-ivy
+    :load-path "~/space.laghost.d/layers/hmz-misc/local/doom-todo-ivy"
+    :ensure t
+    :hook (after-init . doom-todo-ivy)))
+
 (defun hmz-misc/init-indicators ()
   (use-package indicators
-    :defer t
+    :ensure t
     :config
     (setq ind-indicator-height 19)
     (add-hook 'after-change-major-mode-hook
@@ -36,14 +37,13 @@
 (defun hmz-misc/init-fira-code-mode ()
   (use-package fira-code-mode
     :load-path "~/.spacemacs.d/layers/hmz-misc/local/fira-code-mode/"
-    :hook prog-mode
-    ))
+    :hook prog-mode))
 
 (defun hmz-misc/init-gcmh ()
   (use-package gcmh
+    :load-path "~/.spacemacs.d/layers/hmz-misc/local/gcmh/"
     :config
-    (gcmh-mode 1)
-    ))
+    (gcmh-mode 1)))
 
 (defun hmz-misc/init-alert ()
   (use-package alert))

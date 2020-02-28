@@ -13,3 +13,6 @@
 [submodule "layers/hmz-misc/local/rotate-text.el"]
 	path = layers/hmz-misc/local/rotate-text.el
 	url = https://github.com/nschum/rotate-text.el.git
+[submodule "layers/hmz-misc/local/doom-todo-ivy"]
+	path = layers/hmz-misc/local/doom-todo-ivy
+	url = https://github.com/jsmestad/doom-todo-ivy.git
