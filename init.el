@@ -98,27 +98,32 @@ values."
   '(all-the-icons
     ;; exec-path-from-shell
     all-the-icons
+    ;; desktop-plus
     discover-my-major
     doom-modeline
     doom-themes
     dracula-theme
+    evil-magit
     evil-matchit
     evil-ruby-text-objects
     fic-mode
     fringe-helper
     handlebars-sgml-mode
+    highlight-indent-guides
+    ido-completing-read+
     itail
+    ivy
     ns-auto-titlebar
     persistent-scratch
     prodigy
     simpleclip
     sublimity
-    zencoding-mode
-    )
+    zencoding-mode)
 
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages
    '(
+     smex
      powerline
      spaceline
      spaceline-all-the-icons
@@ -201,11 +206,11 @@ values."
    dotspacemacs-default-font '("Fira Code"
                                ;; "Inconsolata"
                                ;; "Anonymous Pro Minus"
-                              :size 13
+                              :size 14
                               :height 140
                               :weight normal
                               :width normal
-                              :powerline-scale 0.5)
+                              :powerline-scale 1.0)
    ;; The leader key
    dotspacemacs-leader-key "SPC"
    ;; The key used for Emacs commands (M-x) (after pressing on the leader key).
@@ -262,7 +267,7 @@ values."
    ;; If non nil then `ido' replaces `helm' for some commands. For now only
    ;; `find-files' (SPC f f), `find-spacemacs-file' (SPC f e s), and
    ;; `find-contrib-file' (SPC f e c) are replaced. (default nil)
-   dotspacemacs-use-ido nil
+   dotspacemacs-use-ido t
    ;; If non nil, `helm' will try to minimize the space it uses. (default nil)
    dotspacemacs-helm-resize nil
    ;; if non nil, the helm header is hidden when there is only one source.
@@ -371,6 +376,80 @@ executes.
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
 
+  ;; ?Redefine transient state to include Next Conflicted File function
+  (spacemacs|define-transient-state smerge
+    :title "smerge transient state"
+    :doc "
+ movement^^^^               merge action^^           other
+ ---------------------^^^^  -------------------^^    -----------
+ [_n_]^^    next hunk       [_b_] keep base          [_u_] undo
+ [_p_]  prev hunk         [_m_] keep mine          [_r_] refine
+ [_j_/_k_]  move up/down    [_a_] keep all           [_q_] quit
+ [_N_]^^    next file       [_o_] keep other
+ ^^^^                       [_c_] keep current
+ ^^^^                       [_C_] combine with next"
+    :bindings
+    ("n" smerge-next)
+    ("p" smerge-prev)
+    ("N" smerge-vc-next-conflict)
+    ("j" evil-next-line)
+    ("k" evil-previous-line)
+    ("a" smerge-keep-all)
+    ("b" smerge-keep-base)
+    ("m" smerge-keep-mine)
+    ("o" smerge-keep-other)
+    ("c" smerge-keep-current)
+    ("C" smerge-combine-with-next)
+    ("r" smerge-refine)
+    ("u" undo-tree-undo)
+    ("q" nil :exit t))
+
+
+  (defun hmz-prog-mode-hook ()
+    ;; NOTE don't know why it was interactive, bvut
+    ;; was causing some adversities. Turned off.
+    (interactive)
+
+    ;; Shiny symbols like eclipse
+    (spacemacs/toggle-automatic-symbol-highlight-on)
+
+    (flyspell-mode t)
+    (flyspell-prog-mode)
+
+    ;; smooth scroll when jumping
+    (require 'sublimity)
+    (require 'sublimity-scroll)
+    (require 'sublimity-attractive)
+    (setq sublimity-attractive-centering-width 110)
+    (sublimity-mode t)
+
+    (indent-guide-mode t)
+    (highlight-indent-guides-mode -1)
+    (highlight-indentation-mode -1)
+
+    (display-line-numbers-mode t)
+
+    ;; FIXME: make me work
+    ;; BUG: it's not activating when prog-mode fires
+    ;; TODO: fix all that garbage
+    (fic-mode t)
+
+    (flycheck-mode -1)
+
+    (rainbow-identifiers-mode t)
+    (rainbow-delimiters-mode-enable)
+
+    (smartparens-global-mode t)
+    (global-evil-matchit-mode 1)
+
+    (visual-line-mode t)
+    (message (concat ">>> Ran the Hook" (buffer-file-name))))
+
+
+  (add-hook 'prog-mode-hook 'hmz-prog-mode-hook)
+  (add-hook 'text-mode-hook 'hmz-prog-mode-hook)
+
+
   ;; magit
   (setq;;-default
    magit-diff-refine-hunk 'all
@@ -469,13 +548,11 @@ you should place you code here."
                               (replace-regexp-in-string "\\(.*?\\), *\\(.*\\)" "\\1" author)
                             ;; First Last -> F Last
                             (replace-regexp-in-string "\\(.*\\)[. ]+\\(.*\\)" "\\1" author))))
-        (message "Author %s" author-abbr)
         (setf (nth 1 (car args)) author-abbr))
       (car args))                       ;'(REV AUTHOR-ABBR DATE)
     (advice-add 'magit-log-format-margin :filter-args #'modi/magit-log--abbreviate-author)))
 
-  ;; show me some lines, the modern way
-  (global-display-line-numbers-mode t)
+  ;; down with the old
   (global-linum-mode -1)
   (linum-mode -1)
 
@@ -495,18 +572,40 @@ you should place you code here."
   (setq helm-mode-line-string nil)
   (redraw-display)
 
-  ;; set mode-line's font
-  (set-face-attribute 'mode-line nil :family "San Francisco" :height 0.8)
-
   ;; avoid leaving stall branch information by VC
   (setq auto-revert-check-vc-info t)
 
+  (defun prodigy-strip-ctrl-m (output)
+    "Strip  line endings from OUTPUT."
+    (s-replace "" "" output)
+    (s-replace "" "\n" output)
+
+    )
+
   (prodigy-define-service
-    :name "Vavato's Angular Frontend"
-    :command "ng"
-    :args '("serve")
+    :name "Vavato's Guard Backend"
+    :command "guard"
+    :args '("-f" "doc" "SKIP_COV=true")
+    :cwd "/Users/HMz/Development/Vavato/vavato-backend/"
+    :tags '(vavato work)
+    :stop-signal 'sigkill
+    :kill-process-buffer-on-stop t)
+
+  (prodigy-define-service
+    :name "Vavato's Rails Backend"
+    :command "rails"
+    :args '("s")
+    :cwd "/Users/HMz/Development/Vavato/vavato-backend/"
+    :tags '(vavato work)
+    :stop-signal 'sigkill
+    :kill-process-buffer-on-stop t)
+
+  (prodigy-define-service
+    :name "Vavato's Angular Fronted"
+    :command "npm"
+    :args '("start")
     :cwd "/Users/HMz/Development/Vavato/vavato-frontend/"
-    :tags '(work)
+    :tags '(vavato work)
     :stop-signal 'sigkill
     :kill-process-buffer-on-stop t)
 
@@ -580,9 +679,9 @@ you should place you code here."
   (add-hook 'after-make-frame-functions 'spacemacs/enable-transparency)
   (spacemacs/enable-transparency)
 
-  ;; highlight inent
-  (setq highlight-indent-guides-method 'character)
-  (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
+  ;; highlight indent
+  ;; (setq highlight-indent-guides-method 'character)
+  ;; (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
 
   ;; separate system clipboard from kill ring
   (simpleclip-mode 1)
@@ -633,12 +732,15 @@ you should place you code here."
                              (snippet-mode 0)
                              (rainbow-identifiers t)))
 
+    ;; disable mode-line
+    ;; (setq-default mode-line-format nil)
+
+  (add-hook 'prog-mode-hook 'hmz-prog-mode-hook)
+  (add-hook 'text-mode-hook 'hmz-prog-mode-hook)
+
   ;; Clear unused buffers
   (midnight-mode t)
   (add-to-list 'clean-buffer-list-kill-never-regexps ".*NeoTree.*")
-
-  ;; M-x with SPC - SPC
-  (spacemacs/set-leader-keys "SPC" 'helm-M-x)
 
   ;; Eval and Print ERROR: not working so far
   (evil-define-key 'nomal emacs-lisp-mode-map (kbd "e p") 'eval-print-last-sexp)
@@ -681,6 +783,7 @@ you should place you code here."
   (define-key evil-normal-state-map (kbd "k") 'evil-previous-visual-line)
 
   ;; command-T
+
   (global-set-key (kbd "s-t") 'helm-projectile-find-file)
   (global-set-key (kbd "H-t") 'helm-projectile-find-file)
   (setq projectile-enable-caching nil)
@@ -692,9 +795,6 @@ you should place you code here."
   ;; kill buffers: c-k didn't work right
   (global-set-key (kbd "s-k") 'kill-this-buffer)
   (global-set-key (kbd "H-k") 'kill-this-buffer)
-
-  ;; my old pal C-k
-  ;; (define-key evil-normal-state-map (kbd "C-k") 'kill-this-buffer)
 
   ;; spacemacs as default git editor
   (global-git-commit-mode t)
@@ -721,29 +821,8 @@ you should place you code here."
   ;; flycheck is ugly
   (global-flycheck-mode -1)
 
-  (defun hmz-prog-mode-hook ()
-    (interactive)
+  (global-company-mode t)
 
-    (global-company-mode t)
-
-    ;; FIXME: make me work
-    ;; BUG: it's not activating when prog-mode fires
-    ;; TODO: fix all that garbage
-    (fic-mode t)
-
-    (flycheck-mode -1)
-
-    (rainbow-identifiers-mode t)
-    (rainbow-delimiters-mode-enable)
-
-    (smartparens-global-mode t)
-    (global-evil-matchit-mode 1)
-
-    (visual-line-mode t))
-
-  (add-hook 'prog-mode-hook 'hmz-prog-mode-hook)
-
-  ;; (setq-default mode-line-format nil)
 
   ;; Unix Style C-h
   (global-set-key (kbd "C-?") 'help-command) ;; this isn't working...
@@ -952,13 +1031,6 @@ you should place you code here."
 
    ;; (face-remap-add-relative 'header-line :family "San Francisco" :height 1.0)
 
-   ;; smooth scroll when jumping
-   (require 'sublimity)
-   (require 'sublimity-scroll)
-   (require 'sublimity-attractive)
-   (setq sublimity-attractive-centering-width 110)
-   (sublimity-mode t)
-
    ;; keep these configs here once customize loves to screw up
    (set-face-attribute 'header-line nil :family "San Francisco" :height 1.0)
 
@@ -986,7 +1058,9 @@ you should place you code here."
 
 
    (add-hook 'after-load-theme-hook 'customize-theme-after-load)
-   (add-hook 'after-init-hook 'customize-theme-after-load))
+   (add-hook 'after-init-hook 'customize-theme-after-load)
+
+   ) ;; end user-config
 
 ;;;;;;;;;;;;;;;
 ;; Rotate Text
@@ -1125,21 +1199,48 @@ Example:
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(default ((((min-colors 16777216)) (:background "#282a36" :foreground "#f8f8f2")) (t (:background nil :foreground "#f8f8f2"))))
+ '(ahs-definition-face ((t (:weight bold))))
+ '(ahs-edit-mode-face ((t (:weight bold))))
+ '(ahs-face ((t (:weight bold))))
+ '(ahs-plugin-whole-buffer-face ((t (:underline t))))
+ '(doom-modeline-bar ((t (:inherit highlight :height 2))))
  '(evil-search-highlight-persist-highlight-face ((t (:inherit lazy-highlight))))
+ '(flyspell-duplicate ((t (:underline "DarkOrange"))))
+ '(flyspell-incorrect ((t (:underline "Red1"))))
+ '(header-line ((t (:background "#44475a" :underline "gray20" :height 1.0 :family "San Francisco"))))
  '(highlight-indent-guides-character-face ((t (:foreground "#3df1410a539f"))))
+ '(hydra-face-red ((t (:foreground "#FF0000" :weight bold))))
  '(indent-guide-face ((t (:inherit font-lock-constant-face :slant normal))))
- '(line-number ((t (:background "#282a36" :foreground "#565761" :box nil :slant normal :height 0.9 :family "san francisco")))))
+ '(line-number ((t (:background "#282a36" :foreground "#565761" :slant normal :height 0.8))))
+ '(line-number-current-line ((t (:inherit (font-lock-keyword-face hl-line line-number)))))
+ '(mode-line ((t (:foreground "White" :box (:line-width 1 :color "#44475a") :height 0.9 :family "San Francisco"))))
+ '(mode-line-inactive ((t (:inherit mode-line :background "#373844" :foreground "#f8f8f2" :height 120))))
+ '(neo-banner-face ((t (:inherit font-lock-constant-face :weight bold :family "San Francisco"))))
+ '(neo-button-face ((t (:underline nil :family "San Francisco"))))
+ '(neo-dir-link-face ((t (:foreground "DeepSkyBlue" :family "San Francisco"))))
+ '(neo-file-link-face ((t (:foreground "White" :family "San Francisco"))))
+ '(spacemacs-transient-state-title-face ((t (:inherit mode-line :height 0.8))))
+ '(tabbar-default ((t (:inherit (hl-line header-line) :box nil :underline nil :weight light :height 0.8))))
+ '(tabbar-icon-unselected ((t (:box nil :inherit 'tabbar-default :underline t)))))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(ahs-default-range 'ahs-range-whole-buffer)
+ '(ahs-idle-interval 1.0)
  '(coffee-tab-width 2)
+ '(global-auto-highlight-symbol-mode t)
  '(highlight-indent-guides-character 183)
  '(highlight-indent-guides-method 'character)
+ '(highlight-indent-guides-mode nil t)
  '(highlight-indentation-offset 4)
  '(package-selected-packages
-   '(indent-guide-mode highlight-indent-guides-mode evil-ruby-text-objects vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toml-mode toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocopfmt rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails prodigy popwin pip-requirements persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file ns-auto-titlebar nginx-mode neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-gutter-fringe git-gutter-fringe+ gh-md gcmh fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme doom-themes doom-modeline discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby cargo bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+   '(wakatime-mode rspec-simple ido-completing-read+ shrink-path amx ri-mode ri smooth-scrolling ivy-youtube wgrep ivy-hydra lv flyspell-correct-ivy counsel-projectile counsel swiper ivy doom-todo-ivy magit-todos todo-projectile hl-block hl-block-mode indent-guide-mode highlight-indent-guides-mode evil-ruby-text-objects vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toml-mode toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocopfmt rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails prodigy popwin pip-requirements persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file ns-auto-titlebar nginx-mode mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-gutter-fringe git-gutter-fringe+ gh-md gcmh fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme doom-themes doom-modeline discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby cargo bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))
+ '(wakatime-api-key "79de0de9-6375-48d1-b78f-440418c5e5a0")
+ '(wakatime-cli-path "/usr/local/bin/wakatime")
+ '(wakatime-python-bin "/usr/local/bin/"))
 (defun dotspacemacs/emacs-custom-settings ()
   "Emacs custom settings.
 This is an auto-generated function, do not modify its content directly, use
@@ -1183,7 +1284,7 @@ This function is called at the very end of Spacemacs initialization."
  '(neo-window-width 20)
  '(package-selected-packages
    (quote
-    (yasnippet-snippets symon string-inflection spaceline powerline ruby-refactor ruby-hash-syntax rake inflections pcre2el password-generator spinner overseer org-mime org-brain nameless markdown-mode skewer-mode json-snatcher json-reformat multiple-cursors js2-mode impatient-mode simple-httpd parent-mode helm-purpose window-purpose imenu-list request haml-mode gitignore-mode fringe-helper git-gutter+ git-gutter flyspell-correct flx evil-org magit magit-popup git-commit ghub let-alist with-editor evil-lion iedit smartparens paredit anzu highlight editorconfig counsel-projectile counsel swiper ivy pkg-info epl web-completion-data dash-functional tern company-lua company centered-cursor-mode inf-ruby browse-at-remote f dash s bpr yasnippet packed all-the-icons memoize helm avy helm-core auto-complete popup org-plus-contrib hydra font-lock+ evil goto-chg undo-tree diminish bind-map bind-key async yascroll projectile switch-buffer-functions itail makey dired-toggle dired-open dired-narrow dirtree direx dired-rainbow discover-my-major org-alert all-the-icons-dired diredful dired-single dired-sidebar hide-lines org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-download htmlize gnuplot nginx-mode tide typescript-mode flycheck fic-mode zencoding-mode handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file neotree mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+    (yasnippet-snippets symon string-inflection spaceline powerline ruby-refactor ruby-hash-syntax rake inflections pcre2el password-generator spinner overseer org-mime org-brain nameless markdown-mode skewer-mode json-snatcher json-reformat multiple-cursors js2-mode impatient-mode simple-httpd parent-mode helm-purpose window-purpose imenu-list request haml-mode gitignore-mode fringe-helper git-gutter+ git-gutter flyspell-correct flx evil-org magit magit-popup git-commit ghub let-alist with-editor evil-lion iedit smartparens paredit anzu highlight editorconfig counsel-projectile counsel swiper ivy pkg-info epl web-completion-data dash-functional tern company-lua company centered-cursor-mode inf-ruby browse-at-remote f dash s bpr yasnippet packed all-the-icons memoize helm avy helm-core auto-complete popup org-plus-contrib hydra font-lock+ evil goto-chg undo-tree diminish bind-map bind-key async yascroll projectile switch-buffer-functions itail makey dired-toggle dired-open dired-narrow dirtree direx dired-rainbow discover-my-major org-alert all-the-icons-dired diredful dired-single dired-sidebar hide-lines org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-download htmlize gnuplot nginx-mode tide typescript-mode flycheck fic-mode zencoding-mode handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
  '(sublimity-mode t)
  '(tooltip-use-echo-area t))
 (custom-set-faces
@@ -1203,8 +1304,6 @@ This function is called at the very end of Spacemacs initialization."
  '(evil-search-highlight-persist-highlight-face ((t (:inherit lazy-highlight))))
  '(font-lock-warning-face ((t (:background "DeepSkyBlue" :foreground "#ffb86c"))))
  '(fringe ((t (:foreground "DeepSkyBlue" :background unspecified))))
- '(header-line ((t (:weight thin :family "San Francisco"))))
- '(hl-line ((t (:background "#34374a"))))
  '(neo-banner-face ((t (:foreground "lightblue" :weight bold :family "san francisco"))))
  '(neo-dir-link-face ((t (:foreground "DeepSkyBlue" :family "san francisco"))))
  '(neo-expand-btn-face ((t (:foreground "SkyBlue" :family "San Francisco"))))

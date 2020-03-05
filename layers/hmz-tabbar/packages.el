@@ -110,10 +110,7 @@ which require an initialization must be listed explicitly in the list.")
     (global-set-key [header-line double-wheel-left] 'tabbar-press-scroll-left)
     (global-set-key [header-line wheel-left] nil)
 
-    (setq mouse-wheel-progessive-speed nil)
-    (setq scroll-step 1)
-
-    (setq mouse-wheel-scroll-amount '(1 ((shift) . 10) ((control) . 30)))
+    (setq mouse-wheel-scroll-amount '(1 ((shift) . 1) ((control) . 30)))
     (setq mouse-wheel-progressive-speed nil)
 
     :config
@@ -159,6 +156,7 @@ which require an initialization must be listed explicitly in the list.")
                           :foreground 'unspecified
                           :background (face-attribute 'default :background)
                           :inherit 'tabbar-default
+                          :underline (face-attribute 'font-lock-comment-face :background)
                           :overline nil
                           :weight 'normal)
 
@@ -181,6 +179,7 @@ which require an initialization must be listed explicitly in the list.")
                           :foreground 'unspecified
                           :background 'unspecified
                           :box nil
+                          :underline 'unspecified
                           :inherit 'tabbar-default)
 
       (set-face-attribute 'tabbar-button nil
@@ -193,7 +192,15 @@ which require an initialization must be listed explicitly in the list.")
                                          :inherit 'tabbar-default
                                          ))
         "Unselected tab's icon foreground color."
-        :group 'tabbar))
+        :group 'tabbar)
+
+      ;; set colors through here so it can be dinamically redone
+      (set-face-attribute 'tabbar-icon-unselected nil
+                          :foreground (face-attribute 'font-lock-comment-face :foreground)
+                          :background 'unspecified
+                          :underline (face-attribute 'font-lock-variable-name-face :foreground)
+                          )
+      )
 
     (hmz-tabbar-refresh-faces)
 

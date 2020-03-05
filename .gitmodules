@@ -16,3 +16,9 @@
 [submodule "layers/hmz-misc/local/doom-todo-ivy"]
 	path = layers/hmz-misc/local/doom-todo-ivy
 	url = https://github.com/jsmestad/doom-todo-ivy.git
+[submodule "layers/hmz-misc/local/rspec-simple"]
+	path = layers/hmz-misc/local/rspec-simple
+	url = https://github.com/code-mancers/rspec-simple.git
+[submodule "todo-projectile"]
+	path = layers/hmz-misc/local/todo-projectile
+	url = https://github.com/WolfeCub/todo-projectile.git

@@ -1,20 +1,82 @@
 (defconst hmz-misc-packages
   ;; default behaviour is to install from melpa.org
   '(alert
+    amx
     bpr
     ember-mode
     ;; highlight-indent-guides
+    (el :location local)
+    (doom-todo-ivy :location local)
     (gcmh :location local)
     indicators
-    indent-guide-mode
+    indent-guide
+    wakatime-mode
+    ;; (hl-block-mode (recipe :fetcher github :repo "10sr/emacs-hl-block-mode"))
     neotree
     rubocopfmt
+    (rspec-simple :location local)
     (evil-ruby-text-objects :location local)
     (fira-code-mode :location local)
     (hide-lines :location local)
     (indicators :location local)
     (list-processes+ :location local)
     (switch-buffer-functions :location local)))
+
+(defun hmz-misc/init-ri ()
+  (add-to-list 'load-path  "~/spacemacs.d/layers/hmz-misc/local/rspec-simple")
+  (load "rspec-simple/rspec-simple"))
+
+(defun hmz-misc/init-amx ()
+  (defun spacemacs/amx ()
+    "Execute amx with a better prompt."
+    (interactive)
+    (let ((amx-prompt-string "Emacs commands: "))
+      (amx)))
+
+  (defun spacemacs/amx-major-mode-commands ()
+    "Reexecute amx with major mode commands only."
+    (interactive)
+    (let ((amx-prompt-string (format "%s commands: " major-mode)))
+      (amx-major-mode-commands)))
+
+  (use-package amx
+    :defer t
+    :init
+    (progn
+      (setq-default amx-history-length 32
+                    amx-save-file (concat spacemacs-cache-directory
+                                           ".amx-items"))
+      ;; define the key binding at the very end in order to allow the user
+      ;; to overwrite any key binding
+      (add-hook 'emacs-startup-hook
+                (lambda () (spacemacs/set-leader-keys
+                             dotspacemacs-emacs-command-key 'spacemacs/amx)))
+      (spacemacs/set-leader-keys ":" 'spacemacs/amx-major-mode-commands)
+      (spacemacs/set-leader-keys "SPC" 'spacemacs/amx)
+      (global-set-key (kbd "M-x") 'spacemacs/amx)
+      (global-set-key (kbd "M-X") 'spacemacs/amx-major-mode-commands)
+
+      )))
+
+(defun hmz-misc/init-ri ()
+  (add-to-list 'load-path  "~/spacemacs.d/layers/hmz-misc/local/ri")
+  (load "ri/ri"))
+
+(defun hmz-misc/init-wakatime-mode ()
+  (use-package wakatime-mode
+    :ensure t
+    :init
+    (setq wakatime-python-path "/usr/local/bin/")
+    :config
+    (global-wakatime-mode t)
+    ))
+
+(defun hmz-misc/init-hl-block-mode ()
+  (use-package hl-block-mode
+    :ensure t
+    :config
+    (global-hl-block-mode t)
+    ))
 
 (defun hmz-misc/init-evil-ruby-text-objects ()
   (use-package evil-ruby-text-objects
@@ -27,11 +89,19 @@
 (defun hmz-misc/init-indent-guide ()
   (use-package indent-guide
     :ensure t
-    :init
+    :config
     (indent-guide-mode t)
-    (setq indent-guide-delay 0.5)
+    (setq indent-guide-delay 0.8)
     (setq indent-guide-char "·")
-    ))
+    (setq indent-guide-threshold 1)
+
+    ;; retard removing highlights so I can find myself after long jumps in big
+    ;; blocks
+    (defun indent-guide-pre-command-hook ()
+      ;; some commands' behavior may affected by indent-guide overlays, so
+      ;; remove all overlays in pre-command-hook.
+      (run-with-timer 0.4 nil
+                      (lambda () (indent-guide-remove))))))
 
 (defun hmz-misc/init-highlight-indent-guides ()
   (use-package highlight-indent-guides
@@ -40,11 +110,13 @@
     (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
     (setq highlight-indent-guides-method 'character)))
 
-(defun hmz-misc/init-doom-todo-ivy ()
-  (use-package doom-todo-ivy
-    :load-path "~/space.laghost.d/layers/hmz-misc/local/doom-todo-ivy"
+(defun hmz-misc/post-init-ivy ()
+  (use-package ivy
+    ;; :requires ivy
     :ensure t
-    :hook (after-init . doom-todo-ivy)))
+    :config
+    (add-to-list 'load-path  "~/spacemacs.d/layers/hmz-misc/local/doom-todo-ivy/doom-todo-ivy")
+    (load "doom-todo-ivy/doom-todo-ivy")))
 
 (defun hmz-misc/init-indicators ()
   (use-package indicators
@@ -130,7 +202,8 @@
                (zero-or-more (char (?0 . ?\?)))
                (zero-or-more (char ?\s ?- ?\/))
                (char (?@ . ?~)))
-          (char ""))))
+          (char "")
+          (char ""))))
 
     (defun hmz-misc/bpr-process-filter (proc string)
       (when (buffer-live-p (process-buffer proc))
@@ -166,6 +239,8 @@
                          ;;TODO save re context
                          ;; Color Code
                          ;; ((string-equal "\\n" ansi-code) (insert "\n"))
+                         ((string-equal "" ansi-code)
+                          (delete-backward-char 1))
                          ((string-equal "" ansi-code)
                           (beginning-of-line)
                           (kill-line))
