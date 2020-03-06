@@ -14,6 +14,8 @@
     ;; (hl-block-mode (recipe :fetcher github :repo "10sr/emacs-hl-block-mode"))
     neotree
     rubocopfmt
+    (ri :location local)
+    (tempbuf :location local)
     (rspec-simple :location local)
     (evil-ruby-text-objects :location local)
     (fira-code-mode :location local)
@@ -22,9 +24,25 @@
     (list-processes+ :location local)
     (switch-buffer-functions :location local)))
 
-(defun hmz-misc/init-ri ()
-  (add-to-list 'load-path  "~/spacemacs.d/layers/hmz-misc/local/rspec-simple")
-  (load "rspec-simple/rspec-simple"))
+(defun hmz-misc/init-tempbuf ()
+  (use-package tempbuf
+    :load-path  "~/spacemacs.d/layers/hmz-misc/local/tempbuf/tempbuf.el"
+    :init                             ;
+    ;; modified from jmjeong / jmjeong-emacs
+    (add-hook 'minibuffer-inactive-mode-hook 'turn-on-tempbuf-mode)
+    (add-hook 'dired-mode-hook 'turn-on-tempbuf-mode)
+    (add-hook 'custom-mode-hook 'turn-on-tempbuf-mode)
+    (add-hook 'w3-mode-hook 'turn-on-tempbuf-mode)
+    (add-hook 'Man-mode-hook 'turn-on-tempbuf-mode)
+    (add-hook 'view-mode-hook 'turn-on-tempbuf-mode)
+    (add-hook 'inferior-python-mode-hook 'turn-on-tempbuf-mode)
+    (add-hook 'magit-mode-hook 'turn-on-tempbuf-mode)
+
+    (and (fboundp 'temp-buffer-resize-mode) (temp-buffer-resize-mode t)) ; temp-buffer의 window는 작게
+    ))
+
+(defun hmz-misc/init-rspec-simple ()
+  (use-package rspec-simple))
 
 (defun hmz-misc/init-amx ()
   (defun spacemacs/amx ()
@@ -59,8 +77,7 @@
       )))
 
 (defun hmz-misc/init-ri ()
-  (add-to-list 'load-path  "~/spacemacs.d/layers/hmz-misc/local/ri")
-  (load "ri/ri"))
+  (use-package ri))
 
 (defun hmz-misc/init-wakatime-mode ()
   (use-package wakatime-mode

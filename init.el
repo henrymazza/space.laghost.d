@@ -376,6 +376,9 @@ executes.
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
 
+  ;; init for doom-modeline
+  (doom-modeline-mode 1)
+
   ;; ?Redefine transient state to include Next Conflicted File function
   (spacemacs|define-transient-state smerge
     :title "smerge transient state"
@@ -517,8 +520,10 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loa,
 you should place you code here."
 
-  ;; init for doom-modeline
-  (doom-modeline-mode 1)
+  (add-hook 'before-save-hook
+            (lambda ()
+              (message "hooking...")
+              (set-buffer-modified-p t)))
 
   ;; Monkey Patch (or use functional magic) to show only first name of the
   ;; author in magit-log, as well abbrev. date.
@@ -782,8 +787,14 @@ you should place you code here."
   (define-key evil-normal-state-map (kbd "j") 'evil-next-visual-line)
   (define-key evil-normal-state-map (kbd "k") 'evil-previous-visual-line)
 
-  ;; command-T
+  ;; command-s
+  (defun hmz-init/save-unmodified ()
+    (interactive)
+    (set-buffer-modified-p t)
+    (call-interactively (key-binding "")))
+  (global-set-key (kbd "s-s") 'hmz-init/save-unmodified)
 
+  ;; command-t
   (global-set-key (kbd "s-t") 'helm-projectile-find-file)
   (global-set-key (kbd "H-t") 'helm-projectile-find-file)
   (setq projectile-enable-caching nil)
@@ -1203,7 +1214,7 @@ Example:
  '(ahs-definition-face ((t (:weight bold))))
  '(ahs-edit-mode-face ((t (:weight bold))))
  '(ahs-face ((t (:weight bold))))
- '(ahs-plugin-whole-buffer-face ((t (:underline t))))
+ '(ahs-plugin-whole-buffer-face ((t nil)))
  '(doom-modeline-bar ((t (:inherit highlight :height 2))))
  '(evil-search-highlight-persist-highlight-face ((t (:inherit lazy-highlight))))
  '(flyspell-duplicate ((t (:underline "DarkOrange"))))
@@ -1230,6 +1241,14 @@ Example:
  ;; If there is more than one, they won't work right.
  '(ahs-default-range 'ahs-range-whole-buffer)
  '(ahs-idle-interval 1.0)
+ '(before-save-hook
+    '(time-stamp
+      (lambda nil
+        (message "hooking...")
+        (set-buffer-modified-p t))
+      (lambda nil
+        (set-buffer-modified-p t))
+      whitespace-cleanup spacemacs//python-sort-imports))
  '(coffee-tab-width 2)
  '(global-auto-highlight-symbol-mode t)
  '(highlight-indent-guides-character 183)
@@ -1237,7 +1256,7 @@ Example:
  '(highlight-indent-guides-mode nil t)
  '(highlight-indentation-offset 4)
  '(package-selected-packages
-   '(wakatime-mode rspec-simple ido-completing-read+ shrink-path amx ri-mode ri smooth-scrolling ivy-youtube wgrep ivy-hydra lv flyspell-correct-ivy counsel-projectile counsel swiper ivy doom-todo-ivy magit-todos todo-projectile hl-block hl-block-mode indent-guide-mode highlight-indent-guides-mode evil-ruby-text-objects vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toml-mode toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocopfmt rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails prodigy popwin pip-requirements persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file ns-auto-titlebar nginx-mode mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-gutter-fringe git-gutter-fringe+ gh-md gcmh fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme doom-themes doom-modeline discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby cargo bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))
+    '(tempbuf wakatime-mode rspec-simple ido-completing-read+ shrink-path amx ri-mode ri smooth-scrolling ivy-youtube wgrep ivy-hydra lv flyspell-correct-ivy counsel-projectile counsel swiper ivy doom-todo-ivy magit-todos todo-projectile hl-block hl-block-mode indent-guide-mode highlight-indent-guides-mode evil-ruby-text-objects vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toml-mode toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocopfmt rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails prodigy popwin pip-requirements persp-mode persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file ns-auto-titlebar nginx-mode mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-gutter-fringe git-gutter-fringe+ gh-md gcmh fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme doom-themes doom-modeline discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby cargo bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))
  '(wakatime-api-key "79de0de9-6375-48d1-b78f-440418c5e5a0")
  '(wakatime-cli-path "/usr/local/bin/wakatime")
  '(wakatime-python-bin "/usr/local/bin/"))
