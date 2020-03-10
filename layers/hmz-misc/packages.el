@@ -184,12 +184,12 @@
     (setq doom/ivy-task-tags
           '(
             ("HACK" . warning)
-            ("OPTIMIZE". success)
+            ("OPTIMIZE" . success)
             ("XXX" . font-lock-function-name-face)
             ("NOTE"  . font-lock-variable-name-face)
             ("BUG"  . font-lock-warning-face)
             ("TODO"  . warning)
-        ("FIXME" . error))
+            ("FIXME" . error)))
 
     ))
 
