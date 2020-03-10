@@ -1264,7 +1264,7 @@ Example:
      whitespace-cleanup spacemacs//python-sort-imports))
  '(coffee-tab-width 2)
  '(doom-modeline-height 18)
- '(doom-modeline-indent-info t)
+ '(doom-modeline-indent-info nil)
  '(doom-modeline-mode t)
  '(fic-highlighted-words '("FIXME" "TODO" "BUG" "HACK" "XXX" "OPTIMIZE" "NOTE"))
  '(global-auto-highlight-symbol-mode t)

@@ -42,6 +42,8 @@
   (use-package doom-modeline
     :if window-system
     :config
+    ;; The maximum displayed length of the branch name of version control.
+    (setq doom-modeline-vcs-max-length 34)
     (setq doom-modeline-height 18)
     (doom-modeline-mode 1)))
 
