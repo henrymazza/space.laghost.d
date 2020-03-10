@@ -475,6 +475,8 @@ element."
                       "proc"
                     "limbo"))
                  ((eq major-mode 'dired-mode) "dired")
+                 ((string-match-p "magit" (symbol-name major-mode))
+                  "magit")
                  ((projectile-project-p) (projectile-project-name))
                  ((buffer-file-name) "other")
                  (t "limbo"))

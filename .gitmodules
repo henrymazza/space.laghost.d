@@ -22,3 +22,6 @@
 [submodule "todo-projectile"]
 	path = layers/hmz-misc/local/todo-projectile
 	url = https://github.com/WolfeCub/todo-projectile.git
+[submodule "layers/hmz-misc/local/restore-frame-position"]
+	path = layers/hmz-misc/local/restore-frame-position
+	url = https://github.com/aaronjensen/restore-frame-position.git

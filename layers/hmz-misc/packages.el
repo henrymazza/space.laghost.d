@@ -1,28 +1,56 @@
 (defconst hmz-misc-packages
-  ;; default behaviour is to install from melpa.org
+  ;; default behavior is to install from melpa.org
   '(alert
     amx
     bpr
+    doom-modeline
     ember-mode
     ;; highlight-indent-guides
-    (el :location local)
-    (doom-todo-ivy :location local)
-    (gcmh :location local)
-    indicators
+    ;; hl-block-mode
     indent-guide
-    wakatime-mode
-    ;; (hl-block-mode (recipe :fetcher github :repo "10sr/emacs-hl-block-mode"))
+    indicators
     neotree
     rubocopfmt
-    (ri :location local)
-    (tempbuf :location local)
-    (rspec-simple :location local)
+    ;; (sublimity :location (recipe :fetcher github :repo "zk-phi/sublimity"))
+    sublimity
+    wakatime-mode
+    (doom-todo-ivy :location local)
     (evil-ruby-text-objects :location local)
     (fira-code-mode :location local)
+    (gcmh :location local)
     (hide-lines :location local)
     (indicators :location local)
     (list-processes+ :location local)
-    (switch-buffer-functions :location local)))
+    (restore-frame-position :location local)
+    (ri :location local)
+    (rspec-simple :location local)
+    (switch-buffer-functions :location local))
+    (tempbuf :location local))
+
+(defun hmz-misc/init-sublimity ()
+    (use-package sublimity
+      :init
+      (require 'sublimity)
+      (require 'sublimity-scroll)
+      (require 'sublimity-attractive)
+      (setq sublimity-attractive-centering-width 110)
+      (sublimity-mode t)
+
+      ))
+
+(defun hmz-misc/init-doom-modeline ()
+  (use-package doom-modeline
+    :if window-system
+    :config
+    (setq doom-modeline-height 18)
+    (doom-modeline-mode 1)))
+
+(defun hmz-misc/init-restore-frame-position ()
+  (use-package restore-frame-position
+    :load-path "/Users/HMz/Development/space.laghost.d/layers/hmz-misc/local/restore-frame-position/restore-frame-position.el"
+    :config
+    (restore-frame-position)
+    ))
 
 (defun hmz-misc/init-tempbuf ()
   (use-package tempbuf
@@ -30,13 +58,27 @@
     :init                             ;
     ;; modified from jmjeong / jmjeong-emacs
     (add-hook 'minibuffer-inactive-mode-hook 'turn-on-tempbuf-mode)
+    (add-hook 'help-mode-hook 'turn-on-tempbuf-mode)
     (add-hook 'dired-mode-hook 'turn-on-tempbuf-mode)
     (add-hook 'custom-mode-hook 'turn-on-tempbuf-mode)
     (add-hook 'w3-mode-hook 'turn-on-tempbuf-mode)
     (add-hook 'Man-mode-hook 'turn-on-tempbuf-mode)
     (add-hook 'view-mode-hook 'turn-on-tempbuf-mode)
+    (add-hook 'helm-major-mode-hook 'turn-on-tempbuf-mode)
+    (add-hook 'fundamental-mode-hook 'turn-on-tempbuf-mode)
     (add-hook 'inferior-python-mode-hook 'turn-on-tempbuf-mode)
     (add-hook 'magit-mode-hook 'turn-on-tempbuf-mode)
+
+    (defun hmz-misc/tempbuf-kill-func ()
+             (message "%s" (buffer-name))
+             (shell-command
+              (combine-and-quote-strings
+               (list "terminal-notifier"
+                 "-message"  (buffer-name)
+                 "-title" "Tempbuf"
+                 ) " ")))
+
+    ;; (add-hook 'tempbuf-kill-hook 'hmz-misc/tempbuf-kill-func)
 
     (and (fboundp 'temp-buffer-resize-mode) (temp-buffer-resize-mode t)) ; temp-buffer의 window는 작게
     ))
@@ -92,12 +134,11 @@
   (use-package hl-block-mode
     :ensure t
     :config
-    (global-hl-block-mode t)
-    ))
+    (global-hl-block-mode t)))
 
 (defun hmz-misc/init-evil-ruby-text-objects ()
   (use-package evil-ruby-text-objects
-    :ensure t
+    :load-path  "~/.spacemacs.d/layers/hmz-misc/local/evil-ruby-text-objects/evil-ruby-text-objects.el"
     :init
     (add-hook 'ruby-mode-hook 'evil-ruby-text-objects-mode)
     (add-hook 'enh-ruby-mode-hook 'evil-ruby-text-objects-mode)
@@ -105,7 +146,7 @@
 
 (defun hmz-misc/init-indent-guide ()
   (use-package indent-guide
-    :ensure t
+    ;; :if window-system
     :config
     (indent-guide-mode t)
     (setq indent-guide-delay 0.8)
@@ -127,13 +168,30 @@
     (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
     (setq highlight-indent-guides-method 'character)))
 
-(defun hmz-misc/post-init-ivy ()
-  (use-package ivy
+(defun hmz-misc/init-doom-todo-ivy ()
+  (use-package doom-todo-ivy
     ;; :requires ivy
-    :ensure t
-    :config
-    (add-to-list 'load-path  "~/spacemacs.d/layers/hmz-misc/local/doom-todo-ivy/doom-todo-ivy")
-    (load "doom-todo-ivy/doom-todo-ivy")))
+    :hook (after-init . doom-todo-ivy)
+    :load-path "~/.spacemacs.d/layers/hmz-misc/local/doom-todo-ivy/doom-todo-ivy.el"
+    :init
+    ;; XXX test
+    ;; NOTE test
+    ;; HACK test
+    ;; OPTIMIZE test
+    ;; BUG test
+    ;; TODO test
+    ;; FIXME test
+    (setq doom/ivy-task-tags
+          '(
+            ("HACK" . warning)
+            ("OPTIMIZE". success)
+            ("XXX" . font-lock-function-name-face)
+            ("NOTE"  . font-lock-variable-name-face)
+            ("BUG"  . font-lock-warning-face)
+            ("TODO"  . warning)
+        ("FIXME" . error))
+
+    ))
 
 (defun hmz-misc/init-indicators ()
   (use-package indicators
@@ -152,6 +210,7 @@
 
 (defun hmz-misc/init-fira-code-mode ()
   (use-package fira-code-mode
+    :if window-system
     :load-path "~/.spacemacs.d/layers/hmz-misc/local/fira-code-mode/"
     :hook prog-mode))
 
