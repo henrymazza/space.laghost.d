@@ -25,3 +25,9 @@
 [submodule "layers/hmz-misc/local/restore-frame-position"]
 	path = layers/hmz-misc/local/restore-frame-position
 	url = https://github.com/aaronjensen/restore-frame-position.git
+[submodule "layers/hmz-misc/local/persp-mode-projectile-bridge.el"]
+	path = layers/hmz-misc/local/persp-mode-projectile-bridge.el
+	url = https://github.com/Bad-ptr/persp-mode-projectile-bridge.el.git
+[submodule "layers/hmz-misc/local/workgroups.el"]
+	path = layers/hmz-misc/local/workgroups.el
+	url = https://github.com/tlh/workgroups.el.git
