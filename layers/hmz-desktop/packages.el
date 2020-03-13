@@ -34,10 +34,7 @@
       (setq desktop-dirname (concat user-emacs-directory ".cache/"))
 
       ;; use different file to gui
-      (setq desktop-base-file-name ".emacs.app.desktop" )
-
-      ;; beyond this number is restored lazily
-      (setq desktop-restore-eager 5)
+      ;; (setq desktop-base-file-name ".emacs.app.desktop" )
 
       ;; Make sure that even if emacs or OS crashed, emacs
       ;; still have last opened files.
@@ -70,8 +67,8 @@
                   ;; Reset desktop modification time so the user is not bothered
                   (setq desktop-file-modtime (nth 5 (file-attributes (desktop-full-file-name)))))))
 
-    (setq desktop-base-lock-name
-          (convert-standard-filename (format ".emacs.app.desktop.lock-%d" (emacs-pid))))
+    ;; (setq desktop-base-lock-name
+          ;; (convert-standard-filename (format ".emacs.app.desktop.lock-%d" (emacs-pid))))
 
     ;; If the *scratch* buffer is the current one, then create a new
     ;; empty untitled buffer to hide *scratch*
