@@ -3,6 +3,8 @@
   '(alert
     amx
     bpr
+    centaur-tabs
+    direx
     doom-modeline
     ember-mode
     ;; highlight-indent-guides
@@ -12,8 +14,13 @@
     neotree
     rubocopfmt
     ;; (sublimity :location (recipe :fetcher github :repo "zk-phi/sublimity"))
+    ibuffer-sidebar
+    dired-sidebar
     sublimity
     wakatime-mode
+    persp-mode
+    persp-mode-projectile-bridge
+    ;; (persp-mode-projectile-bridge :location local)
     (doom-todo-ivy :location local)
     (evil-ruby-text-objects :location local)
     (fira-code-mode :location local)
@@ -27,9 +34,101 @@
     (switch-buffer-functions :location local))
     (tempbuf :location local))
 
+(defun hmz-misc/init-ibuffer-sidebar ()
+  (use-package ibuffer-sidebar
+    ;; :load-path "~/.emacs.d/fork/ibuffer-sidebar"
+    :ensure nil
+    :commands (ibuffer-sidebar-toggle-sidebar)
+    :config
+    (setq ibuffer-sidebar-use-custom-font t)
+    (setq ibuffer-sidebar-face `(:family "San Francisco" :height 120)))
+  )
+
+(defun hmz-misc/init-dired-sidebar ()
+(use-package dired-sidebar
+  :ensure t
+  :commands (dired-sidebar-toggle-sidebar))
+  )
+
+(defun hmz-misc/init-centaur-tabs ()
+  (use-package centaur-tabs
+    :demand
+    :config
+    (centaur-tabs-mode t)
+    :bind
+    ("C-<prior>" . centaur-tabs-backward)
+    ("C-<next>" . centaur-tabs-forward))
+  )
+
+(defun hmz-misc/init-direx ()
+  (use-package direx
+    :init
+    ))
+
+(defun hmz-misc/init-persp-mode-projectile-bridge ()
+  (use-package persp-mode-projectile-bridge
+    :after (projectile persp-mode)
+    ;; :load-path "/Users/HMz/.spacemacs.d/layers/hmz-misc/local/persp-mode-projectile-bridge.el/persp-mode-projectile-bridge.el"
+    :defer 2
+    :init
+    (add-hook 'persp-mode-projectile-bridge-mode-hook
+              #'(lambda ()
+                  (if persp-mode-projectile-bridge-mode
+                      (persp-mode-projectile-bridge-find-perspectives-for-all-buffers)
+                    (persp-mode-projectile-bridge-kill-perspectives))))
+
+    :config
+    (persp-mode-projectile-bridge-mode 1)
+
+    ))
+
+(defun hmz-misc/post-init-persp-mode ()
+  (use-package persp-mode
+    :requires projectile
+    :custom
+    (persp-auto-save-num-of-backups 10)
+    (persp-autokill-buffer-on-remove 'kill-weak)
+    (persp-interactive-completion-system 'ido)
+    (persp-keymap-prefix "")
+    (persp-nil-name "nil")
+
+    :config
+    (persp-def-auto-persp "dotfiles"
+                          :mode 'prog-mode
+                          ;; :predicate (lambda (buffer state)
+                          ;;              (message "%s" buffer)
+                          ;;              nil
+
+                          ;;              )
+                          ;; :parameters '((dont-save-to-file . t))
+                          ;; :switch 'frame
+                          )
+
+    (persp-def-auto-persp "ruby"
+                          :buffer-name "\\.rb")
+
+    (persp-def-auto-persp "elisp"
+                          :buffer-name "\\.el")
+
+    (persp-def-auto-persp "projectile"
+                          :hooks 'projectile-mode-hook
+                          :get-name (projectile-project-root)
+                          :predicate (lambda (buffer state)
+                                       (message ">>> %s" buffer)
+                                       (if (and (not (eq nil (buffer-file-name buffer)))
+                                                (bound-and-true-p projectile-mode)
+                                                (projectile-project-p)
+                                                (projectile-project-buffer-p buffer (projectile-project-root)))
+                                           nil))
+                          :on-match (lambda (perspective buffer after-match hook args)
+                                      (persp-frame-switch perspective))
+
+                          )
+))
+
 (defun hmz-misc/init-sublimity ()
     (use-package sublimity
-      :init
+      :config
       (require 'sublimity)
       (require 'sublimity-scroll)
       (require 'sublimity-attractive)
@@ -49,7 +148,7 @@
 
 (defun hmz-misc/init-restore-frame-position ()
   (use-package restore-frame-position
-    :load-path "/Users/HMz/Development/space.laghost.d/layers/hmz-misc/local/restore-frame-position/restore-frame-position.el"
+    :load-path "/Users/HMz/.spacemacs.d/layers/hmz-misc/local/restore-frame-position/restore-frame-position.el"
     :config
     (restore-frame-position)
     ))
@@ -57,7 +156,7 @@
 (defun hmz-misc/init-tempbuf ()
   (use-package tempbuf
     :load-path  "~/spacemacs.d/layers/hmz-misc/local/tempbuf/tempbuf.el"
-    :init                             ;
+    :config
     ;; modified from jmjeong / jmjeong-emacs
     (add-hook 'minibuffer-inactive-mode-hook 'turn-on-tempbuf-mode)
     (add-hook 'help-mode-hook 'turn-on-tempbuf-mode)
@@ -71,6 +170,9 @@
     (add-hook 'inferior-python-mode-hook 'turn-on-tempbuf-mode)
     (add-hook 'magit-mode-hook 'turn-on-tempbuf-mode)
 
+    ;; tempbuf by default
+    (add-hook 'find-file-hooks 'turn-on-tempbuf-mode)
+
     (defun hmz-misc/tempbuf-kill-func ()
              (message "%s" (buffer-name))
              (shell-command
@@ -80,7 +182,7 @@
                  "-title" "Tempbuf"
                  ) " ")))
 
-    ;; (add-hook 'tempbuf-kill-hook 'hmz-misc/tempbuf-kill-func)
+    (add-hook 'tempbuf-kill-hook 'hmz-misc/tempbuf-kill-func)
 
     (and (fboundp 'temp-buffer-resize-mode) (temp-buffer-resize-mode t)) ; temp-buffer의 window는 작게
     ))
@@ -148,9 +250,8 @@
 
 (defun hmz-misc/init-indent-guide ()
   (use-package indent-guide
-    ;; :if window-system
-    :config
-    (indent-guide-mode t)
+    :if window-system
+    :init
     (setq indent-guide-delay 0.8)
     (setq indent-guide-char "·")
     (setq indent-guide-threshold 1)
@@ -161,7 +262,15 @@
       ;; some commands' behavior may affected by indent-guide overlays, so
       ;; remove all overlays in pre-command-hook.
       (run-with-timer 0.4 nil
-                      (lambda () (indent-guide-remove))))))
+                      (lambda () (indent-guide-remove))))
+
+    (add-hook 'prog-mode-hook
+              (lambda() (indent-guide-mode t)))
+
+    (highlight-indent-guides-mode -1)
+    (highlight-indentation-mode -1)
+
+    ))
 
 (defun hmz-misc/init-highlight-indent-guides ()
   (use-package highlight-indent-guides
