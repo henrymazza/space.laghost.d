@@ -505,4 +505,43 @@ element."
     (add-hook 'first-change-hook 'hmz-tabbar-refresh-tabs))
 
     ;; init me!
-    (tabbar-mode 1))
+  (tabbar-mode 1)
+  ;; redefine tabbar-add-tab so that it alphabetizes / sorts the tabs
+  ;; TODO: better treat non-file buffers in sort
+  (defun tabbar-add-tab (tabset object &optional append)
+    "Add to TABSET a tab with value OBJECT if there isn't one there yet.
+  If the tab is added, it is added at the beginning of the tab list,
+  unless the optional argument APPEND is non-nil, in which case it is
+  added at the end."
+    (let ((tabs (tabbar-tabs tabset)))
+      (if (tabbar-get-tab object tabset)
+          tabs
+        (let* (
+            (tab (tabbar-make-tab object tabset))
+            (tentative-new-tabset
+              (if append
+                (append tabs (list tab))
+                (cons tab tabs)))
+            (new-tabset
+              (sort
+                tentative-new-tabset
+                #'(lambda (e1 e2)
+                    (setq file1 (buffer-local-value 'buffer-file-name (get-buffer (car e1)))
+                          file2 (buffer-local-value 'buffer-file-name (get-buffer (car e2))))
+                    (if (and file1 file2)
+                      (not (time-less-p
+                            (file-attribute-modification-time
+                             (file-attributes (expand-file-name file1)))
+                            (file-attribute-modification-time
+
+                             (file-attributes (expand-file-name file2)))
+                            ))
+                      (progn
+                        (message ">>> NULL")
+                        t))
+
+                    ))))
+          (tabbar-set-template tabset nil)
+          (set tabset new-tabset)))))
+
+  )
