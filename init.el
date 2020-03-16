@@ -37,6 +37,7 @@ values."
   ;; of a list then all discovered layers will be installed.
   dotspacemacs-configuration-layers
   '(
+    gnus
     php
     html
     rust
@@ -383,6 +384,23 @@ executes.
  This function is mostly useful for variables that need to be set
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
+
+  ;; config shell-pop
+  (custom-set-variables
+   ;; custom-set-variables was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   ;; '(shell-pop-default-directory "/Users/kyagi/git")
+   ;; '(shell-pop-shell-type (quote ("ansi-term" "*ansi-term*" (lambda nil (ansi-term shell-pop-term-shell)))))
+   ;; '(shell-pop-term-shell "/bin/bash")
+   ;; '(shell-pop-universal-key "C-t")
+   '(shell-pop-window-size 30)
+   '(shell-pop-full-span nil)
+   '(shell-pop-window-position "left")
+   ;; '(shell-pop-autocd-to-working-dir t)
+   '(shell-pop-restore-window-configuration t)
+   '(shell-pop-cleanup-buffer-at-process-exit t))
 
   ;; force enh-ruby-mode to syntax highlight
   (add-hook 'enh-ruby-mode-hook
@@ -1095,7 +1113,6 @@ you should place you code here."
     ("enable" "disable")
     ("enabled" "disabled")
     ("describe" "context" "it")
-    ("build" "create")
     ("t" "nil")
     ("if" "unless")
     ("top" "bottom")
