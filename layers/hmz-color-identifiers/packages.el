@@ -7,6 +7,11 @@
 
 (defun hmz-color-identifiers/post-rainbow-delimiters ()
   (use-package rainbow-delimiters
+    :init
+    (set-face-attribute 'rainbow-delimiters-unmatched-face nil
+            :foreground "red"
+            :inherit 'error
+            :box t)
     :config
     (add-hook 'prog-mode-hook
               (lambda ()
@@ -87,5 +92,6 @@
               (lambda ()
                 (rainbow-identifiers-mode t)
                 (rainbow-delimiters-mode-enable)
+                (font-lock-fillin-text-property)
                 ))
     ))

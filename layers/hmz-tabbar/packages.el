@@ -536,9 +536,7 @@ element."
 
                              (file-attributes (expand-file-name file2)))
                             ))
-                      (progn
-                        (message ">>> NULL")
-                        t))
+                      t)
 
                     ))))
           (tabbar-set-template tabset nil)

@@ -37,7 +37,6 @@ values."
   ;; of a list then all discovered layers will be installed.
   dotspacemacs-configuration-layers
   '(
-    gnus
     php
     html
     rust
@@ -65,7 +64,7 @@ values."
     hmz-misc
     (hmz-color-identifiers
      :variables hmz-color-identifiers-saturation 20)
-    ;; hmz-desktop
+    hmz-desktop
 
     better-defaults
     emacs-lisp
@@ -109,6 +108,7 @@ values."
     discover-my-major
     doom-themes
     dracula-theme
+    enh-ruby-mode
     evil-magit
     evil-matchit
     fic-mode
@@ -385,6 +385,30 @@ executes.
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
 
+  ;; Kill every buffer not associated with a file
+  ;; https://emacs.stackexchange.com/questions/35906/how-can-i-automatically-close-buffers-when-the-underlying-file-is-deleted
+  (defun buffer-backed-by-file-p (buffer)
+    (let ((backing-file (buffer-file-name buffer)))
+      (if (buffer-modified-p buffer)
+          t
+        (if backing-file
+            (file-exists-p (buffer-file-name buffer))
+          t))))
+
+  (defun hmz-init/kill-orphan-buffers  ()
+    (interactive)
+    (mapc 'kill-buffer (-remove 'buffer-backed-by-file-p (buffer-list))))
+
+  (global-auto-revert-mode t)
+
+  ;; turn off magic comments for any ruby mode
+  (setq enh-ruby-add-encoding-comment-on-save nil)
+  (setq ruby-insert-encoding-magic-comment nil)
+
+  ;; try to fix "unrecognized entry undo list ..."
+  ;; seems promising
+  (setq undo-tree-enable-undo-in-region nil)
+
   ;; config shell-pop
   (custom-set-variables
    ;; custom-set-variables was added by Custom.
@@ -401,10 +425,6 @@ before packages are loaded. If you are unsure, you should try in setting them in
    ;; '(shell-pop-autocd-to-working-dir t)
    '(shell-pop-restore-window-configuration t)
    '(shell-pop-cleanup-buffer-at-process-exit t))
-
-  ;; force enh-ruby-mode to syntax highlight
-  (add-hook 'enh-ruby-mode-hook
-            (lambda () (run-with-timer 1 nil 'font-lock-fontify-buffer)))
 
   (setq initial-buffer-choice t)
 
@@ -435,7 +455,6 @@ before packages are loaded. If you are unsure, you should try in setting them in
     ("r" smerge-refine)
     ("u" undo-tree-undo)
     ("q" nil :exit t))
-
 
   (if (window-system)
       (global-auto-highlight-symbol-mode 1))
@@ -521,7 +540,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
   (setq undo-tree-enable-undo-in-region nil)
 
   ;; keep undo tree across restarts
-  (setq undo-tree-auto-save-history t)
+  (setq undo-tree-auto-save-history nil)
 
   ;; keep undo tree files in proper place
   (setq undo-tree-history-directory-alist '(("." . "~/.spacemacs.d/undo")))
@@ -539,15 +558,41 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loa,
 you should place you code here."
 
+  ;; disable vc in tramp dirs (too radical!)
+  ;; (setq vc-ignore-dir-regexp
+  ;;       (format "\\(%s\\)\\|\\(%s\\)"
+  ;;               vc-ignore-dir-regexp
+  ;;               tramp-file-name-regexp))
+
+  ;; just use git
+  (setq vc-handled-backends '(Git))
+
+  ;; change executable for rspec
+  (defun rspec-compile-on-line ()
+  (interactive)
+  (progn
+    (window-configuration-to-register 9)
+    (compile (format "cd %s;bundle exec spring rspec -f doc %s:%s"
+                     (get-closest-gemfile-root)
+                     (file-relative-name (buffer-file-name) (get-closest-gemfile-root))
+                     (line-number-at-pos)
+                     ) t)))
   ;; auto refresh
   (add-hook 'ibuffer-mode-hook (lambda () (ibuffer-auto-mode 1)))
 
   (global-auto-revert-mode t)
 
-  (add-hook 'before-save-hook
-            (lambda ()
-              (message "hooking...")
-              (set-buffer-modified-p t)))
+  (defun hmz-init/before-save (save-fun &rest args)
+    (set-buffer-modified-p t)
+    (if (file-exists-p (buffer-file-name))
+        (progn
+          (set-buffer-modified-p t)
+          (apply save-fun args))
+      (if (y-or-n-p (concat "Buffer " (buffer-name) " has no file on disk! Create it?"))
+          (apply save-fun args))))
+
+
+  (advice-add 'save-buffer :around #'hmz-init/before-save)
 
   ;; Monkey Patch (or use functional magic) to show only first name of the
   ;; author in magit-log, as well abbrev. date.
@@ -787,6 +832,15 @@ you should place you code here."
   ;; Find String in Project
   (global-set-key (kbd "s-F") 'helm-projectile-ag)
 
+;;;###autoload
+  (defun projectile-save-project-buffers ()
+    "Save all project buffers."
+    (interactive)
+    (dolist (buf (projectile-project-buffers))
+      (with-current-buffer buf
+        (when (and buffer-file-name (buffer-modified-p))
+          (save-buffer)))))
+
   ;; Salve all Projectile buffers
   (global-set-key (kbd "s-S") 'projectile-save-project-buffers)
   (spacemacs/set-leader-keys "p s" 'projectile-save-project-buffers)
@@ -813,14 +867,6 @@ you should place you code here."
   ;; Treat wrapped line scrolling as single lines
   (define-key evil-normal-state-map (kbd "j") 'evil-next-visual-line)
   (define-key evil-normal-state-map (kbd "k") 'evil-previous-visual-line)
-
-  ;; command-s
-  (defun hmz-init/save-unmodified ()
-    (interactive)
-    (set-buffer-modified-p t)
-    (call-interactively (key-binding "")))
-
-  (global-set-key (kbd "s-s") 'hmz-init/save-unmodified)
 
   ;; command-t
   (global-set-key (kbd "s-t") 'helm-projectile-find-file)
@@ -992,31 +1038,32 @@ you should place you code here."
               (make-frame
                '((visibility . t)
                  (name . "Monitor")
+                 (vertical-scroll-bars . t)
+
 
                  (minibuffer . t)
                  (height . 22) (width . 120)
                  (top . 1000) (left . 0)
-                 (buffer-list . '("*Messages*"))
-                 (unsplittable . t))))
+                 (unsplittable . t)
+                 )))
 
         (with-selected-window (frame-selected-window hmz-messages-frame)
           ;;TODO: (handle-switch-frame)
-          (switch-to-buffer "*Messages*")
-          (message "current buffer %s" (buffer-name))
-          ;; (hidden-mode-line-mode t)    ;
-          ;; (spacemacs/enable-transparency hmz-messages-frame 90)
-          ;; (setq dotspacemacs-inactive-transparency 70)
-          ;; (tabbar-local-mode 0)
+          (switch-to-buffer "*Messages*" nil t)
+          (hidden-mode-line-mode t)    ;
+          (spacemacs/enable-transparency hmz-messages-frame 90)
+          (setq dotspacemacs-inactive-transparency 70)
+          (tabbar-local-mode 0)
           (set-background-color "black")
           (set-foreground-color "medium spring green")
 
-          ;; (setq mode-line-format nil)
+          (setq mode-line-format nil)
 
-          ;; (setq buffer-face-mode-face `(:background "#333333"))
+          (setq buffer-face-mode-face `(:background "#333333"))
           (buffer-face-mode 1)
           (text-scale-set -1)
-          ;; (set-frame-parameter hmz-messages-frame 'unsplittable t)
-          ;; (set-window-dedicated-p (selected-window) t)
+          (set-frame-parameter hmz-messages-frame 'unsplittable t)
+          (set-window-dedicated-p (selected-window) t)
 
           (spacemacs/toggle-maximize-buffer)
 
@@ -1026,7 +1073,7 @@ you should place you code here."
           (set-window-fringes (selected-window) 0 0 nil)
           )
         ;; (message "%s" original-frame)
-        (select-frame-set-input-focus original-frame)
+        ;; (select-frame-set-input-focus original-frame)
 
         ;; (setq hmz-neotree-hidden nil)
         )))
@@ -1113,13 +1160,14 @@ you should place you code here."
     ("enable" "disable")
     ("enabled" "disabled")
     ("describe" "context" "it")
+    ("create" "build")
     ("t" "nil")
     ("if" "unless")
     ("top" "bottom")
     ("left" "right")
     ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")
     ("relative" "absolute" "fixed" "static" "sticky")
-    ("aliceblue" "antiquewhite" "aqua" "aquamarine" "azure" "beige" "bisque" "black" "blanchedalmond" "blue" "blueviolet" "brown" "burlywood" "cadetblue" "chartreuse" "chocolate" "coral" "cornflowerblue" "cornsilk" "crimson" "cyan" "darkblue" "darkcyan" "darkgoldenrod" "darkgray" "darkgrey" "darkgreen" "darkkhaki" "darkmagenta" "darkolivegreen" "darkorange" "darkorchid" "darkred" "darksalmon" "darkseagreen" "darkslateblue" "darkslategray" "darkslategrey" "darkturquoise" "darkviolet" "deeppink" "deepskyblue" "dimgray" "dimgrey" "dodgerblue" "firebrick" "floralwhite" "forestgreen" "fuchsia" "gainsboro" "ghostwhite" "gold" "goldenrod" "gray" "grey" "green" "greenyellow" "honeydew" "hotpink" "indianred" "indigo" "ivory" "khaki" "lavender" "lavenderblush" "lawngreen" "lemonchiffon" "lightblue" "lightcoral" "lightcyan" "lightgoldenrodyellow" "lightgray" "lightgrey" "lightgreen" "lightpink" "lightsalmon" "lightseagreen" "lightskyblue" "lightslategray" "lightslategrey" "lightsteelblue" "lightyellow" "lime" "limegreen" "linen" "magenta" "maroon" "mediumaquamarine" "mediumblue" "mediumorchid" "mediumpurple" "mediumseagreen" "mediumslateblue" "mediumspringgreen" "mediumturquoise" "mediumvioletred" "midnightblue" "mintcream" "mistyrose" "moccasin" "navajowhite" "navy" "oldlace" "olive" "olivedrab" "orange" "orangered" "orchid" "palegoldenrod" "palegreen" "paleturquoise" "palevioletred" "papayawhip" "peachpuff" "peru" "pink" "plum" "powderblue" "purple" "rebeccapurple" "red" "rosybrown" "royalblue" "saddlebrown" "salmon" "sandybrown" "seagreen" "seashell" "sienna" "silver" "skyblue" "slateblue" "slategray" "slategrey" "snow" "springgreen" "steelblue" "tan" "teal" "thistle" "tomato" "turquoise" "violet" "wheat" "white" "whitesmoke" "yellow" "yellowgreen")
+    ;; ("aliceblue" "antiquewhite" "aqua" "aquamarine" "azure" "beige" "bisque" "black" "blanchedalmond" "blue" "blueviolet" "brown" "burlywood" "cadetblue" "chartreuse" "chocolate" "coral" "cornflowerblue" "cornsilk" "crimson" "cyan" "darkblue" "darkcyan" "darkgoldenrod" "darkgray" "darkgrey" "darkgreen" "darkkhaki" "darkmagenta" "darkolivegreen" "darkorange" "darkorchid" "darkred" "darksalmon" "darkseagreen" "darkslateblue" "darkslategray" "darkslategrey" "darkturquoise" "darkviolet" "deeppink" "deepskyblue" "dimgray" "dimgrey" "dodgerblue" "firebrick" "floralwhite" "forestgreen" "fuchsia" "gainsboro" "ghostwhite" "gold" "goldenrod" "gray" "grey" "green" "greenyellow" "honeydew" "hotpink" "indianred" "indigo" "ivory" "khaki" "lavender" "lavenderblush" "lawngreen" "lemonchiffon" "lightblue" "lightcoral" "lightcyan" "lightgoldenrodyellow" "lightgray" "lightgrey" "lightgreen" "lightpink" "lightsalmon" "lightseagreen" "lightskyblue" "lightslategray" "lightslategrey" "lightsteelblue" "lightyellow" "lime" "limegreen" "linen" "magenta" "maroon" "mediumaquamarine" "mediumblue" "mediumorchid" "mediumpurple" "mediumseagreen" "mediumslateblue" "mediumspringgreen" "mediumturquoise" "mediumvioletred" "midnightblue" "mintcream" "mistyrose" "moccasin" "navajowhite" "navy" "oldlace" "olive" "olivedrab" "orange" "orangered" "orchid" "palegoldenrod" "palegreen" "paleturquoise" "palevioletred" "papayawhip" "peachpuff" "peru" "pink" "plum" "powderblue" "purple" "rebeccapurple" "red" "rosybrown" "royalblue" "saddlebrown" "salmon" "sandybrown" "seagreen" "seashell" "sienna" "silver" "skyblue" "slateblue" "slategray" "slategrey" "snow" "springgreen" "steelblue" "tan" "teal" "thistle" "tomato" "turquoise" "violet" "wheat" "white" "whitesmoke" "yellow" "yellowgreen")
     ("yes" "no"))
   "List of text rotation sets.")
 
@@ -1271,7 +1319,8 @@ Example:
  '(speedbar-separator-face ((t nil)))
  '(speedbar-tag-face ((t nil)))
  '(tabbar-default ((t (:inherit (hl-line header-line) :box nil :underline nil :weight light :height 0.8))))
- '(tabbar-icon-unselected ((t (:box nil :inherit 'tabbar-default :underline t)))))
+ '(tabbar-icon-unselected ((t (:box nil :inherit 'tabbar-default :underline t))))
+ '(which-key-posframe-border ((t (:inherit default :background "gray50" :underline t)))))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -1279,15 +1328,21 @@ Example:
  ;; If there is more than one, they won't work right.
  '(ahs-default-range 'ahs-range-whole-buffer)
  '(ahs-idle-interval 1.0)
+ '(auto-revert-buffer-list-filter 'magit-auto-revert-buffer-p)
+ '(auto-revert-verbose t)
  '(before-save-hook
-   '(time-stamp
-     (lambda nil
-       (set-buffer-modified-p t))
-     (lambda nil
-       (set-buffer-modified-p t))
-     whitespace-cleanup spacemacs//python-sort-imports))
+   '(undohist-save-safe time-stamp whitespace-cleanup spacemacs//python-sort-imports))
  '(coffee-tab-width 2)
- '(doom-modeline-height 18)
+ '(desktop-minor-mode-table
+   '((defining-kbd-macro nil)
+     (isearch-mode nil)
+     (vc-mode nil)
+     (vc-dired-mode nil)
+     (erc-track-minor-mode nil)
+     (savehist-mode nil)
+     (company-posframe-mode nil)))
+ '(doom-modeline-buffer-encoding nil)
+ '(doom-modeline-height 15)
  '(doom-modeline-indent-info nil)
  '(doom-modeline-mode t)
  '(fic-highlighted-words '("FIXME" "TODO" "BUG" "HACK" "XXX" "OPTIMIZE" "NOTE"))
@@ -1296,11 +1351,19 @@ Example:
  '(highlight-indent-guides-method 'character)
  '(highlight-indent-guides-mode nil t)
  '(highlight-indentation-offset 4)
+ '(ibuffer-default-sorting-mode 'recency)
+ '(ibuffer-sidebar-width 22)
  '(message-sent-hook '((lambda nil (message (buffer-name)))))
  '(package-selected-packages
-   '(dired-sidebar centaur-tabs writeroom-mode workgroups memory-usage drupal-mode phpunit phpcbf php-auto-yasnippets php-mode zones sr-speedbar evil-ruby-text-objects tempbuf wakatime-mode rspec-simple ido-completing-read+ shrink-path amx ri-mode ri smooth-scrolling ivy-youtube wgrep ivy-hydra lv flyspell-correct-ivy counsel-projectile counsel swiper ivy doom-todo-ivy magit-todos todo-projectile hl-block hl-block-mode indent-guide-mode highlight-indent-guides-mode vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toml-mode toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocopfmt rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails prodigy popwin pip-requirements persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file ns-auto-titlebar nginx-mode mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-gutter-fringe gh-md gcmh fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme doom-themes doom-modeline discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby cargo bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))
+   '(enh-ruby-mode psession telega dired-sidebar centaur-tabs writeroom-mode workgroups memory-usage drupal-mode phpunit phpcbf php-auto-yasnippets php-mode zones sr-speedbar evil-ruby-text-objects tempbuf wakatime-mode rspec-simple ido-completing-read+ shrink-path amx ri-mode ri smooth-scrolling ivy-youtube wgrep ivy-hydra lv flyspell-correct-ivy counsel-projectile counsel swiper ivy doom-todo-ivy magit-todos todo-projectile hl-block hl-block-mode indent-guide-mode highlight-indent-guides-mode vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toml-mode toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocopfmt rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails prodigy popwin pip-requirements persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file ns-auto-titlebar nginx-mode mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-gutter-fringe gh-md gcmh fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme doom-themes doom-modeline discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby cargo bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))
+ '(shell-pop-cleanup-buffer-at-process-exit t)
+ '(shell-pop-full-span nil)
+ '(shell-pop-restore-window-configuration t)
+ '(shell-pop-window-position "left")
+ '(shell-pop-window-size 30)
  '(speedbar-use-images nil)
  '(tempbuf-kill-hook nil)
+ '(use-dialog-box t)
  '(wakatime-api-key "79de0de9-6375-48d1-b78f-440418c5e5a0")
  '(wakatime-cli-path "/usr/local/bin/wakatime")
  '(wakatime-python-bin "/usr/local/bin/")
