@@ -4,7 +4,8 @@
 
 (defun hmz-desktop/post-init-desktop ()
   (use-package desktop
-    ;; I'm suspecting cli emacs is breaking desktop file
+    ;; I suspect cli emacs is breaking desktop file
+    :defer 3
     :ensure nil
     :if window-system
     :hook

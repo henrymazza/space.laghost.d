@@ -5,7 +5,7 @@
     bpr
     circe
     centaur-tabs
-    direx
+    ;; direx
     doom-modeline
     ember-mode
     ;; highlight-indent-guides
@@ -20,12 +20,12 @@
     ibuffer-sidebar
     dired-sidebar
     undohist
-    sublimity
+    ;; sublimity
     wakatime-mode
 
-    company-posframe
-    ivy-posframe
-    which-key-posframe
+    ;; company-posframe
+    ;; ivy-posframe
+    ;; which-key-posframe
 
     persp-mode
     persp-mode-projectile-bridge
@@ -35,7 +35,7 @@
     (fira-code-mode :location local)
     (gcmh :location local)
     (hide-lines :location local)
-    (indicators :location local)
+    ;; (indicators :location local)
     (list-processes+ :location local)
     (restore-frame-position :location local)
     (ri :location local)
@@ -43,9 +43,32 @@
     (switch-buffer-functions :location local))
     (tempbuf :location local))
 
+
+(defun hmz-misc/post-init-projectile-rails ()
+  ;; FIXME: i'm not running
+  ;; temporary fix for void auto-insert-alist / Not working?
+  (use-package projectile-rails
+    :config
+    ;; Fix for projectile rails breaking helm buffers
+    (defun projectile-rails--setup-auto-insert ()
+      "Call `define-auto-insert' with condition for ruby files under the current project.
+
+If `auto-insert-alist' holds already the condition for the current project it does nothing.
+So it safe to call it many times like in a minor mode hook."
+      (let* ((file-re (format "^%s.*\\.rb$" (projectile-rails-root)))
+             (current-project-cond `(,file-re . "projectile-rails")))
+        (unless (and (boundp 'auto-insert-alist)
+                     (projectile-rails--auto-insert-setup-p current-project-cond))
+          (define-auto-insert
+            current-project-cond
+            [
+             (lambda () (insert (projectile-rails-corresponding-snippet)))
+             projectile-rails-expand-yas-buffer
+             ]
+            ))))))
+
 (defun hmz-misc/init-circe ()
-  (use-package circe)
-  )
+  (use-package circe))
 
 (defun hmz-misc/init-ibuffer-projectile ()
   (use-package ibuffer-projectile
@@ -98,15 +121,13 @@
 (defun hmz-misc/init-psession ()
   (use-package psession
     :config
-    (psession-mode 1)
-    ))
+    (psession-mode 1)))
 
 (defun hmz-misc/init-undohist ()
   (use-package undohist
     :demand
     :config
-    (undohist-initialize)
-  ))
+    (undohist-initialize)))
 
 (defun hmz-misc/init-ibuffer-sidebar ()
   (use-package ibuffer-sidebar
@@ -119,46 +140,39 @@
     (spacemacs/set-leader-keys "b B" 'ibuffer-sidebar-toggle-sidebar)
     (setq ibuffer-default-sorting-mode 'recency)
     (setq ibuffer-sidebar-use-custom-font t)
-    (add-hook 'ibuffer-sidebar-mode-hook #'j-ibuffer-projectile-run)
-    )))
+    (add-hook 'ibuffer-sidebar-mode-hook #'j-ibuffer-projectile-run))))
 
 (defun hmz-misc/init-dired-sidebar ()
-(use-package dired-sidebar
-  :ensure t
-  :commands (dired-sidebar-toggle-sidebar))
-  )
+  (use-package dired-sidebar
+    :ensure t
+    :commands (dired-sidebar-toggle-sidebar)))
 
 (defun hmz-misc/init-centaur-tabs ()
   (use-package centaur-tabs
     :demand
     :config
     (centaur-tabs-mode t)
-    :bind
-    ("C-<prior>" . centaur-tabs-backward)
-    ("C-<next>" . centaur-tabs-forward))
-  )
+    ;; Safari like key-bindings
+    (global-set-key [(control shift tab)] 'centaur-tabs-backward)
+    (global-set-key [(control tab)] 'centaur-tabs-forward)))
 
 (defun hmz-misc/init-direx ()
   (use-package direx
-    :init
-    ))
+    :init))
 
 (defun hmz-misc/init-persp-mode-projectile-bridge ()
   (use-package persp-mode-projectile-bridge
     :after (projectile persp-mode)
-    ;; :load-path "/Users/HMz/.spacemacs.d/layers/hmz-misc/local/persp-mode-projectile-bridge.el/persp-mode-projectile-bridge.el"
     :defer 2
     :init
     (add-hook 'persp-mode-projectile-bridge-mode-hook
         #'(lambda ()
-      (if persp-mode-projectile-bridge-mode
-          (persp-mode-projectile-bridge-find-perspectives-for-all-buffers)
-        (persp-mode-projectile-bridge-kill-perspectives))))
+            (if persp-mode-projectile-bridge-mode
+                (persp-mode-projectile-bridge-find-perspectives-for-all-buffers)
+              (persp-mode-projectile-bridge-kill-perspectives))))
 
     :config
-    (persp-mode-projectile-bridge-mode 1)
-
-    ))
+    (persp-mode-projectile-bridge-mode 1)))
 
 (defun hmz-misc/post-init-persp-mode ()
   (use-package persp-mode
@@ -172,15 +186,7 @@
 
     :config
     (persp-def-auto-persp "dotfiles"
-        :mode 'prog-mode
-        ;; :predicate (lambda (buffer state)
-        ;;              (message "%s" buffer)
-        ;;              nil
-
-        ;;              )
-        ;; :parameters '((dont-save-to-file . t))
-        ;; :switch 'frame
-        )
+        :mode 'prog-mode)
 
     (persp-def-auto-persp "ruby"
         :buffer-name "\\.rb")
@@ -198,10 +204,7 @@
             (projectile-project-buffer-p buffer (projectile-project-root)))
              nil))
         :on-match (lambda (perspective buffer after-match hook args)
-              (persp-frame-switch perspective))
-
-        )
-))
+              (persp-frame-switch perspective)))))
 
 (defun hmz-misc/init-sublimity ()
     (use-package sublimity
@@ -210,18 +213,20 @@
       (require 'sublimity-scroll)
       (require 'sublimity-attractive)
       (setq sublimity-attractive-centering-width 110)
-      (sublimity-mode t)
-
-      ))
+      (sublimity-mode t)))
 
 (defun hmz-misc/init-doom-modeline ()
   (use-package doom-modeline
-    :if window-system
+    ;; :if window-system
+    ;; :defer 2
+    :requires all-the-icons
+    :ensure t
+    :init
+    (doom-modeline-mode 1)
     :config
     ;; The maximum displayed length of the branch name of version control.
     (setq doom-modeline-vcs-max-length 34)
-    (setq doom-modeline-height 18)
-    (doom-modeline-mode 1)))
+    (setq doom-modeline-height 18)))
 
 (defun hmz-misc/init-restore-frame-position ()
   (use-package restore-frame-position
@@ -285,19 +290,17 @@
     :init
     (progn
       (setq-default amx-history-length 32
-        amx-save-file (concat spacemacs-cache-directory
-             ".amx-items"))
+                    amx-save-file (concat spacemacs-cache-directory
+                                          ".amx-items"))
       ;; define the key binding at the very end in order to allow the user
       ;; to overwrite any key binding
       (add-hook 'emacs-startup-hook
-    (lambda () (spacemacs/set-leader-keys
-           dotspacemacs-emacs-command-key 'spacemacs/amx)))
+                (lambda () (spacemacs/set-leader-keys
+                        dotspacemacs-emacs-command-key 'spacemacs/amx)))
       (spacemacs/set-leader-keys ":" 'spacemacs/amx-major-mode-commands)
       (spacemacs/set-leader-keys "SPC" 'spacemacs/amx)
       (global-set-key (kbd "M-x") 'spacemacs/amx)
-      (global-set-key (kbd "M-X") 'spacemacs/amx-major-mode-commands)
-
-      )))
+      (global-set-key (kbd "M-X") 'spacemacs/amx-major-mode-commands))))
 
 (defun hmz-misc/init-ri ()
   (use-package ri))
@@ -306,10 +309,9 @@
   (use-package wakatime-mode
     :ensure t
     :init
-    (setq wakatime-python-path "/usr/local/bin/")
+    (setq wakatime-python-path "/usr/local/bin/python3")
     :config
-    (global-wakatime-mode t)
-    ))
+    (global-wakatime-mode t)))
 
 (defun hmz-misc/init-hl-block-mode ()
   (use-package hl-block-mode
@@ -345,9 +347,7 @@
         (lambda() (indent-guide-mode t)))
 
     (highlight-indent-guides-mode -1)
-    (highlight-indentation-mode -1)
-
-    ))
+    (highlight-indentation-mode -1)))
 
 (defun hmz-misc/init-highlight-indent-guides ()
   (use-package highlight-indent-guides
@@ -409,7 +409,25 @@
     (gcmh-mode 1)))
 
 (defun hmz-misc/init-alert ()
-  (use-package alert))
+  (use-package alert
+    :config
+    (alert-add-rule :status   '(buried visible idle)
+                :severity '(moderate high urgent)
+                :mode     'erc-mode
+                :predicate
+                #'(lambda (info)
+                    (string-match (concat "\\`[^&].*@BitlBee\\'")
+                                  (erc-format-target-and/or-network)))
+                :persistent
+                #'(lambda (info)
+                    ;; If the buffer is buried, or the user has been
+                    ;; idle for `alert-reveal-idle-time' seconds,
+                    ;; make this alert persistent.  Normally, alerts
+                    ;; become persistent after
+                    ;; `alert-persist-idle-time' seconds.
+                    (memq (plist-get info :status) '(buried idle)))
+                :style 'fringe
+                :continue t)))
 
 (defun hmz-misc/init-list-processes+ ()
   (use-package list-processes+
@@ -436,8 +454,7 @@
         (lambda () (add-to-invisibility-spec 'hl)))))
 
 (defun hmz-misc/init-hidesearch ()
-  (use-package hidesearch
-    ))
+  (use-package hidesearch))
 
 (defun hmz-misc/init-bpr ()
   (use-package bpr
@@ -723,8 +740,7 @@
         (if (and (not hmz-neotree-hidden) (buffer-file-name))
       (neotree-refresh t)
 
-          (neotree-hide))
-        )))))
+          (neotree-hide)))))))
 
 (defun hmz-misc/init-indicators ()
   (use-package indicators
@@ -737,7 +753,8 @@
 
 (defun hmz-misc/post-init-neotree ()
   (use-package neotree
-    :ensure all-the-icons
+    :ensure t
+    :requires (all-the-icons rainbow-identifiers)
 
     :init
     ;; I'm leaving most of these settings to customize
@@ -780,195 +797,201 @@
     (defun neo-buffer--insert-dir-entry (node depth expanded)
       "Overriden function to get rid of useless typography."
       (let ((node-short-name (neo-path--file-short-name node)))
-  (insert
-   (propertize " "
-         'display `(space :width ,(* 2 (- depth 1)) )))
+        (insert
+         (propertize " "
+                     'display `(space :width ,(* 2 (- depth 1)) )))
 
-  (when (memq 'char neo-vc-integration)
+        (when (memq 'char neo-vc-integration)
 
-    (insert
-     (propertize " "
-           'display `(space :width 0.35))))
+          (insert
+           (propertize " "
+                       'display `(space :width 0.35))))
 
-  (neo-buffer--insert-fold-symbol
-   (if expanded 'open 'close) node)
-  (insert-button (concat node-short-name "")
-           'follow-link t
-           'face neo-dir-link-face
-           'neo-full-path node
-           'keymap neotree-dir-button-keymap
-           'help-echo
-       (neo-buffer--help-echo-message node-short-name))
-  (neo-buffer--node-list-set nil node)
-  (neo-buffer--newline-and-begin)))
+        (neo-buffer--insert-fold-symbol
+         (if expanded 'open 'close) node)
+        (insert-button (concat node-short-name "")
+                       'follow-link t
+                       'face neo-dir-link-face
+                       'neo-full-path node
+                       'keymap neotree-dir-button-keymap
+                       'help-echo
+                       (neo-buffer--help-echo-message node-short-name))
+        (neo-buffer--node-list-set nil node)
+        (neo-buffer--newline-and-begin)))
 
     (setq hmz-misc/neo-sort-dir-with-files t)
 
     (defun neo-buffer--insert-tree (path depth)
       (if (eq depth 1)
-    (neo-buffer--insert-root-entry path))
+          (neo-buffer--insert-root-entry path))
       (let* ((contents (neo-buffer--get-nodes path))
-       (nodes (car contents))
-       (leafs (cdr contents))
-       (default-directory path))
+             (nodes (car contents))
+             (leafs (cdr contents))
+             (default-directory path))
 
-  (if (> (length nodes) 100)
-      (insert " ··· \n")
-   (if (bound-and-true-p hmz-misc/neo-sort-dir-with-files)
-        (let ((sorted (sort
-           (append (car contents) (cdr contents))
-           (lambda (s1 s2)
-             (string< (upcase s1) (upcase s2) )))))
-    (dolist (node sorted)
-      (if (file-directory-p node)
-          (let ((expanded (neo-buffer--expanded-node-p node)))
-      (neo-buffer--insert-dir-entry
-       node depth expanded)
-      (if expanded (neo-buffer--insert-tree (concat node "/")
-                    (+ depth 1))))
+        (if (> (length nodes) 100)
+            (insert " ··· \n")
+          (if (bound-and-true-p hmz-misc/neo-sort-dir-with-files)
+              (let ((sorted (sort
+                             (append (car contents) (cdr contents))
+                             (lambda (s1 s2)
+                               (string< (upcase s1) (upcase s2) )))))
+                (dolist (node sorted)
+                  (if (file-directory-p node)
+                      (let ((expanded (neo-buffer--expanded-node-p node)))
+                        (neo-buffer--insert-dir-entry
+                         node depth expanded)
+                        (if expanded (neo-buffer--insert-tree (concat node "/")
+                                                              (+ depth 1))))
 
-        (neo-buffer--insert-file-entry node depth))))
+                    (neo-buffer--insert-file-entry node depth))))
 
-      (dolist (node nodes)
-        (let ((expanded (neo-buffer--expanded-node-p node)))
-    (neo-buffer--insert-dir-entry
-     node depth expanded)
-    (if expanded (neo-buffer--insert-tree (concat node "/")
-                  (+ depth 1)))))
-      (dolist (leaf leafs)
-        (neo-buffer--insert-file-entry leaf depth))))))
-
-
- (defun neo-buffer--insert-file-entry (node depth)
-   "Overriden so it can be configured to show files and directories together."
-
-   (let ((node-short-name (neo-path--file-short-name node))
-   (vc (when neo-vc-integration (neo-vc-for-node node))))
+            (dolist (node nodes)
+              (let ((expanded (neo-buffer--expanded-node-p node)))
+                (neo-buffer--insert-dir-entry
+                 node depth expanded)
+                (if expanded (neo-buffer--insert-tree (concat node "/")
+                                                      (+ depth 1)))))
+            (dolist (leaf leafs)
+              (neo-buffer--insert-file-entry leaf depth))))))
 
 
-     (insert
-      (propertize " "
-      'display `(space :width ,(+ 0.3 (* 2 (- depth 1))))))
+    (defun neo-buffer--insert-file-entry (node depth)
+      "Overriden so it can be configured to show files and directories together."
 
-     (neo-buffer--insert-fold-symbol 'leaf node-short-name)
-
-     (insert-button node-short-name
-        'follow-link t
-        'face neo-file-link-face
-        'neo-full-path node
-        'keymap neotree-file-button-keymap
-        'help-echo (neo-buffer--help-echo-message node-short-name))
-     (neo-buffer--node-list-set nil node)
-     (neo-buffer--newline-and-begin)))
-
- (defun neo-buffer--insert-fold-symbol (name &optional node-name)
-   "Overriden to make it less noisy. Made to work with non-monospaced fonts."
-   (let ((vc (when neo-vc-integration (neo-vc-for-node node)))
-   (n-insert-symbol (lambda (n)
-          (neo-buffer--insert-with-face
-           n 'neo-expand-btn-face))))
-     (cond
-      ((and (display-graphic-p) (equal neo-theme 'icons))
-
-       (or (and (equal name 'open)
-    (insert
-     (propertize
-      " "
-      'display '((raise 0)
-           (space :width 0.0)))
-     (propertize
-      (all-the-icons-octicon "triangle-down")
-      'face `(:family ,(all-the-icons-octicon-family) :foreground "skyblue" :height 1.2)
-      'display '(raise -0.0))
-     (propertize
-      " "
-      'display '((raise 0)
-           (space :width 0.3)))))
-
-        (and (equal name 'close)
-       (insert
-
-        (propertize
-         " "
-         'display '((raise 0.00)
-        (space :width 0.50)))
-        (propertize
-         (all-the-icons-octicon "triangle-right")
-         'face `(:family ,(all-the-icons-octicon-family) :foreground  "grey40" :height 1.2 )
-         'display '(raise 0.0))
-
-        (propertize
-         " "
-         'display '((raise 0)
-        (space :width 0.5)))))
-
-        (and (equal name 'leaf)
-       (if vc
-           (let ((vc-string (char-to-string (car vc))))
-
-       (insert (propertize vc-string
-             'display '(height 0.80)
-             'face (if (memq 'face neo-vc-integration)
-                 (cdr vc)
-               neo-file-link-face)))
-       (if (string-equal vc-string " ")
-           (insert
-            (propertize " " 'display '(space :width 0.90)))
-         (insert (propertize " " 'display '(space :width 0.70)))))
-
-         (insert
-          (propertize " "
-          'display `(space :width 1.00))))
+      (let ((node-short-name (neo-path--file-short-name node))
+            (vc (when neo-vc-integration (neo-vc-for-node node))))
 
 
+        (insert
+         (propertize " "
+                     'display `(space :width ,(+ 0.3 (* 2 (- depth 1))))))
 
-       )))
-      (t
-       (or (and (equal name 'open)  (funcall n-insert-symbol "▼ "))
-     (and (equal name 'close) (funcall n-insert-symbol "► ")))))))
+        (neo-buffer--insert-fold-symbol 'leaf node-short-name)
+
+        (insert-button node-short-name
+                       'follow-link t
+                       'face neo-file-link-face
+                       'neo-full-path node
+                       'keymap neotree-file-button-keymap
+                       'help-echo (neo-buffer--help-echo-message node-short-name))
+        (neo-buffer--node-list-set nil node)
+        (neo-buffer--newline-and-begin)))
+
+    (defun neo-buffer--insert-fold-symbol (name &optional node-name)
+      "Overriden to make it less noisy. Made to work with non-monospaced fonts."
+      (let ((vc (when neo-vc-integration (neo-vc-for-node node)))
+            (n-insert-symbol (lambda (n)
+                               (neo-buffer--insert-with-face
+                                n 'neo-expand-btn-face))))
+        (cond
+         ((and (display-graphic-p) (equal neo-theme 'icons))
+
+          (or (and (equal name 'open)
+                   (insert
+                    (propertize
+                     " "
+                     'display '((raise 0)
+                                (space :width 0.0)))
+                    (propertize
+                     (all-the-icons-octicon "triangle-down")
+                     'face `(:family ,(all-the-icons-octicon-family) :foreground "skyblue" :height 1.2)
+                     'display '(raise -0.0))
+                    (propertize
+                     " "
+                     'display '((raise 0)
+                                (space :width 0.3)))))
+
+              (and (equal name 'close)
+                   (insert
+
+                    (propertize
+                     " "
+                     'display '((raise 0.00)
+                                (space :width 0.50)))
+                    (propertize
+                     (all-the-icons-octicon "triangle-right")
+                     'face `(:family ,(all-the-icons-octicon-family) :foreground  "grey40" :height 1.2 )
+                     'display '(raise 0.0))
+
+                    (propertize
+                     " "
+                     'display '((raise 0)
+                                (space :width 0.5)))))
+
+              (and (equal name 'leaf)
+                   (if vc
+                       (let ((vc-string (char-to-string (car vc))))
+
+                         (insert (propertize vc-string
+                                             'display '(height 0.80)
+                                             'face (if (memq 'face neo-vc-integration)
+                                                       (cdr vc)
+                                                     neo-file-link-face)))
+                         (if (string-equal vc-string " ")
+                             (insert
+                              (propertize " " 'display '(space :width 0.90)))
+                           (insert (propertize " " 'display '(space :width 0.70)))))
+
+                     (insert
+                      (propertize " "
+                                  'display `(space :width 1.00))))
+
+
+
+                   )))
+         (t
+          (or (and (equal name 'open)  (funcall n-insert-symbol "▼ "))
+              (and (equal name 'close) (funcall n-insert-symbol "► ")))))))
 
     (defun neo-opens-outwards ()
       "Reveals Neotree expanding frame and tries to compensate internal size."
       (interactive)
       (if (neo-global--window-exists-p)
-    (progn
-      (setq hmz-neotree-hidden t)
-      (neotree-hide))
+          (progn
+            (setq hmz-neotree-hidden t)
+            (neotree-hide))
 
-  (let ((origin-buffer-file-name (buffer-file-name)))
-    (setq hmz-neotree-hidden nil)
-    (neotree-find (projectile-project-root))
-    (neotree-find origin-buffer-file-name))))
+        (let ((origin-buffer-file-name (buffer-file-name)))
+          (setq hmz-neotree-hidden nil)
+          (neotree-find (projectile-project-root))
+          (neotree-find origin-buffer-file-name))))
 
     (global-set-key (kbd "s-r") 'neo-opens-outwards)
     (global-set-key (kbd "H-r") 'neo-opens-outwards)
 
     (defun hmz-neotree-mode-hook ()
-  ;; (face-remap-add-relative 'default :background-color "white")
-  ;; (hidden-mode-line-mode t)
+      ;; (face-remap-add-relative 'default :background-color "blue")
+      ;; (set-background-color "black")
+      ;; (setq buffer-face-mode-face `(:background "red"))
 
-  ;; custom doesn't work, neither does setting on init file
-  (setq neo-buffer--show-hidden-file-p nil)
+      (hidden-mode-line-mode t)
 
-  ;; hide cursor when not active
-  (setq cursor-in-non-selected-windows nil)
+      ;; custom doesn't work, neither does setting on init file
+      (setq neo-buffer--show-hidden-file-p nil)
 
-  ;; highlight current line
-  (hl-line-mode t)
-  ;; hl-line-mode when window not in focus
-  (setq hl-line-sticky-flag t)
+      ;; hide cursor when not active
+      (setq cursor-in-non-selected-windows nil)
 
-  ;; disable fringes
-  (setq left-fringe-width 0)
-  (setq right-fringe-width 0)
+      ;; no scroll bars
+      (scroll-bar-mode 0)
 
-  ;; makes the icons smaller, once there's no face settings
-  ;; for them.
-  (text-scale-set -1)
+      ;; highlight current line
+      (hl-line-mode t)
+      ;; hl-line-mode when window not in focus
+      (setq hl-line-sticky-flag t)
 
-  ;; Set width here so it takes scaled font size
-  (setq neo-window-width 24)
-  (setq neo-window-fixed-size nil))
+      ;; disable fringes
+      (setq left-fringe-width 0)
+      (setq right-fringe-width 0)
+
+      ;; makes the icons smaller, once there's no face settings
+      ;; for them.
+      (text-scale-set -1)
+
+      ;; Set width here so it takes scaled font size
+      (setq neo-window-width 24)
+      (setq neo-window-fixed-size nil))
 
     (add-hook 'neotree-mode-hook 'hmz-neotree-mode-hook)
 
@@ -979,29 +1002,29 @@
 
     (defadvice tabbar-cycle (after hmz-refresh-neotree-upon-cycle-tabs 1 () activate)
       (when (neo-global--window-exists-p)
-  (neotree-refresh t )))
+        (neotree-refresh t )))
 
     (defadvice next-buffer (after hmz-refresh-neotree-change-next-buffer 1 () activate)
       (when (not (eq buffer-file-name neo-buffer-name))
-  (if (buffer-file-name)
-      (neotree-refresh t)
-    (neotree-hide)
-    ))
+        (if (buffer-file-name)
+            (neotree-refresh t)
+          (neotree-hide)
+          ))
       )
 
     (setq hmz-neotree-hidden t)
 
     (defadvice previous-buffer (after hmz-refresh-neotree-change-previous-buffer 1 () activate)
       (when (not (eq buffer-file-name neo-buffer-name))
-  (if (or buffer-file-name (not hmz-neotree-hidden))
-      (neotree-refresh t)
-    (neotree-hide)
-    ))
+        (if (or buffer-file-name (not hmz-neotree-hidden))
+            (neotree-refresh t)
+          (neotree-hide)
+          ))
       )
 
     (defun neo-global--do-autorefresh ()
       "Overriden version of neotree refresh function that doesn't try to refresh buffers that are not visiting a file and generating error and jumping cursor as result."
       (interactive)
       (when (and neo-autorefresh (neo-global--window-exists-p) buffer-file-name (not (eq (current-buffer) "*NeoTree*"))
-    (neotree-refresh t))))
+                 (neotree-refresh t))))
     ))

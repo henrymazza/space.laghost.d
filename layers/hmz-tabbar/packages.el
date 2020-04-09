@@ -3,9 +3,7 @@
 ;;(require 'req-package)
 
 (defvar hmz-tabbar-packages
-  '(
-    tabbar
-    )
+  '(tabbar)
   "List of all packages to install and/or initialize. Built-in packages
 which require an initialization must be listed explicitly in the list.")
 
@@ -18,8 +16,7 @@ which require an initialization must be listed explicitly in the list.")
       (defun ido-switch-tab-group ()
         "Switch tab groups using ido."
       (interactive)
-        (let* (
-            (tab-buffer-list (mapcar
+        (let* ((tab-buffer-list (mapcar
                 #'(lambda (b)
                     (with-current-buffer b
                       (list (current-buffer)

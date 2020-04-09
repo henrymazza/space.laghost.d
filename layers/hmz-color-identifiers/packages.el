@@ -1,12 +1,10 @@
 (defvar hmz-color-identifiers-packages
-  '(
-    rainbow-mode
-    rainbow-identifiers
-    )
-)
+  '(rainbow-mode
+    rainbow-identifiers))
 
 (defun hmz-color-identifiers/post-rainbow-delimiters ()
   (use-package rainbow-delimiters
+    :defer 2
     :init
     (set-face-attribute 'rainbow-delimiters-unmatched-face nil
             :foreground "red"
@@ -15,9 +13,7 @@
     :config
     (add-hook 'prog-mode-hook
               (lambda ()
-                (rainbow-delimiters-mode t)
-                ))
-    ))
+                (rainbow-delimiters-mode t)))))
 
 (defun hmz-color-identifiers/init-rainbow-mode ()
   "Initialize Rainbow Mode to show color values as string backgrounds."
@@ -34,7 +30,7 @@
 
   (use-package rainbow-identifiers
     :ensure t
-    :config
+    :init
     (defun make-local-face (face-name &rest args)
       "Make a buffer face local"
       (interactive)
@@ -42,7 +38,8 @@
         ;; First create new face which is a copy of the old face
         (copy-face face-name local-face)
         (apply 'set-face-attribute local-face nil args)
-        (set (make-local-variable face-name) local-face)))
+        (set (make-local-variable face-name) local-face))
+      )
 
     (defun default-foreground-lightness ()
       (+ 10 (* 85 (third
@@ -83,15 +80,16 @@
         "Hook run after a color theme is loaded using `load-theme'.")
       (defadvice load-theme (after run-after-load-theme-hook activate)
         "Run `after-load-theme-hook'."
-        (run-hooks 'after-load-theme-hook))
-      )
+        (run-hooks 'after-load-theme-hook)))
+
+    :config
+
+    (hmz-color-identifiers/regenerate-rainbow-colors)
 
     (add-hook 'after-init-hook 'hmz-color-identifiers/regenerate-rainbow-colors)
     (add-hook 'after-load-theme-hook 'hmz-color-identifiers/regenerate-rainbow-colors)
-    (add-hook 'prog-mode-hook
+    (add-hook 'orog-mode-hook
               (lambda ()
                 (rainbow-identifiers-mode t)
                 (rainbow-delimiters-mode-enable)
-                (font-lock-fillin-text-property)
-                ))
-    ))
+                (font-lock-fillin-text-property)))))
