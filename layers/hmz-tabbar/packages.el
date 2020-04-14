@@ -1,3 +1,4 @@
+;; -*- lexical-binding:t -*-
 ;; -*- coding: utf-8; -*-
 
 ;;(require 'req-package)
@@ -10,6 +11,8 @@ which require an initialization must be listed explicitly in the list.")
 (defun hmz-tabbar/init-tabbar ()
   "Tabbar customizations"
   (use-package tabbar
+    :straight t
+    :requires helm-lib
     :ensure all-the-icons
 
     :config
@@ -241,8 +244,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
 
            (tab-is-active (tabbar-selected-p tab (tabbar-current-tabset)))
 
-           (icon-face (plist-get (text-properties-at 0 the-icon) 'face))
-           )
+           (icon-face (plist-get (text-properties-at 0 the-icon) 'face)))
 
         (concat
          (propertize
@@ -396,6 +398,7 @@ element."
     (defun tabbar-buffer-update-groups ()
       "Update tab sets from groups of existing buffers.
   Return the the first group where the current buffer is."
+      ;; (message ">> %s" tabbar--buffers)
       (let ((bl (sort
                  (mapcar
                   ;; for each buffer, create list: buffer, buffer name, groups-list
@@ -403,7 +406,8 @@ element."
                   #'(lambda (b)
                       (with-current-buffer b
                         (list (current-buffer)
-                              (format "%10d" (buffer-chars-modified-tick))
+                                (format "%10s" (nth 0 (nth 5 (file-attributes (buffer-file-name )))))
+                              ;; (format "%10d" (buffer-chars-modified-tick))
                               (if tabbar-buffer-groups-function
                                   (funcall tabbar-buffer-groups-function)
                                 '("Common")))))
@@ -413,6 +417,7 @@ element."
                      (string-lessp (nth 1 e1) (nth 1 e2))))))
         ;; If the cache has changed, update the tab sets.
         (unless (equal bl tabbar--buffers)
+          (message "cache differs")
           ;; Add new buffers, or update changed ones.
           (dolist (e bl) ;; loop through buffer list
             (dolist (g (nth 2 e)) ;; for each member of groups-list for current buffer
@@ -442,8 +447,12 @@ element."
                      ;; Return empty tab sets
                      (unless (tabbar-tabs tabset)
                        tabset)))) ;; return list of tabsets, replacing non-empties with nil
+          ;; NOTE: it looks like tabbar--buffers is getting nil'ed somewhre,
+          ;; using an alternative cache.
           ;; The new cache becomes the current one.
-          (setq tabbar--buffers bl)))
+           (setq tabbar--buffers bl)
+
+          ))
       ;; Return the first group the current buffer belongs to.
       (car (nth 2 (assq (current-buffer) tabbar--buffers))))
 
@@ -479,6 +488,43 @@ element."
                  (t "limbo"))
               "limbo")))
 
+    (defun advice-unadvice (sym)
+      "Remove all advices from symbol SYM."
+      (interactive "Function symbol: ")
+      (advice-mapc (lambda (advice _props) (advice-remove sym advice)) sym))
+
+    (defun my-make-throttler-3 ()
+      (lexical-let ((last-time (+ 10 (float-time) ))
+                    (last-args 'dummy)
+                    (last-val ()))
+        (lambda (&rest args)
+          (if (and (< 1 (- (float-time) last-time))
+                   (equal args last-args))
+              last-val
+            (setq last-time (float-time))
+            (setq last-args args)
+            (setq last-val (apply args))))))
+
+    ;; FIXME: PATCH to try to slow functions calls to
+    ;; tabbar-buffer-update-groups and tabbar-buffer-track-killed.
+    ;;
+    ;; (advice-add 'tabbar-buffer-update-groups :around (my-make-throttler-3))
+    ;; (advice-add 'tabbar-buffer-track-killed :around (my-make-throttler-3))
+    ;; (tabbar-buffer-track-killed)
+    ;; (tabbar-buffer-update-groups)
+    ;; (advice-unadvice 'tabbar-buffer-update-groups)
+    ;; (advice-unadvice 'tabbar-buffer-track-killed)
+    ;;
+    ;; NOTE: it looks this is getting lots of calls from somewhere
+    (add-hook 'kill-buffer-hook 'tabbar-buffer-track-killed)
+    (defun hmz-tabbar/debug2 ()
+      (if (string-match  "\\( *string-output*\\| *temp.*\\)" (buffer-name))
+          (message "Killed: [%s]" (buffer-name))
+
+        (message "Killed: (%s)" (buffer-name))))
+
+    (remove-hook 'kill-buffer-hook 'hmz-tabbar/debug2)
+
     (defun hmz-tabbar-refresh-tabs ()
       (tabbar-mode 0)
       (setq tabbar-scroll-left-button-value nil)
@@ -493,13 +539,17 @@ element."
       (defvar after-load-theme-hook nil
         "Hook run after a color theme is loaded using `load-theme'.")
       (defadvice load-theme (after run-after-load-theme-hook activate)
-        "Run `after-load-theme-hook'."
-        (run-hooks 'after-load-theme-hook))
-      )
+       "Run `after-load-theme-hook'."
+        (run-hooks 'after-load-theme-hook)))
 
+    ;; NOTE: more of the patch: stop turning on and off so often
     (add-hook 'after-load-theme-hook 'hmz-tabbar-refresh-tabs)
     (add-hook 'after-save-hook 'hmz-tabbar-refresh-tabs)
-    (add-hook 'first-change-hook 'hmz-tabbar-refresh-tabs))
+    (add-hook 'first-change-hook 'hmz-tabbar-refresh-tabs)
+    ;; (remove-hook 'after-load-theme-hook 'hmz-tabbar-refresh-tabs)
+    ;; (remove-hook 'after-save-hook 'hmz-tabbar-refresh-tabs)
+    ;; (remove-hook 'first-change-hook 'hmz-tabbar-refresh-tabs)
+    )
 
     ;; init me!
   (tabbar-mode 1)
@@ -537,6 +587,4 @@ element."
 
                     ))))
           (tabbar-set-template tabset nil)
-          (set tabset new-tabset)))))
-
-  )
+          (set tabset new-tabset))))))
