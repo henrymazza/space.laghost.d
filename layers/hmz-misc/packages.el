@@ -1,31 +1,33 @@
 (defconst hmz-misc-packages
   ;; default behavior is to install from melpa.org
   '(alert
+    ;; all-the-icons
     amx
     bpr
     circe
     centaur-tabs
     ;; direx
-    doom-modeline
     ember-mode
     ;; highlight-indent-guides
     ;; hl-block-mode
     ibuffer-projectile
     ibuffer-sidebar
     indent-guide
-    indicators
+    ;; indicators
     neotree
     rubocopfmt
     (sublimity :location (recipe :fetcher github :repo "zk-phi/sublimity"))
-    ibuffer-sidebar
+
     dired-sidebar
-    undohist
+    ;; undohist
     ;; sublimity
     wakatime-mode
 
     ;; company-posframe
     ;; ivy-posframe
     ;; which-key-posframe
+    (hydra-posframe :location
+                    (recipe :fetcher github :repo "Ladicle/hydra-posframe"))
 
     persp-mode
     persp-mode-projectile-bridge
@@ -43,11 +45,19 @@
     (switch-buffer-functions :location local))
     (tempbuf :location local))
 
+(defun hmz-init/init-hydra-posframe ()
+ (use-package hydra-posframe
+   :straight t
+   :ensure t
+   :requires (posframe hydra)
+   :load-path "<path-to-the-hydra-posframe>"
+   :hook (after-init . hydra-posframe-enable)))
 
 (defun hmz-misc/post-init-projectile-rails ()
   ;; FIXME: i'm not running
   ;; temporary fix for void auto-insert-alist / Not working?
   (use-package projectile-rails
+    :straight t
     :config
     ;; Fix for projectile rails breaking helm buffers
     (defun projectile-rails--setup-auto-insert ()
@@ -68,10 +78,19 @@ So it safe to call it many times like in a minor mode hook."
             ))))))
 
 (defun hmz-misc/init-circe ()
-  (use-package circe))
+  (straight-use-package 'circe))
+
+(defun hmz-misc/init-all-the-icons ()
+  (straight-use-package 'all-the-icons)
+  ;; (use-package all-the-icons
+  ;;   :defer 2
+  ;;   :straight (all-the-icons :type git :host github :repo "domtronn/all-the-icons.el")
+  ;;   :ensure t)
+  )
 
 (defun hmz-misc/init-ibuffer-projectile ()
   (use-package ibuffer-projectile
+    :straight t
     :ensure t
     :commands (ibuffer-projectile-set-filter-groups
                ibuffer-projectile-generate-filter-groups)
@@ -85,11 +104,11 @@ So it safe to call it many times like in a minor mode hook."
     (add-hook 'ibuffer-sidebar-mode-hook #'j-ibuffer-projectile-run)
     (add-hook 'ibuffer-hook #'j-ibuffer-projectile-run)
     :config
-    (setq ibuffer-projectile-prefix ""))
-  )
+    (setq ibuffer-projectile-prefix "")))
 
 (defun hmz-misc/init-ibuffer-sidebar ()
   (use-package ibuffer-sidebar
+    :straight t
     :load-path "~/.emacs.d/fork/ibuffer-sidebar"
     :ensure nil
     :commands (ibuffer-sidebar-toggle-sidebar)
@@ -98,6 +117,7 @@ So it safe to call it many times like in a minor mode hook."
 
 (defun hmz-misc/init-which-key-posframe ()
   (use-package which-key-posframe
+    :straight t
     :load-path "path/to/which-key-posframe.el"
     :init
     (setq which-key-posframe-poshandler 'posframe-poshandler-window-top-center)
@@ -106,6 +126,7 @@ So it safe to call it many times like in a minor mode hook."
 
 (defun hmz-misc/init-ivy-posframe ()
   (use-package ivy-posframe
+    :straight t
     :init
     ;; display at `ivy-posframe-style'
     (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display)))
@@ -115,18 +136,21 @@ So it safe to call it many times like in a minor mode hook."
 
 (defun hmz-misc/init-company-posframe ()
   (use-package company-posframe
+    :straight t
     :config
     (company-posframe-mode)))
 
 (defun hmz-misc/init-psession ()
   (use-package psession
+    :straight t
     :config
     (psession-mode 1)))
 
 (defun hmz-misc/init-undohist ()
   (use-package undohist
+    :straight t
     :demand
-    :config
+    :init
     (undohist-initialize)))
 
 (defun hmz-misc/init-ibuffer-sidebar ()
@@ -144,24 +168,53 @@ So it safe to call it many times like in a minor mode hook."
 
 (defun hmz-misc/init-dired-sidebar ()
   (use-package dired-sidebar
+    :straight t
     :ensure t
     :commands (dired-sidebar-toggle-sidebar)))
 
 (defun hmz-misc/init-centaur-tabs ()
   (use-package centaur-tabs
-    :demand
+    :straight t
+    ;; :defer t
+    ;; only load if hmz-tabbar isn't config's part
+    :unless (member 'hmz-tabbar dotspacemacs-configuration-layers)
+    :init
+    (setq centaur-tabs-set-icons t)
+    (setq centaur-tabs-plain-icons nil)
+    (setq centaur-tabs-gray-out-icons 'buffer)
+    (setq centaur-tabs-gray-out-icons nil)
+    (setq centaur-tabs-set-bar 'over)
+    (setq centaur-tabs-set-bar 'under)
+    (setq centaur-tabs-set-bar 'under)
+    (setq centaur-tabs-set-close-button nil)
+    (setq centaur-tabs-set-modified-marker t)
+    (setq centaur-tabs--buffer-show-groups nil)
+    (setq centaur-tabs-cycle-scope 'tabs)
+    (setq centaur-tabs-show-navigation-buttons nil)
+    (setq centaur-tabs-show-navigation-buttons t)
+    (setq centaur-tabs-adjust-buffer-order t)
+    (setq centaur-tabs-background-color "black")
+    (setq centaur-tabs-plain-icons nil)
+    (setq centaur-tabs-set-icons t)
+    (setq centaur-tabs-set-left-close-button nil)
+    (setq centaur-tabs-modified-marker "#")
+
+    ;; (set-selection-coding-system 'utf-8)
+
     :config
-    (centaur-tabs-mode t)
+    (centaur-tabs-mode 1)
     ;; Safari like key-bindings
     (global-set-key [(control shift tab)] 'centaur-tabs-backward)
     (global-set-key [(control tab)] 'centaur-tabs-forward)))
 
 (defun hmz-misc/init-direx ()
   (use-package direx
+    :straight t
     :init))
 
 (defun hmz-misc/init-persp-mode-projectile-bridge ()
   (use-package persp-mode-projectile-bridge
+    :straight t
     :after (projectile persp-mode)
     :defer 2
     :init
@@ -176,6 +229,7 @@ So it safe to call it many times like in a minor mode hook."
 
 (defun hmz-misc/post-init-persp-mode ()
   (use-package persp-mode
+    :straight t
     :requires projectile
     :custom
     (persp-auto-save-num-of-backups 10)
@@ -208,6 +262,7 @@ So it safe to call it many times like in a minor mode hook."
 
 (defun hmz-misc/init-sublimity ()
     (use-package sublimity
+      :straight t
       :init
       (require 'sublimity)
       (require 'sublimity-scroll)
@@ -215,29 +270,16 @@ So it safe to call it many times like in a minor mode hook."
       (setq sublimity-attractive-centering-width 110)
       (sublimity-mode t)))
 
-(defun hmz-misc/init-doom-modeline ()
-  (use-package doom-modeline
-    ;; :if window-system
-    ;; :defer 2
-    :requires all-the-icons
-    :ensure t
-    :init
-    (doom-modeline-mode 1)
-    :config
-    ;; The maximum displayed length of the branch name of version control.
-    (setq doom-modeline-vcs-max-length 34)
-    (setq doom-modeline-height 18)))
-
 (defun hmz-misc/init-restore-frame-position ()
   (use-package restore-frame-position
     :load-path "/Users/HMz/.spacemacs.d/layers/hmz-misc/local/restore-frame-position/restore-frame-position.el"
     :config
-    (restore-frame-position)
-    ))
+    (restore-frame-position)))
 
 (defun hmz-misc/init-tempbuf ()
   (use-package tempbuf
-    :load-path  "~/spacemacs.d/layers/hmz-misc/local/tempbuf/tempbuf.el"
+    :straight t
+    ;; :load-path  "~/spacemacs.d/layers/hmz-misc/local/tempbuf/tempbuf.el"
     :config
     ;; modified from jmjeong / jmjeong-emacs
     (add-hook 'minibuffer-inactive-mode-hook 'turn-on-tempbuf-mode)
@@ -303,7 +345,7 @@ So it safe to call it many times like in a minor mode hook."
       (global-set-key (kbd "M-X") 'spacemacs/amx-major-mode-commands))))
 
 (defun hmz-misc/init-ri ()
-  (use-package ri))
+  (straight-use-package 'ri))
 
 (defun hmz-misc/init-wakatime-mode ()
   (use-package wakatime-mode
@@ -321,11 +363,10 @@ So it safe to call it many times like in a minor mode hook."
 
 (defun hmz-misc/init-evil-ruby-text-objects ()
   (use-package evil-ruby-text-objects
-    :load-path  "~/.spacemacs.d/layers/hmz-misc/local/evil-ruby-text-objects/evil-ruby-text-objects.el"
+    :straight t
     :init
     (add-hook 'ruby-mode-hook 'evil-ruby-text-objects-mode)
-    (add-hook 'enh-ruby-mode-hook 'evil-ruby-text-objects-mode)
-    ))
+    (add-hook 'enh-ruby-mode-hook 'evil-ruby-text-objects-mode)))
 
 (defun hmz-misc/init-indent-guide ()
   (use-package indent-guide
@@ -351,6 +392,7 @@ So it safe to call it many times like in a minor mode hook."
 
 (defun hmz-misc/init-highlight-indent-guides ()
   (use-package highlight-indent-guides
+    :straight t
     :ensure t
     :init
     (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
@@ -358,7 +400,7 @@ So it safe to call it many times like in a minor mode hook."
 
 (defun hmz-misc/init-doom-todo-ivy ()
   (use-package doom-todo-ivy
-    ;; :requires ivy
+    :requires ivy
     :hook (after-init . doom-todo-ivy)
     :load-path "~/.spacemacs.d/layers/hmz-misc/local/doom-todo-ivy/doom-todo-ivy.el"
     :init
@@ -370,19 +412,17 @@ So it safe to call it many times like in a minor mode hook."
     ;; TODO test
     ;; FIXME test
     (setq doom/ivy-task-tags
-    '(
-      ("HACK" . warning)
+    '(("HACK" . warning)
       ("OPTIMIZE" . success)
       ("XXX" . font-lock-function-name-face)
       ("NOTE"  . font-lock-variable-name-face)
       ("BUG"  . font-lock-warning-face)
       ("TODO"  . warning)
-      ("FIXME" . error)))
-
-    ))
+      ("FIXME" . error)))))
 
 (defun hmz-misc/init-indicators ()
   (use-package indicators
+    :straight t
     :ensure t
     :config
     (setq ind-indicator-height 19)
@@ -398,18 +438,21 @@ So it safe to call it many times like in a minor mode hook."
 
 (defun hmz-misc/init-fira-code-mode ()
   (use-package fira-code-mode
+    :straight t
     :if window-system
     :load-path "~/.spacemacs.d/layers/hmz-misc/local/fira-code-mode/"
     :hook prog-mode))
 
 (defun hmz-misc/init-gcmh ()
   (use-package gcmh
+    :straight t
     :load-path "~/.spacemacs.d/layers/hmz-misc/local/gcmh/"
     :config
     (gcmh-mode 1)))
 
 (defun hmz-misc/init-alert ()
   (use-package alert
+    :straight t
     :config
     (alert-add-rule :status   '(buried visible idle)
                 :severity '(moderate high urgent)
@@ -431,6 +474,7 @@ So it safe to call it many times like in a minor mode hook."
 
 (defun hmz-misc/init-list-processes+ ()
   (use-package list-processes+
+    :straight t
     :defer t
     :config
 
@@ -449,15 +493,17 @@ So it safe to call it many times like in a minor mode hook."
 
 (defun hmz-misc/init-hide-lines ()
   (use-package hide-lines
+    :straight t
     :config
     (add-hook 'after-change-major-mode-hook
         (lambda () (add-to-invisibility-spec 'hl)))))
 
 (defun hmz-misc/init-hidesearch ()
-  (use-package hidesearch))
+  (straight-use-package 'hidesearch))
 
 (defun hmz-misc/init-bpr ()
   (use-package bpr
+    :straight t
     :requires alert
     :config
 
@@ -719,6 +765,7 @@ So it safe to call it many times like in a minor mode hook."
 
 (defun hmz-misc/init-ember-mode ()
   (use-package ember-mode
+    :straight t
     :config
     (defun ember--file-project-root (file)
       "Overriden function so it come back to the old behavior and
@@ -731,6 +778,7 @@ So it safe to call it many times like in a minor mode hook."
 
 (defun hmz-misc/init-switch-buffer-functions ()
     (use-package switch-buffer-functions
+      :straight t
       :config
       (setq switch-buffer-functions nil)
       (add-hook 'switch-buffer-functions
@@ -744,6 +792,7 @@ So it safe to call it many times like in a minor mode hook."
 
 (defun hmz-misc/init-indicators ()
   (use-package indicators
+    :straight t
     :config
     (add-hook 'prog-mode
         (lambda ()
@@ -753,9 +802,10 @@ So it safe to call it many times like in a minor mode hook."
 
 (defun hmz-misc/post-init-neotree ()
   (use-package neotree
+    :straight t
     :ensure t
+    :defer t
     :requires (all-the-icons rainbow-identifiers)
-
     :init
     ;; I'm leaving most of these settings to customize
     (setq neo-auto-indent-point t)

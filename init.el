@@ -5,6 +5,7 @@
 ;; Pre Window Initialization code
 
 (require 'iso-transl)
+(setq debug-on-error t)
 
 (defun dotspacemacs/layers ()
   "Configuration Layers declaration.
@@ -60,10 +61,11 @@ values."
                      auto-completion-complete-with-key-sequence-delay 0.01)
 
     ;; custom layers
-    ;; hmz-tabbar
+    hmz-tabbar
     hmz-misc
+    hmz-misc2
     hmz-color-identifiers
-    ;; BUG: pourpose window infinite recursion bug; delete desktop files?
+    ;; FIXME: pourpose window infinite recursion bug; delete desktop files?
     ;; hmz-desktop
 
     github
@@ -73,7 +75,8 @@ values."
     evil-commentary
     git
     javascript
-    lua
+    (spacemacs-layouts :variables spacemacs-layouts-restrict-spc-tab t
+                                  dotspacemacs-auto-resume-layouts t)
     markdown
     org
     prodigy
@@ -82,7 +85,7 @@ values."
           ruby-version-manager 'rbenv
           ruby-enable-enh-ruby-mode nil)
     (spell-checking :variables
-                    spell-checking-enable-by-default nil)
+                    spell-checking-enable-by-default t)
     ;; syntax-checking
     ;; themes-megapack
     themes
@@ -96,18 +99,15 @@ values."
            shell-enable-smart-eshell t
            shell-default-shell 'eshell
            shell-default-full-span nil)
-    (osx :variables osx-command-as 'super)
+    (osx :variables osx-command-as 'super))
 
-    )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
   dotspacemacs-additional-packages
-  '(all-the-icons
-    ;; desktop-plus
+  '(;; desktop-plus
     ;; exec-path-from-shell
-    all-the-icons
     discover-my-major
     doom-themes
     dracula-theme
@@ -128,7 +128,6 @@ values."
     simpleclip
     sr-speedbar
     sublimity
-    undohist
     zencoding-mode)
 
    ;; A list of packages and/or extensions that will not be install and loaded.
@@ -150,7 +149,7 @@ values."
    ;; `used-but-keep-unused' installs only the used packages but won't uninstall
    ;; them if they become unused. `all' installs *all* packages supported by
    ;; Spacemacs and never uninstall them. (default is `used-only')
-   dotspacemacs-install-packages 'used-only))
+   dotspacemacs-install-packages 'used))
 
 (defun dotspacemacs/init ()
   "Initialization function.
@@ -388,6 +387,23 @@ executes.
  This function is mostly useful for variables that need to be set
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
+  ;; straight.el init begins here
+  (defvar bootstrap-version)
+  (let ((bootstrap-file
+         (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+        (bootstrap-version 5))
+    (unless (file-exists-p bootstrap-file)
+      (with-current-buffer
+          (url-retrieve-synchronously
+           "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+           'silent 'inhibit-cookies)
+        (goto-char (point-max))
+        (eval-print-last-sexp)))
+    (load bootstrap-file nil 'nomessage))
+
+  (straight-use-package 'use-package)
+  (straight-use-package 'all-the-icons)
+  ;; straight.el init ends here
 
   ;; fix doom-modeline and neotree not starting
   (defun colors//rainbow-identifiers-ignore-keywords ()
@@ -561,17 +577,18 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loa,
 you should place you code here."
 
-  (use-package doom-modeline
-    ;; :if window-system
-    ;; :defer 2
-    :requires all-the-icons
-    :ensure t
-    :init
-    (doom-modeline-mode 1)
-    :config
-    ;; The maximum displayed length of the branch name of version control.
-    (setq doom-modeline-vcs-max-length 34)
-    (setq doom-modeline-height 18))
+  ;; FIXME: this one isn't being loaded at hmz-misc layer
+  ;; (use-package doom-modeline
+  ;;   ;; :if window-system
+  ;;   ;; :defer 2
+  ;;   :requires all-the-icons
+  ;;   :ensure t
+  ;;   :init
+  ;;   (doom-modeline-mode 1)
+  ;;   :config
+  ;;   ;; The maximum displayed length of the branch name of version control.
+  ;;   (setq doom-modeline-vcs-max-length 34)
+  ;;   (setq doom-modeline-height 18))
 
   (defun hmz-prog-mode-hook ()
     ;; NOTE don't know why it was interactive, but
@@ -646,6 +663,7 @@ you should place you code here."
 
   (defun hmz-init/before-save (save-fun &rest args)
     (set-buffer-modified-p t)
+    (message "Saving... %s" buffer-file-name)
     (if (file-exists-p (buffer-file-name))
         (progn
           (set-buffer-modified-p t)
@@ -1100,8 +1118,7 @@ you should place you code here."
                  (minibuffer . t)
                  (height . 22) (width . 120)
                  (top . 1000) (left . 0)
-                 (unsplittable . t)
-                 )))
+                 (unsplittable . t))))
 
         (with-selected-window (frame-selected-window hmz-messages-frame)
           ;;TODO: (handle-switch-frame)
@@ -1109,7 +1126,8 @@ you should place you code here."
           (hidden-mode-line-mode t)    ;
           (spacemacs/enable-transparency hmz-messages-frame 90)
           (setq dotspacemacs-inactive-transparency 70)
-          (tabbar-local-mode 0)
+          (if (featurep 'tabbar)
+              (tabbar-local-mode 0))
           (set-background-color "black")
           (set-foreground-color "medium spring green")
 
@@ -1126,8 +1144,7 @@ you should place you code here."
           (setq-local header-line-format nil) ;; disables tabbar completly for that window
           (setq left-fringe-width 0)
           (setq right-fringe-width 0)
-          (set-window-fringes (selected-window) 0 0 nil)
-          )
+          (set-window-fringes (selected-window) 0 0 nil))
         ;; (message "%s" original-frame)
         ;; (select-frame-set-input-focus original-frame)
 
@@ -1388,7 +1405,7 @@ Example:
  '(auto-revert-buffer-list-filter 'magit-auto-revert-buffer-p)
  '(auto-revert-verbose t)
  '(before-save-hook
-   '(undohist-save-safe time-stamp whitespace-cleanup spacemacs//python-sort-imports))
+   '(time-stamp whitespace-cleanup spacemacs//python-sort-imports))
  '(coffee-tab-width 2)
  '(default-justification 'left)
  '(desktop-minor-mode-table
@@ -1425,7 +1442,7 @@ Example:
  '(use-dialog-box t)
  '(wakatime-api-key "79de0de9-6375-48d1-b78f-440418c5e5a0")
  '(wakatime-cli-path "/usr/local/bin/wakatime")
- '(wakatime-python-bin "/usr/local/bin/")
+ '(wakatime-python-bin "/usr/local/bin/python3")
  '(workgroups-mode t))
 (defun dotspacemacs/emacs-custom-settings ()
   "Emacs custom settings.
@@ -1445,7 +1462,7 @@ This function is called at the very end of Spacemacs initialization."
  '(auto-revert-buffer-list-filter 'magit-auto-revert-buffer-p)
  '(auto-revert-verbose t)
  '(before-save-hook
-   '(undohist-save-safe time-stamp whitespace-cleanup spacemacs//python-sort-imports))
+   '(time-stamp whitespace-cleanup spacemacs//python-sort-imports))
  '(coffee-tab-width 2)
  '(default-justification 'left)
  '(desktop-minor-mode-table
@@ -1466,6 +1483,7 @@ This function is called at the very end of Spacemacs initialization."
  '(evil-want-Y-yank-to-eol t)
  '(fic-highlighted-words '("FIXME" "TODO" "BUG" "HACK" "XXX" "OPTIMIZE" "NOTE"))
  '(fill-column 80)
+ '(git-gutter-fr:side 'left-fringe)
  '(global-auto-highlight-symbol-mode t)
  '(highlight-indent-guides-character 183)
  '(highlight-indent-guides-method 'character)
@@ -1473,13 +1491,15 @@ This function is called at the very end of Spacemacs initialization."
  '(highlight-indentation-offset 4)
  '(ibuffer-default-sorting-mode 'recency)
  '(ibuffer-sidebar-width 22)
+ '(ispell-highlight-face 'flyspell-incorrect)
  '(line-spacing 3)
+ '(magit-diff-highlight-trailing 'all)
  '(markdown-hide-urls t)
  '(markdown-italic-underscore t)
  '(message-sent-hook '((lambda nil (message (buffer-name)))))
  '(midnight-mode t)
  '(mode-line-in-non-selected-windows t)
- '(neo-vc-integration '(face char) t)
+ '(neo-vc-integration '(face char))
  '(neo-vc-state-char-alist
    '((up-to-date . 32)
      (edited . 10041)
@@ -1496,7 +1516,7 @@ This function is called at the very end of Spacemacs initialization."
      (nil . 8942)))
  '(neo-window-width 20)
  '(package-selected-packages
-   '(emojify enh-ruby-mode neotree hl-block-mode doom-modeline yasnippet-snippets symon string-inflection spaceline powerline ruby-refactor ruby-hash-syntax rake inflections pcre2el password-generator spinner overseer org-mime org-brain nameless markdown-mode skewer-mode json-snatcher json-reformat multiple-cursors js2-mode impatient-mode simple-httpd parent-mode helm-purpose window-purpose imenu-list request haml-mode gitignore-mode fringe-helper git-gutter flyspell-correct flx evil-org magit magit-popup git-commit ghub let-alist with-editor evil-lion iedit smartparens paredit anzu highlight editorconfig counsel-projectile counsel swiper ivy pkg-info epl web-completion-data dash-functional tern company-lua company centered-cursor-mode inf-ruby browse-at-remote f dash s bpr yasnippet packed all-the-icons memoize helm avy helm-core auto-complete popup org-plus-contrib hydra font-lock+ evil goto-chg undo-tree diminish bind-map bind-key async yascroll projectile switch-buffer-functions itail makey dired-toggle dired-open dired-narrow dirtree direx dired-rainbow discover-my-major org-alert all-the-icons-dired diredful dired-single dired-sidebar hide-lines org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-download htmlize gnuplot nginx-mode tide typescript-mode flycheck fic-mode zencoding-mode handlebars-sgml-mode yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package unfill typo toc-org tagedit tabbar sublimity spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters pug-mode projectile-rails popwin persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-bullets open-junk-file mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode link-hint less-css-mode launchctl json-mode js2-refactor js-doc info+ indicators indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe gh-md fuzzy flyspell-correct-helm flx-ido fill-column-indicator feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme diff-hl csv-mode company-web company-tern company-statistics column-enforce-mode coffee-mode clean-aindent-mode chruby bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))
+   '(google-this modern-fringes terraform-mode enh-ruby-mode psession telega dired-sidebar centaur-tabs writeroom-mode workgroups memory-usage drupal-mode phpunit phpcbf php-auto-yasnippets php-mode zones sr-speedbar evil-ruby-text-objects tempbuf wakatime-mode rspec-simple ido-completing-read+ shrink-path amx ri-mode ri smooth-scrolling ivy-youtube wgrep ivy-hydra lv flyspell-correct-ivy counsel-projectile counsel swiper ivy doom-todo-ivy magit-todos todo-projectile hl-block hl-block-mode indent-guide-mode highlight-indent-guides-mode vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toml-mode toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocopfmt rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails prodigy popwin pip-requirements persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file ns-auto-titlebar nginx-mode mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-gutter-fringe gh-md gcmh fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme doom-themes doom-modeline discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby cargo bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))
  '(rainbow-identifiers-cie-l*a*b*-lightness 50)
  '(rainbow-identifiers-cie-l*a*b*-saturation 20)
  '(shell-pop-cleanup-buffer-at-process-exit t)
@@ -1504,15 +1524,20 @@ This function is called at the very end of Spacemacs initialization."
  '(shell-pop-restore-window-configuration t)
  '(shell-pop-window-position "left" t)
  '(shell-pop-window-size 30 t)
+ '(sp-highlight-pair-overlay nil)
+ '(sp-highlight-wrap-overlay nil)
+ '(sp-highlight-wrap-tag-overlay nil)
  '(speedbar-use-images nil)
  '(sublimity-mode t)
  '(tempbuf-kill-hook nil)
  '(tooltip-use-echo-area t)
  '(use-dialog-box t)
+ '(volatile-highlights-mode t)
  '(wakatime-api-key "79de0de9-6375-48d1-b78f-440418c5e5a0")
  '(wakatime-cli-path "/usr/local/bin/wakatime")
  '(wakatime-python-bin "/usr/local/bin/python3")
- '(workgroups-mode t))
+ '(workgroups-mode t)
+ '(yascroll:delay-to-hide 1.5))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -1527,6 +1552,7 @@ This function is called at the very end of Spacemacs initialization."
  '(all-the-icons-lmaroon ((t (:foreground "burlywood3"))))
  '(all-the-icons-maroon ((t (:foreground "burlywood3"))))
  '(anzu-match-2 ((t (:foreground "deep sky blue"))))
+ '(anzu-replace-highlight ((t (:box (:line-width 2 :color "sienna1")))))
  '(bold ((t (:weight semi-light))))
  '(custom-button ((t (:background "lightgrey" :foreground "black" :box 2))))
  '(custom-button-mouse ((t (:background "grey90" :foreground "black" :box 2))))
@@ -1535,9 +1561,10 @@ This function is called at the very end of Spacemacs initialization."
  '(fic-face ((t (:weight bold))))
  '(flyspell-duplicate ((t (:underline "DarkOrange"))))
  '(flyspell-incorrect ((t (:underline "Red1"))))
- '(font-lock-warning-face ((t (:background "DeepSkyBlue" :foreground "#ffb86c"))))
+ '(font-lock-warning-face ((t (:background "#373844" :foreground "#ffb86c" :underline (:color "red" :style wave)))))
  '(fringe ((t (:foreground "DeepSkyBlue" :background unspecified))))
  '(header-line ((t (:background "#44475a" :underline "gray20" :height 1.0 :family "San Francisco"))))
+ '(hi-yellow ((t (:box (:line-width 1 :color "gray") :underline nil :height 1.0))))
  '(highlight-indent-guides-character-face ((t (:foreground "#3df1410a539f"))))
  '(hydra-face-red ((t (:foreground "#FF0000" :weight bold))))
  '(indent-guide-face ((t (:inherit font-lock-constant-face :slant normal))))
@@ -1566,5 +1593,6 @@ This function is called at the very end of Spacemacs initialization."
  '(tabbar-default ((t (:inherit (hl-line header-line) :box nil :underline nil :weight light :height 0.8))))
  '(tabbar-icon-unselected ((t (:box nil :inherit 'tabbar-default :underline t))))
  '(which-key-posframe-border ((t (:inherit default :background "gray50" :underline t))))
- '(window-divider ((t (:foreground "black")))))
+ '(window-divider ((t (:foreground "black"))))
+ '(yascroll:thumb-fringe ((t (:inherit font-lock-comment-face)))))
 )
