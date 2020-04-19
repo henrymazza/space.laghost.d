@@ -9,14 +9,17 @@
 which require an initialization must be listed explicitly in the list.")
 
 (defun hmz-tabbar/init-tabbar ()
+
+  ;; (remove-hook 'kill-buffer-hook (lambda() (message ">>> HI! - %s" (buffer-name))))
+  ;; (run-with-timer 0 (* 30 60) 'recentf-save-list)
+
   "Tabbar customizations"
   (use-package tabbar
     :straight t
-    :defer 1
+    :catch t
+    :defer t
     :bind ("s-b" . tabbar-mode)
-    ;; :requires helm-lib
-    ;; :ensure all-the-icons
-
+    :after (helm-lib all-the-icons)
     :config
       (defun ido-switch-tab-group ()
         "Switch tab groups using ido."
@@ -395,9 +398,30 @@ element."
                            (length (tabbar-view
                                     (tabbar-current-tabset)))))))))
 
+    (defun advice-unadvice (sym)
+      "Remove all advices from symbol SYM."
+      (interactive "Function symbol: ")
+      (advice-mapc (lambda (advice _props) (advice-remove sym advice)) sym))
+
+    (defun my-make-throttler-3 ()
+      (lexical-let ((last-time (+ 10 (float-time) ))
+                    (last-args 'dummy)
+                    (last-val ()))
+        (lambda (&rest args)
+          (if (and (< 10 (- (float-time) last-time))
+                   (equal args last-args))
+              last-val
+            (setq last-time (float-time))
+            (setq last-args args)
+            (setq last-val (apply args))))))
+
+    (advice-unadvice 'tabbar-buffer-update-groups)
+    (advice-add 'tabbar-buffer-update-groups :around (my-make-throttler-3))
+
     (defun tabbar-buffer-update-groups ()
       "Update tab sets from groups of existing buffers.
   Return the the first group where the current buffer is."
+      ;; (message "update groups")
       (let ((bl (sort
                  (mapcar
                   ;; for each buffer, create list: buffer, buffer name, groups-list
@@ -504,7 +528,6 @@ element."
        "Run `after-load-theme-hook'."
         (run-hooks 'after-load-theme-hook)))
 
-    ;; NOTE: more of the patch: stop turning on and off so often
     (add-hook 'after-load-theme-hook 'hmz-tabbar-refresh-tabs)
     (add-hook 'after-save-hook 'hmz-tabbar-refresh-tabs)
     (add-hook 'first-change-hook 'hmz-tabbar-refresh-tabs)
@@ -545,4 +568,4 @@ element."
 
                     ))))
           (tabbar-set-template tabset nil)
-          (set tabset new-tabset))))))
+          (set tabset new-tabset)))))))

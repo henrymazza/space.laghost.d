@@ -1,6 +1,10 @@
-  (use-package all-the-icons
-    :catch t
-    :demand t)
+(add-to-list 'load-path (expand-file-name "~/.spacemacs.develop.d/straight/repos/all-the-icons"))
+
+(use-package all-the-icons
+  :straight t
+  :disabled
+  :catch t
+  :demand t)
 
 (use-package tabbar
     :straight t
@@ -561,7 +565,7 @@ element."
 ;; hmz-misc ======================================================
 (use-package neotree
     :straight t
-    :defer t
+    :demand t
     :after (all-the-icons rainbow-identifiers)
     :init
     ;; I'm leaving most of these settings to customize
@@ -846,7 +850,9 @@ element."
                'point
                :managed t))))
 (use-package magithub
+  :straight t
   :after magit
+  :catch t
   :config
   (magithub-feature-autoinject t)
   (setq magithub-clone-default-directory "~/github"))
@@ -865,10 +871,10 @@ element."
   :config
   (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls))
 
-;; (use-package evil-magit
-;;   :straight t
-;;   :disabled
-;;   :config (evil-magit-init))
+(use-package evil-magit
+  :straight t
+  :disabled
+  :config (evil-magit-init))
 
 (use-package doom-modeline
   :straight t
@@ -1037,6 +1043,7 @@ So it safe to call it many times like in a minor mode hook."
     :straight t
     :disabled
     :init))
+
 (use-package persp-mode-projectile-bridge
   :straight t
   :after (projectile persp-mode)
@@ -1122,7 +1129,6 @@ So it safe to call it many times like in a minor mode hook."
 
 (use-package rspec-simple
   :straight (rspec-simple :type git :host github :repo "code-mancers/rspec-simple"))
-
 
 (use-package amx
   :straight t
@@ -1236,6 +1242,7 @@ So it safe to call it many times like in a minor mode hook."
                                     :managed t
                                     :face 'font-lock-const-face))))
 (use-package rubocopfmt
+  :straight (rubocopfmt :type git :host github :repo "jimeh/rubocopfmt.el")
   :init
   (add-to-list 'load-path "~/.spacemacs.d/layers/hmz-misc/local")
   (add-hook 'ruby-mode-hook #'rubocopfmt-mode))
@@ -1297,6 +1304,7 @@ So it safe to call it many times like in a minor mode hook."
             (lambda () (add-to-invisibility-spec 'hl))))
 
 (use-package origami
+  :straight t
   :config
   (global-origami-mode t))
 

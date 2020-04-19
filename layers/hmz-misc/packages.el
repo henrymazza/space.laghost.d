@@ -10,6 +10,7 @@
     ;; psession
     ;; undohist
     ;; which-key-posframe
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     alert
     all-the-icons
     amx
@@ -21,37 +22,68 @@
     doom-todo-ivy
     ember-mode
     evil-ruby-text-objects
+    evil-magit
     fira-code-mode
     gcmh
     google-this
     hide-lines
     hydra-posframe
-    ibuffer-projectile
-    ibuffer-sidebar
+    ;; ibuffer-projectile
+    ;; ibuffer-sidebar
     indent-guide
     list-processes
+    ;; magit-gh-pulls
+    ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     neotree
     persp-mode
     persp-mode-projectile-bridge
-    ;; restore-frame-position
+    restore-frame-position
     ri
     rspec-simple
     rubocopfmt
     sublimity
     switch-buffer-functions
-    tempbuf
+    ;; tempbuf
     wakatime-mode
     yascroll
     ))
 
+(defun hmz-misc/init-magithub ()
+ (use-package magithub
+   :after magit
+   :config
+   (magithub-feature-autoinject t)
+   (setq magithub-clone-default-directory "~/github")))
+
+(defun hmz-misc/init-magit-popup ()
+ (use-package magit-popup
+  :straight t ; make sure it is installed
+  :demand t ; make sure it is loaded
+  ))
+
+(defun hmz-misc/init-magit-gh-pulls ()
+  (use-package magit-gh-pulls
+    :straight t
+    :demand t
+    :catch (lambda (keyword err)
+           (message (error-message-string err)))
+    :after magit-popup
+    :config
+    (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls)))
+
+(defun hmz-misc/init-evil-magit ()
+  (use-package evil-magit
+      :straight t
+      :config (evil-magit-init)))
 
 (defun hmz-misc/init-doom-modeline ()
   (use-package doom-modeline
     :straight t
+    :demand t
     ;; :if window-system
     ;; :defer 2
-    ;; :requires all-the-icons
-    :config
+    :after all-the-icons
+    :init
     (doom-modeline-mode 1)
     ;; The maximum displayed length of the branch name of version control.
     (setq doom-modeline-vcs-max-length 34)
@@ -71,7 +103,8 @@
 (defun hmz-misc/init-hydra-posframe ()
  (use-package hydra-posframe
    :straight (hydra-posframe :type git :host github :repo "Ladicle/hydra-posframe")
-   :requires (posframe hydra)
+   :catch t
+   :after (posframe hydra)
    ;; :load-path "<path-to-the-hydra-posframe>"
    :hook (after-init . hydra-posframe-enable)))
 
@@ -88,34 +121,39 @@
 If `auto-insert-alist' holds already the condition for the current project it does nothing.
 So it safe to call it many times like in a minor mode hook."
       (let* ((file-re (format "^%s.*\\.rb$" (projectile-rails-root)))
-             (current-project-cond `(,file-re . "projectile-rails")))
-        (unless (and (boundp 'auto-insert-alist)
-                     (projectile-rails--auto-insert-setup-p current-project-cond))
-          (define-auto-insert
-            current-project-cond
-            [
-             (lambda () (insert (projectile-rails-corresponding-snippet)))
-             projectile-rails-expand-yas-buffer
-             ]
-            ))))))
+       (current-project-cond `(,file-re . "projectile-rails")))
+  (unless (and (boundp 'auto-insert-alist)
+         (projectile-rails--auto-insert-setup-p current-project-cond))
+    (define-auto-insert
+      current-project-cond
+      [
+       (lambda () (insert (projectile-rails-corresponding-snippet)))
+       projectile-rails-expand-yas-buffer
+       ]
+      ))))))
 
 (defun hmz-misc/init-circe ()
   (straight-use-package 'circe))
 
 (defun hmz-misc/init-all-the-icons ()
-  (straight-use-package 'all-the-icons))
+
+  (use-package all-the-icons
+    :straight t
+    :ensure t
+    :catch (lambda (keyword err)
+             (message "--------------------------\n%s\n%s" (backtrace)))
+    :demand t))
 
 (defun hmz-misc/init-ibuffer-projectile ()
   (use-package ibuffer-projectile
     :straight t
-    :commands (ibuffer-projectile-set-filter-groups
-               ibuffer-projectile-generate-filter-groups)
+    :requires ibuffer
     :init
     (defun j-ibuffer-projectile-run ()
       "Set up `ibuffer-projectile'."
       (ibuffer-projectile-set-filter-groups)
       (unless (eq ibuffer-sorting-mode 'recency)
-        (ibuffer-do-sort-by-alphabetic)))
+  (ibuffer-do-sort-by-alphabetic)))
 
     (add-hook 'ibuffer-sidebar-mode-hook #'j-ibuffer-projectile-run)
     (add-hook 'ibuffer-hook #'j-ibuffer-projectile-run)
@@ -125,7 +163,7 @@ So it safe to call it many times like in a minor mode hook."
 (defun hmz-misc/init-ibuffer-sidebar ()
   (use-package ibuffer-sidebar
     :straight t
-    :load-path "~/.emacs.d/fork/ibuffer-sidebar"
+    :catch t
     :commands (ibuffer-sidebar-toggle-sidebar)
     :config
     (setq ibuffer-sidebar-use-custom-font t)) )
@@ -170,12 +208,13 @@ So it safe to call it many times like in a minor mode hook."
 
 (defun hmz-misc/init-ibuffer-sidebar ()
   (use-package ibuffer-sidebar
+    :straight t
     ;; :load-path "~/.emacs.d/fork/ibuffer-sidebar"
-    :commands (ibuffer-sidebar-toggle-sidebar)
+    ;; :commands (ibuffer-sidebar-toggle-sidebar)
     :config
     (setq ibuffer-sidebar-use-custom-font t)
     (setq ibuffer-sidebar-face `(:family "San Francisco" :height 120)
-    (spacemacs/set-leader-keys "b B" 'ibuffer-sidebar-toggle-sidebar)
+    ;; (spacemacs/set-leader-keys "b S" 'ibuffer-sidebar-toggle-sidebar)
     (setq ibuffer-default-sorting-mode 'recency)
     (setq ibuffer-sidebar-use-custom-font t)
     (add-hook 'ibuffer-sidebar-mode-hook #'j-ibuffer-projectile-run))))
@@ -212,8 +251,6 @@ So it safe to call it many times like in a minor mode hook."
     (setq centaur-tabs-set-left-close-button nil)
     (setq centaur-tabs-modified-marker "#")
 
-    ;; (set-selection-coding-system 'utf-8)
-
     :config
     (centaur-tabs-mode 1)
     ;; Safari like key-bindings
@@ -232,10 +269,10 @@ So it safe to call it many times like in a minor mode hook."
     :defer 2
     :init
     (add-hook 'persp-mode-projectile-bridge-mode-hook
-        #'(lambda ()
-            (if persp-mode-projectile-bridge-mode
-                (persp-mode-projectile-bridge-find-perspectives-for-all-buffers)
-              (persp-mode-projectile-bridge-kill-perspectives))))
+  #'(lambda ()
+      (if persp-mode-projectile-bridge-mode
+    (persp-mode-projectile-bridge-find-perspectives-for-all-buffers)
+        (persp-mode-projectile-bridge-kill-perspectives))))
 
     :config
     (persp-mode-projectile-bridge-mode 1)))
@@ -243,7 +280,7 @@ So it safe to call it many times like in a minor mode hook."
 (defun hmz-misc/post-init-persp-mode ()
   (use-package persp-mode
     :straight t
-    :requires projectile
+    :after projectile
     :custom
     (persp-auto-save-num-of-backups 10)
     (persp-autokill-buffer-on-remove 'kill-weak)
@@ -253,25 +290,25 @@ So it safe to call it many times like in a minor mode hook."
 
     :config
     (persp-def-auto-persp "dotfiles"
-        :mode 'prog-mode)
+  :mode 'prog-mode)
 
     (persp-def-auto-persp "ruby"
-        :buffer-name "\\.rb")
+  :buffer-name "\\.rb")
 
     (persp-def-auto-persp "elisp"
-        :buffer-name "\\.el")
+  :buffer-name "\\.el")
 
     (persp-def-auto-persp "projectile"
-        :hooks 'projectile-mode-hook
-        :get-name (projectile-project-root)
-        :predicate (lambda (buffer state)
-               (if (and (not (eq nil (buffer-file-name buffer)))
-            (bound-and-true-p projectile-mode)
-            (projectile-project-p)
-            (projectile-project-buffer-p buffer (projectile-project-root)))
-             nil))
-        :on-match (lambda (perspective buffer after-match hook args)
-              (persp-frame-switch perspective)))))
+  :hooks 'projectile-mode-hook
+  :get-name (projectile-project-root)
+  :predicate (lambda (buffer state)
+         (if (and (not (eq nil (buffer-file-name buffer)))
+      (bound-and-true-p projectile-mode)
+      (projectile-project-p)
+      (projectile-project-buffer-p buffer (projectile-project-root)))
+       nil))
+  :on-match (lambda (perspective buffer after-match hook args)
+        (persp-frame-switch perspective)))))
 
 (defun hmz-misc/init-sublimity ()
     (use-package sublimity
@@ -290,9 +327,10 @@ So it safe to call it many times like in a minor mode hook."
     (restore-frame-position)))
 
 (defun hmz-misc/init-tempbuf ()
+  ;; (unload-feature 'tempbuf)
   (use-package tempbuf
-    :straight t
-    ;; :load-path  "~/spacemacs.d/layers/hmz-misc/local/tempbuf/tempbuf.el"
+    ;; :straight t
+    :load-path  "~/spacemacs.d/layers/hmz-misc/local/tempbuf/tempbuf.el"
     :config
     ;; modified from jmjeong / jmjeong-emacs
     (add-hook 'help-mode-hook 'turn-on-tempbuf-mode)
@@ -302,18 +340,14 @@ So it safe to call it many times like in a minor mode hook."
     (add-hook 'Man-mode-hook 'turn-on-tempbuf-mode)
     (add-hook 'view-mode-hook 'turn-on-tempbuf-mode)
     (add-hook 'helm-major-mode-hook 'turn-on-tempbuf-mode)
-    (add-hook 'fundamental-mode-hook 'turn-on-tempbuf-mode)
     (add-hook 'inferior-python-mode-hook 'turn-on-tempbuf-mode)
     (add-hook 'magit-mode-hook 'turn-on-tempbuf-mode)
-
-    ;; tempbuf by default
-    ;; (remove-hook 'find-file-hooks 'turn-on-tempbuf-mode)
 
     (defun hmz-misc/tempbuf-kill-func ()
        (message "%s" (buffer-name))
        (shell-command
-        (combine-and-quote-strings
-         (list "terminal-notifier"
+  (combine-and-quote-strings
+   (list "terminal-notifier"
      "-message" (buffer-name)
      "-title" "Tempbuf"
      ) " ")))
@@ -344,13 +378,13 @@ So it safe to call it many times like in a minor mode hook."
     :init
     (progn
       (setq-default amx-history-length 32
-                    amx-save-file (concat spacemacs-cache-directory
-                                          ".amx-items"))
+        amx-save-file (concat spacemacs-cache-directory
+            ".amx-items"))
       ;; define the key binding at the very end in order to allow the user
       ;; to overwrite any key binding
       (add-hook 'emacs-startup-hook
-                (lambda () (spacemacs/set-leader-keys
-                        dotspacemacs-emacs-command-key 'spacemacs/amx)))
+    (lambda () (spacemacs/set-leader-keys
+      dotspacemacs-emacs-command-key 'spacemacs/amx)))
       (spacemacs/set-leader-keys ":" 'spacemacs/amx-major-mode-commands)
       (spacemacs/set-leader-keys "SPC" 'spacemacs/amx)
       (global-set-key (kbd "M-x") 'spacemacs/amx)
@@ -395,10 +429,10 @@ So it safe to call it many times like in a minor mode hook."
       ;; some commands' behavior may affected by indent-guide overlays, so
       ;; remove all overlays in pre-command-hook.
       (run-with-timer 0.4 nil
-          (lambda () (indent-guide-remove))))
+    (lambda () (indent-guide-remove))))
 
     (add-hook 'prog-mode-hook
-        (lambda() (indent-guide-mode t)))
+  (lambda() (indent-guide-mode t)))
 
     (highlight-indent-guides-mode -1)
     (highlight-indentation-mode -1)))
@@ -412,7 +446,7 @@ So it safe to call it many times like in a minor mode hook."
 
 (defun hmz-misc/init-doom-todo-ivy ()
   (use-package doom-todo-ivy
-    :requires ivy
+    :after ivy
     :hook (after-init . doom-todo-ivy)
     :load-path "~/.spacemacs.d/layers/hmz-misc/local/doom-todo-ivy/doom-todo-ivy.el"
     :init
@@ -438,10 +472,10 @@ So it safe to call it many times like in a minor mode hook."
     :config
     (setq ind-indicator-height 19)
     (add-hook 'after-change-major-mode-hook
-        (lambda()
+  (lambda()
     (ind-create-indicator 'point
-              :managed t
-              :face 'font-lock-const-face)))))
+        :managed t
+        :face 'font-lock-const-face)))))
 
 (defun hmz-misc/init-rubocopfmt ()
   (add-to-list 'load-path "~/.spacemacs.d/layers/hmz-misc/local")
@@ -454,10 +488,10 @@ So it safe to call it many times like in a minor mode hook."
     :load-path "~/.spacemacs.d/layers/hmz-misc/local/fira-code-mode/"
     :hook prog-mode))
 
+ ;; Garbage Collector Magic Hack
 (defun hmz-misc/init-gcmh ()
   (use-package gcmh
     :straight t
-    :load-path "~/.spacemacs.d/layers/hmz-misc/local/gcmh/"
     :config
     (gcmh-mode 1)))
 
@@ -466,22 +500,22 @@ So it safe to call it many times like in a minor mode hook."
     :straight t
     :config
     (alert-add-rule :status   '(buried visible idle)
-                :severity '(moderate high urgent)
-                :mode     'erc-mode
-                :predicate
-                #'(lambda (info)
-                    (string-match (concat "\\`[^&].*@BitlBee\\'")
-                                  (erc-format-target-and/or-network)))
-                :persistent
-                #'(lambda (info)
-                    ;; If the buffer is buried, or the user has been
-                    ;; idle for `alert-reveal-idle-time' seconds,
-                    ;; make this alert persistent.  Normally, alerts
-                    ;; become persistent after
-                    ;; `alert-persist-idle-time' seconds.
-                    (memq (plist-get info :status) '(buried idle)))
-                :style 'fringe
-                :continue t)))
+    :severity '(moderate high urgent)
+    :mode     'erc-mode
+    :predicate
+    #'(lambda (info)
+        (string-match (concat "\\`[^&].*@BitlBee\\'")
+          (erc-format-target-and/or-network)))
+    :persistent
+    #'(lambda (info)
+        ;; If the buffer is buried, or the user has been
+        ;; idle for `alert-reveal-idle-time' seconds,
+        ;; make this alert persistent.  Normally, alerts
+        ;; become persistent after
+        ;; `alert-persist-idle-time' seconds.
+        (memq (plist-get info :status) '(buried idle)))
+    :style 'fringe
+    :continue t)))
 
 (defun hmz-misc/init-list-processes+ ()
   (use-package list-processes+
@@ -507,7 +541,7 @@ So it safe to call it many times like in a minor mode hook."
     :straight t
     :config
     (add-hook 'after-change-major-mode-hook
-        (lambda () (add-to-invisibility-spec 'hl)))))
+  (lambda () (add-to-invisibility-spec 'hl)))))
 
 (defun hmz-misc/init-hidesearch ()
   (straight-use-package 'hidesearch))
@@ -515,7 +549,7 @@ So it safe to call it many times like in a minor mode hook."
 (defun hmz-misc/init-bpr ()
   (use-package bpr
     :straight t
-    :requires alert
+    :after alert
     :config
 
     (use-package alert
@@ -526,20 +560,20 @@ So it safe to call it many times like in a minor mode hook."
     (defun hmz-misc/bpr-process-sentinel (proc string)
       (if (string-equal string "finished\n")
     (run-with-timer 5 nil (lambda (p)
-        (delete-window)
-        ) (process-buffer proc))
+  (delete-window)
+  ) (process-buffer proc))
     (run-with-timer 60 nil (lambda (p)
-        (kill-buffer p)
-        (message "Killed buffer %s" p)
-        ) (process-buffer proc)))
+  (kill-buffer p)
+  (message "Killed buffer %s" p)
+  ) (process-buffer proc)))
       (alert (process-name proc) :title string))
 
     (setq my-ansi-escape-re
       (rx (or
     (and (or ?\233 (and ?\e ?\[))
-         (zero-or-more (char (?0 . ?\?)))
-         (zero-or-more (char ?\s ?- ?\/))
-         (char (?@ . ?~)))
+   (zero-or-more (char (?0 . ?\?)))
+   (zero-or-more (char ?\s ?- ?\/))
+   (char (?@ . ?~)))
     (char "")
     (char ""))))
 
@@ -547,82 +581,82 @@ So it safe to call it many times like in a minor mode hook."
       (when (buffer-live-p (process-buffer proc))
   (with-current-buffer (process-buffer proc)
     (let
-        ((moving (> 3 (abs (- (count-lines (point-min) (point-max)) (line-number-at-pos))))))
+  ((moving (> 3 (abs (- (count-lines (point-min) (point-max)) (line-number-at-pos))))))
 
       (save-excursion  ;;TODO perhaps save-mark-and-excursion?
 
-        ;; Insert the text, advancing the process marker.
-        (goto-char (process-mark proc))
-        ;; (overwrite-mode overwrite-mode-textual)
+  ;; Insert the text, advancing the process marker.
+  (goto-char (process-mark proc))
+  ;; (overwrite-mode overwrite-mode-textual)
 
 
-        (let ((str
-         ;; Ember test is throwing escaped \n, hope just now
-         (replace-regexp-in-string "\\\\n" "\n" string)))
+  (let ((str
+   ;; Ember test is throwing escaped \n, hope just now
+   (replace-regexp-in-string "\\\\n" "\n" string)))
 
     (while (string-match my-ansi-escape-re str)
       ;; send first part to the buffer
       (let ((content (substring str 0 (car (match-data)))))
-        (insert content)
-        (delete-char (min (- (point-max)
-           (point))
-              (length content))))
+  (insert content)
+  (delete-char (min (- (point-max)
+     (point))
+        (length content))))
 
       ;; deal with special code
       (let ((ansi-code (substring str  (car (match-data))
-                (cadr (match-data)))))
+    (cadr (match-data)))))
 
-        (condition-case nil
+  (condition-case nil
       (cond
        ;;TODO save re context
        ;; Color Code
        ;; ((string-equal "\\n" ansi-code) (insert "\n"))
        ((string-equal "" ansi-code)
-        (delete-backward-char 1))
+  (delete-backward-char 1))
        ((string-equal "" ansi-code)
-        (beginning-of-line)
-        (kill-line))
+  (beginning-of-line)
+  (kill-line))
        ((string-match-p "m$" ansi-code) (insert ansi-code))
 
        ((string-match "\\[\\(?1:.*\\);\\(?2:.*\\)f" ansi-code)
-        (let ((col (string-to-number (match-string 1 ansi-code)))
-        (lin (string-to-number (match-string 2 ansi-code))))
-          (goto-char (point-max))
-          (while (< (count-lines (point-min) (point-max)) (lin))
-            (newline))
-          (goto-line lin)
+  (let ((col (string-to-number (match-string 1 ansi-code)))
+  (lin (string-to-number (match-string 2 ansi-code))))
+    (goto-char (point-max))
+    (while (< (count-lines (point-min) (point-max)) (lin))
+      (newline))
+    (goto-line lin)
 
-          (end-of-line)
-          (while (< (current-column) col)
-            (insert " "))
-          (beginning-of-line)
-          (forward-char col)))
+    (end-of-line)
+    (while (< (current-column) col)
+      (insert " "))
+    (beginning-of-line)
+    (forward-char col)))
 
        ((string-match "\\[\\(?1:.*\\)\\(?2:[ABCD]\\)" ansi-code)
-        (let ((count (string-to-int
-          (match-string 1 ansi-code)))
-        (cmd (match-string 2 ansi-code)))
+  (let ((count (string-to-int
+    (match-string 1 ansi-code)))
+  (cmd (match-string 2 ansi-code)))
 
-          (cond
-           ;;TODO: does up and down command preserve columns(?)
-           ;; Moves the cursor up by COUNT rows
-           ((string-equal cmd "A")
-            (forward-line ;; negative goes back
-             (- (min
-           count
-           (count-lines (point-min)
-            (point))))))
-           ;; moves the cursor down by COUNT rows
-           ((string-equal cmd "B")
-            (forward-line count))
-           ;; moves the cursor forward by COUNT columns
-           ((string-equal cmd "C")
-            (forward-char count))
-           ;; moves the cursor backward by COUNT columns
-           ((string-equal cmd "D")
-            (if (> (current-column) count)
-          (backward-char count)
-        (beginning-of-line))))))
+    (cond
+     ;;TODO: does up and down command preserve columns(?)
+     ;; Moves the cursor up by COUNT rows
+     ((string-equal cmd "A")
+      (forward-line ;; negative goes back
+       (- (min
+     count
+     (count-lines (point-min)
+      (point))))))
+     ;; moves the cursor down by COUNT rows
+     ((string-equal cmd "B")
+      (forward-line count))
+     ;; moves the cursor forward by COUNT columns
+     ((string-equal cmd "C")
+      (forward-char count))
+     ;; moves the cursor backward by COUNT columns
+     ((string-equal cmd "D")
+      (if (> (current-column) count)
+    (backward-char count)
+  (beginning-of-line))))))
 
        ;; clear all to the right
        ((string-equal ansi-code "[0K") (kill-line))
@@ -640,23 +674,23 @@ So it safe to call it many times like in a minor mode hook."
        ((string-equal ansi-code "[?25h") nil)
        ;; insert unrecognized
        (t (insert (format "[%s]"ansi-code))))
-          (error "ERROR: %s" ansi-code))
+    (error "ERROR: %s" ansi-code))
 
-        ;; process the rest
-        (setq str (substring str (cadr (match-data))))))
+  ;; process the rest
+  (setq str (substring str (cadr (match-data))))))
 
     ;; insert piece after last code
     (insert str))
 
-        ;;TODO Try to detect errors and such
-        (when (string-match-p "Error" string)
+  ;;TODO Try to detect errors and such
+  (when (string-match-p "Error" string)
     (hmz-misc/mac-notify "Filter got and Error!" string))
 
-        (if (< (process-mark proc) (point))
+  (if (< (process-mark proc) (point))
       (ansi-color-apply-on-region (marker-position (process-mark proc)) (point))
     (ansi-color-apply-on-region (point-min) (marker-position (process-mark proc))))
 
-        (set-marker (process-mark proc) (point)))
+  (set-marker (process-mark proc) (point)))
 
       (if moving (goto-char (process-mark proc)))))))
 
@@ -665,7 +699,7 @@ So it safe to call it many times like in a minor mode hook."
       (interactive)
       (if (process-live-p (get-buffer-process (current-buffer)))
     (if (zerop (buffer-size))
-        (kill-this-buffer)
+  (kill-this-buffer)
       (erase-buffer))
   (kill-this-buffer)))
 
@@ -748,7 +782,7 @@ So it safe to call it many times like in a minor mode hook."
      (point-min-marker)))
       (end-marker
        (process-mark
-        (get-buffer-process (current-buffer)))))
+  (get-buffer-process (current-buffer)))))
   (filter-non-sgr-control-sequences-in-region
    start-marker
    end-marker)))
@@ -795,18 +829,18 @@ So it safe to call it many times like in a minor mode hook."
       (add-hook 'switch-buffer-functions
     (lambda (prev cur)
       (unless (or (string= (buffer-name) "*Messages*")
-         (string= (buffer-name) neo-buffer-name))
-        (if (and (not hmz-neotree-hidden) (buffer-file-name))
+   (string= (buffer-name) neo-buffer-name))
+  (if (and (not hmz-neotree-hidden) (buffer-file-name))
       (neotree-refresh t)
 
-          (neotree-hide)))))))
+    (neotree-hide)))))))
 
 (defun hmz-misc/init-indicators ()
   (use-package indicators
     :straight t
     :config
     (add-hook 'prog-mode
-        (lambda ()
+  (lambda ()
     (ind-create-indicator
      'point
      :managed t)))))
@@ -815,7 +849,7 @@ So it safe to call it many times like in a minor mode hook."
   (use-package neotree
     :straight t
     :defer t
-    :requires (all-the-icons rainbow-identifiers)
+    :after (all-the-icons rainbow-identifiers)
     :init
     ;; I'm leaving most of these settings to customize
     (setq neo-auto-indent-point t)
@@ -830,7 +864,7 @@ So it safe to call it many times like in a minor mode hook."
     (setq neo-banner-message "")
     (setq neo-create-file-auto-open t)
     (setq neo-filepath-sort-function (lambda (f1 f2) (string< (downcase f1)
-                    (downcase f2))))
+        (downcase f2))))
 
     (setq neo-vc-integration (quote (face char)))
     (setq neo-force-change-root t)
@@ -857,165 +891,165 @@ So it safe to call it many times like in a minor mode hook."
     (defun neo-buffer--insert-dir-entry (node depth expanded)
       "Overriden function to get rid of useless typography."
       (let ((node-short-name (neo-path--file-short-name node)))
-        (insert
-         (propertize " "
-                     'display `(space :width ,(* 2 (- depth 1)) )))
+  (insert
+   (propertize " "
+         'display `(space :width ,(* 2 (- depth 1)) )))
 
-        (when (memq 'char neo-vc-integration)
+  (when (memq 'char neo-vc-integration)
 
-          (insert
-           (propertize " "
-                       'display `(space :width 0.35))))
+    (insert
+     (propertize " "
+           'display `(space :width 0.35))))
 
-        (neo-buffer--insert-fold-symbol
-         (if expanded 'open 'close) node)
-        (insert-button (concat node-short-name "")
-                       'follow-link t
-                       'face neo-dir-link-face
-                       'neo-full-path node
-                       'keymap neotree-dir-button-keymap
-                       'help-echo
-                       (neo-buffer--help-echo-message node-short-name))
-        (neo-buffer--node-list-set nil node)
-        (neo-buffer--newline-and-begin)))
+  (neo-buffer--insert-fold-symbol
+   (if expanded 'open 'close) node)
+  (insert-button (concat node-short-name "")
+           'follow-link t
+           'face neo-dir-link-face
+           'neo-full-path node
+           'keymap neotree-dir-button-keymap
+           'help-echo
+           (neo-buffer--help-echo-message node-short-name))
+  (neo-buffer--node-list-set nil node)
+  (neo-buffer--newline-and-begin)))
 
     (setq hmz-misc/neo-sort-dir-with-files t)
 
     (defun neo-buffer--insert-tree (path depth)
       (if (eq depth 1)
-          (neo-buffer--insert-root-entry path))
+    (neo-buffer--insert-root-entry path))
       (let* ((contents (neo-buffer--get-nodes path))
-             (nodes (car contents))
-             (leafs (cdr contents))
-             (default-directory path))
+       (nodes (car contents))
+       (leafs (cdr contents))
+       (default-directory path))
 
-        (if (> (length nodes) 100)
-            (insert " ··· \n")
-          (if (bound-and-true-p hmz-misc/neo-sort-dir-with-files)
-              (let ((sorted (sort
-                             (append (car contents) (cdr contents))
-                             (lambda (s1 s2)
-                               (string< (upcase s1) (upcase s2) )))))
-                (dolist (node sorted)
-                  (if (file-directory-p node)
-                      (let ((expanded (neo-buffer--expanded-node-p node)))
-                        (neo-buffer--insert-dir-entry
-                         node depth expanded)
-                        (if expanded (neo-buffer--insert-tree (concat node "/")
-                                                              (+ depth 1))))
+  (if (> (length nodes) 100)
+      (insert " ··· \n")
+    (if (bound-and-true-p hmz-misc/neo-sort-dir-with-files)
+        (let ((sorted (sort
+           (append (car contents) (cdr contents))
+           (lambda (s1 s2)
+             (string< (upcase s1) (upcase s2) )))))
+    (dolist (node sorted)
+      (if (file-directory-p node)
+          (let ((expanded (neo-buffer--expanded-node-p node)))
+      (neo-buffer--insert-dir-entry
+       node depth expanded)
+      (if expanded (neo-buffer--insert-tree (concat node "/")
+                    (+ depth 1))))
 
-                    (neo-buffer--insert-file-entry node depth))))
+        (neo-buffer--insert-file-entry node depth))))
 
-            (dolist (node nodes)
-              (let ((expanded (neo-buffer--expanded-node-p node)))
-                (neo-buffer--insert-dir-entry
-                 node depth expanded)
-                (if expanded (neo-buffer--insert-tree (concat node "/")
-                                                      (+ depth 1)))))
-            (dolist (leaf leafs)
-              (neo-buffer--insert-file-entry leaf depth))))))
+      (dolist (node nodes)
+        (let ((expanded (neo-buffer--expanded-node-p node)))
+    (neo-buffer--insert-dir-entry
+     node depth expanded)
+    (if expanded (neo-buffer--insert-tree (concat node "/")
+                  (+ depth 1)))))
+      (dolist (leaf leafs)
+        (neo-buffer--insert-file-entry leaf depth))))))
 
 
     (defun neo-buffer--insert-file-entry (node depth)
       "Overriden so it can be configured to show files and directories together."
 
       (let ((node-short-name (neo-path--file-short-name node))
-            (vc (when neo-vc-integration (neo-vc-for-node node))))
+      (vc (when neo-vc-integration (neo-vc-for-node node))))
 
 
-        (insert
-         (propertize " "
-                     'display `(space :width ,(+ 0.3 (* 2 (- depth 1))))))
+  (insert
+   (propertize " "
+         'display `(space :width ,(+ 0.3 (* 2 (- depth 1))))))
 
-        (neo-buffer--insert-fold-symbol 'leaf node-short-name)
+  (neo-buffer--insert-fold-symbol 'leaf node-short-name)
 
-        (insert-button node-short-name
-                       'follow-link t
-                       'face neo-file-link-face
-                       'neo-full-path node
-                       'keymap neotree-file-button-keymap
-                       'help-echo (neo-buffer--help-echo-message node-short-name))
-        (neo-buffer--node-list-set nil node)
-        (neo-buffer--newline-and-begin)))
+  (insert-button node-short-name
+           'follow-link t
+           'face neo-file-link-face
+           'neo-full-path node
+           'keymap neotree-file-button-keymap
+           'help-echo (neo-buffer--help-echo-message node-short-name))
+  (neo-buffer--node-list-set nil node)
+  (neo-buffer--newline-and-begin)))
 
     (defun neo-buffer--insert-fold-symbol (name &optional node-name)
       "Overriden to make it less noisy. Made to work with non-monospaced fonts."
       (let ((vc (when neo-vc-integration (neo-vc-for-node node)))
-            (n-insert-symbol (lambda (n)
-                               (neo-buffer--insert-with-face
-                                n 'neo-expand-btn-face))))
-        (cond
-         ((and (display-graphic-p) (equal neo-theme 'icons))
+      (n-insert-symbol (lambda (n)
+             (neo-buffer--insert-with-face
+        n 'neo-expand-btn-face))))
+  (cond
+   ((and (display-graphic-p) (equal neo-theme 'icons))
 
-          (or (and (equal name 'open)
-                   (insert
-                    (propertize
-                     " "
-                     'display '((raise 0)
-                                (space :width 0.0)))
-                    (propertize
-                     (all-the-icons-octicon "triangle-down")
-                     'face `(:family ,(all-the-icons-octicon-family) :foreground "skyblue" :height 1.2)
-                     'display '(raise -0.0))
-                    (propertize
-                     " "
-                     'display '((raise 0)
-                                (space :width 0.3)))))
+    (or (and (equal name 'open)
+       (insert
+        (propertize
+         " "
+         'display '((raise 0)
+        (space :width 0.0)))
+        (propertize
+         (all-the-icons-octicon "triangle-down")
+         'face `(:family ,(all-the-icons-octicon-family) :foreground "skyblue" :height 1.2)
+         'display '(raise -0.0))
+        (propertize
+         " "
+         'display '((raise 0)
+        (space :width 0.3)))))
 
-              (and (equal name 'close)
-                   (insert
+        (and (equal name 'close)
+       (insert
 
-                    (propertize
-                     " "
-                     'display '((raise 0.00)
-                                (space :width 0.50)))
-                    (propertize
-                     (all-the-icons-octicon "triangle-right")
-                     'face `(:family ,(all-the-icons-octicon-family) :foreground  "grey40" :height 1.2 )
-                     'display '(raise 0.0))
+        (propertize
+         " "
+         'display '((raise 0.00)
+        (space :width 0.50)))
+        (propertize
+         (all-the-icons-octicon "triangle-right")
+         'face `(:family ,(all-the-icons-octicon-family) :foreground  "grey40" :height 1.2 )
+         'display '(raise 0.0))
 
-                    (propertize
-                     " "
-                     'display '((raise 0)
-                                (space :width 0.5)))))
+        (propertize
+         " "
+         'display '((raise 0)
+        (space :width 0.5)))))
 
-              (and (equal name 'leaf)
-                   (if vc
-                       (let ((vc-string (char-to-string (car vc))))
+        (and (equal name 'leaf)
+       (if vc
+           (let ((vc-string (char-to-string (car vc))))
 
-                         (insert (propertize vc-string
-                                             'display '(height 0.80)
-                                             'face (if (memq 'face neo-vc-integration)
-                                                       (cdr vc)
-                                                     neo-file-link-face)))
-                         (if (string-equal vc-string " ")
-                             (insert
-                              (propertize " " 'display '(space :width 0.90)))
-                           (insert (propertize " " 'display '(space :width 0.70)))))
+       (insert (propertize vc-string
+               'display '(height 0.80)
+               'face (if (memq 'face neo-vc-integration)
+                   (cdr vc)
+                 neo-file-link-face)))
+       (if (string-equal vc-string " ")
+           (insert
+            (propertize " " 'display '(space :width 0.90)))
+         (insert (propertize " " 'display '(space :width 0.70)))))
 
-                     (insert
-                      (propertize " "
-                                  'display `(space :width 1.00))))
+         (insert
+          (propertize " "
+          'display `(space :width 1.00))))
 
 
 
-                   )))
-         (t
-          (or (and (equal name 'open)  (funcall n-insert-symbol "▼ "))
-              (and (equal name 'close) (funcall n-insert-symbol "► ")))))))
+       )))
+   (t
+    (or (and (equal name 'open)  (funcall n-insert-symbol "▼ "))
+        (and (equal name 'close) (funcall n-insert-symbol "► ")))))))
 
     (defun neo-opens-outwards ()
       "Reveals Neotree expanding frame and tries to compensate internal size."
       (interactive)
       (if (neo-global--window-exists-p)
-          (progn
-            (setq hmz-neotree-hidden t)
-            (neotree-hide))
+    (progn
+      (setq hmz-neotree-hidden t)
+      (neotree-hide))
 
-        (let ((origin-buffer-file-name (buffer-file-name)))
-          (setq hmz-neotree-hidden nil)
-          (neotree-find (projectile-project-root))
-          (neotree-find origin-buffer-file-name))))
+  (let ((origin-buffer-file-name (buffer-file-name)))
+    (setq hmz-neotree-hidden nil)
+    (neotree-find (projectile-project-root))
+    (neotree-find origin-buffer-file-name))))
 
     (global-set-key (kbd "s-r") 'neo-opens-outwards)
     (global-set-key (kbd "H-r") 'neo-opens-outwards)
@@ -1062,29 +1096,29 @@ So it safe to call it many times like in a minor mode hook."
 
     (defadvice tabbar-cycle (after hmz-refresh-neotree-upon-cycle-tabs 1 () activate)
       (when (neo-global--window-exists-p)
-        (neotree-refresh t )))
+  (neotree-refresh t )))
 
     (defadvice next-buffer (after hmz-refresh-neotree-change-next-buffer 1 () activate)
       (when (not (eq buffer-file-name neo-buffer-name))
-        (if (buffer-file-name)
-            (neotree-refresh t)
-          (neotree-hide)
-          ))
+  (if (buffer-file-name)
+      (neotree-refresh t)
+    (neotree-hide)
+    ))
       )
 
     (setq hmz-neotree-hidden t)
 
     (defadvice previous-buffer (after hmz-refresh-neotree-change-previous-buffer 1 () activate)
       (when (not (eq buffer-file-name neo-buffer-name))
-        (if (or buffer-file-name (not hmz-neotree-hidden))
-            (neotree-refresh t)
-          (neotree-hide)
-          ))
+  (if (or buffer-file-name (not hmz-neotree-hidden))
+      (neotree-refresh t)
+    (neotree-hide)
+    ))
       )
 
     (defun neo-global--do-autorefresh ()
       "Overriden version of neotree refresh function that doesn't try to refresh buffers that are not visiting a file and generating error and jumping cursor as result."
       (interactive)
       (when (and neo-autorefresh (neo-global--window-exists-p) buffer-file-name (not (eq (current-buffer) "*NeoTree*"))
-                 (neotree-refresh t))))
+     (neotree-refresh t))))
     ))
