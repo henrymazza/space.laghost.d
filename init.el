@@ -6,7 +6,7 @@
 
 ;; (require 'iso-transl)
 
-(setq debug-on-error t)
+(setq debug-on-error nil)
 ;; it may cause problems with spacemacs own loader
 (setq straight-use-package-by-default nil)
 
@@ -378,7 +378,7 @@ values."
    ;; (default nil)
    dotspacemacs-whitespace-cleanup 'all
 
-   ;; dotspacemacs-frame-title-format "%I@%S"
+   dotspacemacs-frame-title-format "%I@%S"
 
    dotspacemacs-show-transient-state-title nil
    ))
@@ -416,11 +416,6 @@ before packages are loaded. If you are unsure, you should try in setting them in
   ;;   :catch t
   ;;   :demant t)
 
-  (add-to-list 'load-path (expand-file-name "~/.spacemacs.develop.d/straight/repos/all-the-icons"))
-  ;; (add-to-list 'load-path (expand-file-name user-emacs-directory))
-
-  (require 'hmz-modules (concat (expand-file-name user-emacs-directory) "../.spacemacs.d/hmz-modules.el"))
-
   ;; UTF-8 I said!
   (add-to-list 'file-coding-system-alist '("\\.el" . utf-8-unix) )
   (prefer-coding-system 'utf-8)
@@ -435,11 +430,12 @@ before packages are loaded. If you are unsure, you should try in setting them in
   (setq utf-translate-cjk-mode nil)
   (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
 
-  (defun hmz-init/org-line-wrap ()
+  (defun hmz-init/org-config ()
     (spacemacs/toggle-visual-line-navigation-on)
+    (org-indent-mode t)
     (setq-local word-wrap nil))
 
-  (add-hook 'org-mode-hook 'hmz-init/org-line-wrap)
+  (add-hook 'org-mode-hook 'hmz-init/org-config)
 
   ;; fix doom-modeline and neotree not starting
   (defun colors//rainbow-identifiers-ignore-keywords ()
@@ -766,7 +762,10 @@ you should place you code here."
    (global-set-key (kbd "s-1") 'next-multiframe-window)
 
   ;; Initialize title bar appearence manager
-  ;; (when (and (window-system) (eq system-type 'darwin)) (ns-auto-titlebar-mode))
+   (use-package ns-auto-titlebar
+     :if (memq window-system '(mac ns))
+     :config
+     (ns-auto-titlebar-mode))
 
   ;; TODO IT DOESN'T WORK!!!
   ;; disable mode-line in helm
@@ -1267,7 +1266,7 @@ you should place you code here."
    (add-hook 'after-init-hook 'customize-theme-after-load)
    (message ">>> end user-config")
 
-   ) ;; end user-config
+   ;; ) ;; end user-config
 
 ;;;;;;;;;;;;;;;
 ;; Rotate Text
@@ -1279,9 +1278,10 @@ you should place you code here."
     ("enable" "disable")
     ("add-hook" "remove-hook")
     ("enabled" "disabled")
-    ("describe" "context" "it")
+    ("describe" "context")
     ("create" "build")
     ("t" "nil")
+    ("it", "skip")
     ("if" "unless")
     ("top" "bottom")
     ("left" "right")
@@ -1403,6 +1403,10 @@ Example:
     (function (lambda ()
           (local-set-key (kbd "s-k") 'clear-comint-buffer))))
 
+(require 'hmz-modules (concat (expand-file-name user-emacs-directory) "../.spacemacs.d/hmz-modules.el"))
+
+) ;; end user-config
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -1460,7 +1464,7 @@ Example:
      (vc-mode nil)
      (vc-dired-mode nil)
      (erc-track-minor-mode nil)
-     (savehist-mode nil)
+    ;; (savehist-mode nil)
      (company-posframe-mode nil)))
  '(doom-modeline-buffer-encoding nil)
  '(doom-modeline-height 15)
@@ -1505,10 +1509,16 @@ This function is called at the very end of Spacemacs initialization."
  '(alert-default-style 'notifier)
  '(ansi-color-names-vector
    ["dim gray" "orange red" "medium spring green" "gold" "dodger blue" "purple" "turquoise1" "#eeeeec"])
+ '(auth-sources '("~/.authinfo.gpg" "~/.authinfo" "~/.netrc"))
  '(auto-revert-buffer-list-filter 'magit-auto-revert-buffer-p)
  '(auto-revert-verbose t)
  '(before-save-hook
    '(time-stamp whitespace-cleanup spacemacs//python-sort-imports))
+ '(centaur-tabs-backward-tab-text " ⤶ ")
+ '(centaur-tabs-close-button " × ")
+ '(centaur-tabs-forward-tab-text " ⤷ ")
+ '(centaur-tabs-modified-marker "⦿")
+ '(centaur-tabs-set-close-button t)
  '(coffee-tab-width 2)
  '(default-justification 'left)
  '(desktop-minor-mode-table
@@ -1517,7 +1527,6 @@ This function is called at the very end of Spacemacs initialization."
      (vc-mode nil)
      (vc-dired-mode nil)
      (erc-track-minor-mode nil)
-     (savehist-mode nil)
      (company-posframe-mode nil)))
  '(doom-modeline-buffer-encoding nil)
  '(doom-modeline-height 15)
@@ -1534,6 +1543,7 @@ This function is called at the very end of Spacemacs initialization."
  '(global-auto-highlight-symbol-mode t)
  '(global-visual-line-mode t)
  '(helm-completion-style 'emacs)
+ '(helm-mode-fuzzy-match t)
  '(highlight-indent-guides-character 183)
  '(highlight-indent-guides-method 'character)
  '(highlight-indent-guides-mode nil t)
@@ -1568,6 +1578,34 @@ This function is called at the very end of Spacemacs initialization."
      (nil . 8942)))
  '(neo-window-width 20)
  '(objed-cursor-color "#ff5555")
+ '(org-export-backends '(ascii html icalendar latex md odt))
+ '(org-fontify-quote-and-verse-blocks t)
+ '(origami-parser-alist
+   '((ruby-mode origami-markers-parser "do" "end")
+     (java-mode . origami-java-parser)
+     (c-mode . origami-c-parser)
+     (c++-mode . origami-c-style-parser)
+     (perl-mode . origami-c-style-parser)
+     (cperl-mode . origami-c-style-parser)
+     (js-mode . origami-c-style-parser)
+     (js2-mode . origami-c-style-parser)
+     (js3-mode . origami-c-style-parser)
+     (go-mode . origami-c-style-parser)
+     (php-mode . origami-c-style-parser)
+     (python-mode . origami-python-parser)
+     (emacs-lisp-mode . origami-elisp-parser)
+     (lisp-interaction-mode . origami-elisp-parser)
+     (clojure-mode . origami-clj-parser)
+     (triple-braces .
+                    #[257 "\303\304\305\306\307\300\301\302$\310\"\311\312%\207"
+                          ["{{{" "}}}" "\\(?:{{{\\|}}}\\)" make-byte-code 257 "\304\302\"\305\303\300\301$\207" vconcat vector
+                           [origami-get-positions origami-build-pair-tree]
+                           7 "
+
+(fn CONTENT)"]
+                          10 "
+
+(fn CREATE)"])))
  '(package-selected-packages
    '(google-this modern-fringes terraform-mode enh-ruby-mode psession telega dired-sidebar centaur-tabs writeroom-mode workgroups memory-usage drupal-mode phpunit phpcbf php-auto-yasnippets php-mode zones sr-speedbar evil-ruby-text-objects tempbuf wakatime-mode rspec-simple ido-completing-read+ shrink-path amx ri-mode ri smooth-scrolling ivy-youtube wgrep ivy-hydra lv flyspell-correct-ivy counsel-projectile counsel swiper ivy doom-todo-ivy magit-todos todo-projectile hl-block hl-block-mode indent-guide-mode highlight-indent-guides-mode vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toml-mode toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocopfmt rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails prodigy popwin pip-requirements persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file ns-auto-titlebar nginx-mode mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-gutter-fringe gh-md gcmh fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme doom-themes doom-modeline discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby cargo bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))
  '(pdf-view-midnight-colors (cons "#f8f8f2" "#282a36"))
@@ -1582,10 +1620,10 @@ This function is called at the very end of Spacemacs initialization."
  '(rustic-ansi-faces
    ["#282a36" "#ff5555" "#50fa7b" "#f1fa8c" "#61bfff" "#ff79c6" "#8be9fd" "#f8f8f2"])
  '(shell-pop-cleanup-buffer-at-process-exit t)
- '(shell-pop-full-span nil t)
+ '(shell-pop-full-span nil)
  '(shell-pop-restore-window-configuration t)
- '(shell-pop-window-position "left" t)
- '(shell-pop-window-size 30 t)
+ '(shell-pop-window-position "left")
+ '(shell-pop-window-size 30)
  '(sp-highlight-pair-overlay nil)
  '(sp-highlight-wrap-overlay nil)
  '(sp-highlight-wrap-tag-overlay nil)
@@ -1640,7 +1678,7 @@ This function is called at the very end of Spacemacs initialization."
  '(all-the-icons-maroon ((t (:foreground "burlywood3"))))
  '(anzu-match-2 ((t (:foreground "deep sky blue"))))
  '(anzu-replace-highlight ((t (:box (:line-width 2 :color "sienna1")))))
- '(bold ((t (:weight semi-light))))
+ '(bold ((t (:weight bold))))
  '(custom-button ((t (:background "lightgrey" :foreground "black" :box 2))))
  '(custom-button-mouse ((t (:background "grey90" :foreground "black" :box 2))))
  '(custom-button-pressed ((t (:background "gray" :foreground "black" :box 2))))
@@ -1651,7 +1689,7 @@ This function is called at the very end of Spacemacs initialization."
  '(font-lock-warning-face ((t (:background "#373844" :foreground "#ffb86c" :underline (:color "red" :style wave)))))
  '(fringe ((t (:foreground "DeepSkyBlue" :background unspecified))))
  '(header-line ((t (:background "#44475a" :underline "gray20" :height 1.0 :family "San Francisco"))))
- '(hi-yellow ((t (:box (:line-width 1 :color "gray") :underline nil :height 1.0))))
+ '(hi-yellow ((t nil)))
  '(highlight-indent-guides-character-face ((t (:foreground "#3df1410a539f"))))
  '(hydra-face-red ((t (:foreground "#FF0000" :weight bold))))
  '(indent-guide-face ((t (:inherit font-lock-constant-face :slant normal))))
@@ -1660,6 +1698,7 @@ This function is called at the very end of Spacemacs initialization."
  '(link ((t (:foreground "#AAF" :underline nil :family "San Francisco"))))
  '(magit-blame-highlight ((t (:inherit (font-lock-comment-face hl-line) :height 0.8 :family "San Francisco"))))
  '(magit-blame-name ((t (:inherit font-lock-variable-name-face))) t)
+ '(minibuffer-prompt ((t (:foreground "#ff79c6" :weight bold :height 1.0))))
  '(mode-line ((t (:foreground "White" :box (:line-width 1 :color "#44475a") :height 0.9 :family "San Francisco"))))
  '(mode-line-inactive ((t (:inherit mode-line :background "#373844" :foreground "#f8f8f2" :height 120))))
  '(neo-banner-face ((t (:inherit font-lock-constant-face :weight bold :family "San Francisco"))))
@@ -1671,8 +1710,13 @@ This function is called at the very end of Spacemacs initialization."
  '(neo-vc-added-face ((t (:foreground "#50fa7b"))))
  '(neo-vc-conflict-face ((t (:foreground "dark red"))))
  '(neo-vc-edited-face ((t (:foreground "#ff79c6"))))
- '(org-level-1 ((t (:inherit bold :foreground "#ff79c6" :height 1.3 :family "San Francisco"))))
+ '(org-block ((t (:foreground "#ffb86c"))))
+ '(org-level-1 ((t (:inherit font-lock-variable-name-face :underline "gray50" :height 1.3 :family "San Francisco"))))
  '(org-link ((t (:inherit link :underline nil))))
+ '(org-quote ((t (:inherit nil :background "gray20" :foreground "gray80" :slant italic))))
+ '(org-todo ((t (:foreground "#ffb86c" :weight bold))))
+ '(org-verbatim ((t (:inherit font-lock-variable-name-face :family "Fira Code"))))
+ '(origami-fold-replacement-face ((t (:inherit 'font-lock-builtin-face))))
  '(spacemacs-transient-state-title-face ((t (:inherit mode-line :height 0.8))))
  '(speedbar-button-face ((t nil)))
  '(speedbar-file-face ((t nil)))

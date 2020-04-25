@@ -8,8 +8,9 @@
 
 (use-package tabbar
     :straight t
+    :disabled
+    :demand t
     :catch t
-    :defer t
     :bind ("s-b" . tabbar-mode)
     :after (helm-lib all-the-icons)
     :config
@@ -565,6 +566,7 @@ element."
 ;; hmz-misc ======================================================
 (use-package neotree
     :straight t
+    :disabled
     :demand t
     :after (all-the-icons rainbow-identifiers)
     :init
@@ -759,17 +761,45 @@ element."
       "Reveals Neotree expanding frame and tries to compensate internal size."
       (interactive)
       (if (neo-global--window-exists-p)
-    (progn
-      (setq hmz-neotree-hidden t)
-      (neotree-hide))
+          (progn
+            (setq hmz-neotree-hidden t)
+            (neotree-hide))
 
-  (let ((origin-buffer-file-name (buffer-file-name)))
-    (setq hmz-neotree-hidden nil)
-    (neotree-find (projectile-project-root))
-    (neotree-find origin-buffer-file-name))))
+        (let ((origin-buffer-file-name (buffer-file-name)))
+          (setq hmz-neotree-hidden nil)
+          (neotree-find (projectile-project-root))
+          (neotree-find origin-buffer-file-name))))
+
+    (defun neotree-project-root-dir-or-current-dir ()
+      "Open NeoTree using the project root, using projectile, or the
+current buffer directory."
+      (interactive)
+      (let ((project-dir (ignore-errors (projectile-project-root)))
+            (file-name (buffer-file-name))
+            (neo-smart-open t))
+        (if (neo-global--window-exists-p)
+            (neotree-hide)
+          (progn
+            (neotree-show)
+            (if project-dir
+                (neotree-dir project-dir))
+            (if file-name
+                (neotree-find (buffer-file-name))
+                (neotree-find file-name))))))
 
     (global-set-key (kbd "s-r") 'neo-opens-outwards)
+    ;; (global-set-key (kbd "s-r") 'neotree-project-root-dir-or-current-dir)
+    ;; (global-set-key (kbd "s-r") 'neotree-show)
     (global-set-key (kbd "H-r") 'neo-opens-outwards)
+
+    ;; (defun hmz-neo-enter-hook ()
+    ;;   (neotree-show)
+    ;;   (message ">>>>>>>> HEEEERE!")
+    ;;   (neotree-find (projectile-project-root))
+    ;;   (neotree-find (buffer-file-name)))
+
+    ;; (add-hook 'neo-enter-hook 'hmz-neo-enter-hook)
+    ;; (setq neo-enter-hook nil)
 
     (defun hmz-neotree-mode-hook ()
       ;; (face-remap-add-relative 'default :background-color "blue")
@@ -787,8 +817,15 @@ element."
       ;; no scroll bars
       (scroll-bar-mode 0)
 
+      ;; no yascroll
+      (yascroll-bar-mode 0)
+
       ;; highlight current line
       (hl-line-mode t)
+
+      ;; don't mess with my lines
+      (visual-line-mode 0)
+
       ;; hl-line-mode when window not in focus
       (setq hl-line-sticky-flag t)
 
@@ -849,8 +886,10 @@ element."
               (ind-create-indicator
                'point
                :managed t))))
+
 (use-package magithub
   :straight t
+  :disabled
   :after magit
   :catch t
   :config
@@ -862,19 +901,53 @@ element."
   :demand t ; make sure it is loaded
   )
 
+(use-package git-link
+  :straight t
+  :after magit)
+
+(use-package forge
+  :straight t
+  :after magit)
+
+;; NOTE: Broken! asks for magit-gh-pulls-pop which depends on:
+(require 'magit-popup)
+(require 'gh-url) ;; this is giving recursive load, try twice at least:
 (use-package magit-gh-pulls
   :straight t
-  :disabled
+  ;; :disabled
   :demand t
   :catch t
   :after magit-popup
   :config
-  (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls))
+  (remove-hook 'magit-mode-hook 'turn-on-magit-gh-pulls))
 
 (use-package evil-magit
   :straight t
-  :disabled
   :config (evil-magit-init))
+
+(use-package poporg
+  :straight t
+  :after org
+  :bind (("C-c /" . poporg-dwim)))
+
+(use-package yafolding
+  :straight t
+  :init
+  (define-key evil-normal-state-map (kbd "z a") 'yafolding-toggle-element)
+  (define-key evil-normal-state-map (kbd "z c") 'yafolding-hide-element)
+  (define-key evil-normal-state-map (kbd "z o") 'yafolding-show-element)
+  (define-key evil-normal-state-map (kbd "z m") 'yafolding-toggle-all))
+
+
+(use-package helm-org-rifle
+  :straight t)
+
+(use-package org-super-links
+  :straight (org-super-links :type git :host github :repo "toshism/org-super-links")
+  :after (org helm-org-rifle)
+  :bind (("C-c s s" . sl-link)
+     ("C-c s l" . sl-store-link)
+     ("C-c s C-l" . sl-insert-link)))
 
 (use-package doom-modeline
   :straight t
@@ -882,11 +955,12 @@ element."
   :demand t
   :if window-system
   :after all-the-icons
-  :init
-  (doom-modeline-mode 1)
+  :config
   ;; The maximum displayed length of the branch name of version control.
   (setq doom-modeline-vcs-max-length 34)
-  (setq doom-modeline-height 18))
+  (setq doom-modeline-height 18)
+
+  (doom-modeline-mode 1))
 
 (use-package yascroll
   :straight t
@@ -896,13 +970,6 @@ element."
 (use-package google-this
   :straight t
   :config (google-this-mode 1))
-
-(use-package hydra-posframe
-  :straight (hydra-posframe :type git :host github :repo "Ladicle/hydra-posframe")
-  :catch t
-  :after (posframe hydra)
-  ;; :load-path "<path-to-the-hydra-posframe>"
-  :hook (after-init . hydra-posframe-enable))
 
 (use-package projectile-rails
   :straight t
@@ -1010,7 +1077,6 @@ So it safe to call it many times like in a minor mode hook."
     :straight t
     ;; :defer t
     ;; only load if hmz-tabbar isn't config's part
-    :unless (member 'hmz-tabbar dotspacemacs-configuration-layers)
     :init
     (setq centaur-tabs-set-icons t)
     (setq centaur-tabs-plain-icons nil)
@@ -1038,28 +1104,14 @@ So it safe to call it many times like in a minor mode hook."
     (global-set-key [(control shift tab)] 'centaur-tabs-backward)
     (global-set-key [(control tab)] 'centaur-tabs-forward))
 
-(defun hmz-misc/init-direx ()
-  (use-package direx
-    :straight t
-    :disabled
-    :init))
-
-(use-package persp-mode-projectile-bridge
+(use-package direx
   :straight t
-  :after (projectile persp-mode)
-  :defer 2
-  :init
-  (add-hook 'persp-mode-projectile-bridge-mode-hook
-            #'(lambda ()
-                (if persp-mode-projectile-bridge-mode
-                    (persp-mode-projectile-bridge-find-perspectives-for-all-buffers)
-                  (persp-mode-projectile-bridge-kill-perspectives))))
-
-  :config
-  (persp-mode-projectile-bridge-mode 1))
+  :disabled
+  :init)
 
 (use-package persp-mode
   :straight t
+  :demand t
   :after projectile
   :custom
   (persp-auto-save-num-of-backups 10)
@@ -1089,6 +1141,20 @@ So it safe to call it many times like in a minor mode hook."
                                          nil))
                         :on-match (lambda (perspective buffer after-match hook args)
                                     (persp-frame-switch perspective))))
+
+(use-package persp-mode-projectile-bridge
+  :straight t
+  :demand t
+  :after (projectile persp-mode)
+  :init
+  (add-hook 'persp-mode-projectile-bridge-mode-hook
+            #'(lambda ()
+                (if persp-mode-projectile-bridge-mode
+                    (persp-mode-projectile-bridge-find-perspectives-for-all-buffers)
+                  (persp-mode-projectile-bridge-kill-perspectives))))
+
+  :config
+  (persp-mode-projectile-bridge-mode 1))
 
 (use-package sublimity
   :straight t
@@ -1173,15 +1239,16 @@ So it safe to call it many times like in a minor mode hook."
 
 (use-package hl-block-mode
   :straight (hl-block-mode :type git :host github :repo "emacsmirror/hl-block-mode")
+  :disabled
   :config
   (global-hl-block-mode t))
 
-;; (use-package evil-ruby-text-objects
-;;   :straight t
-;;   :disabled
-;;   :init
-;;   (add-hook 'ruby-mode-hook 'evil-ruby-text-objects-mode)
-;;   (add-hook 'enh-ruby-mode-hook 'evil-ruby-text-objects-mode))
+(use-package evil-ruby-text-objects
+  :straight t
+  :disabled
+  :init
+  (add-hook 'ruby-mode-hook 'evil-ruby-text-objects-mode)
+  (add-hook 'enh-ruby-mode-hook 'evil-ruby-text-objects-mode))
 
 (use-package indent-guide
   :straight t
@@ -1203,19 +1270,12 @@ So it safe to call it many times like in a minor mode hook."
             (lambda() (indent-guide-mode t))))
 
 (use-package doom-todo-ivy
-  :disabled
+  ;; :disabled
   :straight (doom-todo-ivy :type git :host github :repo "jsmestad/doom-todo-ivy")
   :catch t
   :after ivy
   :hook (after-init . doom-todo-ivy)
   :init
-  ;; XXX test
-  ;; NOTE test
-  ;; HACK test
-  ;; OPTIMIZE test
-  ;; BUG test
-  ;; TODO test
-  ;; FIXME test
   (setq doom/ivy-task-tags
         '(("HACK" . warning)
           ("OPTIMIZE" . success)
@@ -1596,6 +1656,18 @@ So it safe to call it many times like in a minor mode hook."
                     (neotree-refresh t)
 
                   (neotree-hide))))))
+
+;; NOTE: the following two are incompatible with Ruby code
+(use-package vimish-fold
+  :ensure
+  :disabled
+  :after evil)
+
+(use-package evil-vimish-fold
+  :ensure
+  :disabled
+  :after vimish-fold
+  :hook ((prog-mode conf-mode text-mode) . evil-vimish-fold-mode))
 
 (provide 'hmz-modules)
 
