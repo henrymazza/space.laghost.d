@@ -1,3 +1,5 @@
+(setq use-package-verbose 'debug)
+
 (add-to-list 'load-path (expand-file-name "~/.spacemacs.develop.d/straight/repos/all-the-icons"))
 
 (use-package all-the-icons
@@ -587,9 +589,8 @@
   (setq magithub-clone-default-directory "~/github"))
 
 (use-package magit-popup
-  :straight t ; make sure it is installed
-  :demand t ; make sure it is loaded
-  )
+  :straight t
+  :demand t)
 
 (use-package git-link
   :straight t
@@ -599,15 +600,18 @@
   :straight t
   :after magit)
 
-;; NOTE: Broken! asks for magit-gh-pulls-pop which depends on:
-(require 'magit-popup)
-(require 'gh-url) ;; this is giving recursive load, try twice at least:
 (use-package magit-gh-pulls
   :straight t
-  ;; :disabled
+  :disabled
   :demand t
   :catch t
   :after magit-popup
+  :init
+  ;; NOTE: Broken! asks for magit-gh-pulls-pop which depends on:
+  (require 'magit-popup)
+
+  (require 'gh-url) ;; this is giving recursive load, try twice at least:
+
   :config
   (remove-hook 'magit-mode-hook 'turn-on-magit-gh-pulls))
 
@@ -651,6 +655,7 @@
 (use-package doom-modeline
   :straight t
   :catch t
+  :hook (prog-mode . doom-modeline-mode)
   :demand t
   :if window-system
   :after all-the-icons

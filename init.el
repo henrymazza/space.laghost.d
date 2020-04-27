@@ -391,6 +391,8 @@ executes.
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
 
+  (setq use-package-always-defer nil)
+
   ;; straight.el init begins here
   (defvar bootstrap-version)
   (let ((bootstrap-file
@@ -1272,7 +1274,7 @@ you should place you code here."
 ;; Rotate Text
 ;;;;;;;;;;;;;;;
 (setq max-lisp-eval-depth 10000)
-(defvar rotate-text-rotations
+(setq rotate-text-rotations
   '(("true" "false")
     ("width" "height")
     ("enable" "disable")
@@ -1281,15 +1283,14 @@ you should place you code here."
     ("describe" "context")
     ("create" "build")
     ("t" "nil")
-    ("it", "skip")
+    ("it" "skip")
     ("if" "unless")
     ("top" "bottom")
     ("left" "right")
     ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")
     ("relative" "absolute" "fixed" "static" "sticky")
-    ;; ("aliceblue" "antiquewhite" "aqua" "aquamarine" "azure" "beige" "bisque" "black" "blanchedalmond" "blue" "blueviolet" "brown" "burlywood" "cadetblue" "chartreuse" "chocolate" "coral" "cornflowerblue" "cornsilk" "crimson" "cyan" "darkblue" "darkcyan" "darkgoldenrod" "darkgray" "darkgrey" "darkgreen" "darkkhaki" "darkmagenta" "darkolivegreen" "darkorange" "darkorchid" "darkred" "darksalmon" "darkseagreen" "darkslateblue" "darkslategray" "darkslategrey" "darkturquoise" "darkviolet" "deeppink" "deepskyblue" "dimgray" "dimgrey" "dodgerblue" "firebrick" "floralwhite" "forestgreen" "fuchsia" "gainsboro" "ghostwhite" "gold" "goldenrod" "gray" "grey" "green" "greenyellow" "honeydew" "hotpink" "indianred" "indigo" "ivory" "khaki" "lavender" "lavenderblush" "lawngreen" "lemonchiffon" "lightblue" "lightcoral" "lightcyan" "lightgoldenrodyellow" "lightgray" "lightgrey" "lightgreen" "lightpink" "lightsalmon" "lightseagreen" "lightskyblue" "lightslategray" "lightslategrey" "lightsteelblue" "lightyellow" "lime" "limegreen" "linen" "magenta" "maroon" "mediumaquamarine" "mediumblue" "mediumorchid" "mediumpurple" "mediumseagreen" "mediumslateblue" "mediumspringgreen" "mediumturquoise" "mediumvioletred" "midnightblue" "mintcream" "mistyrose" "moccasin" "navajowhite" "navy" "oldlace" "olive" "olivedrab" "orange" "orangered" "orchid" "palegoldenrod" "palegreen" "paleturquoise" "palevioletred" "papayawhip" "peachpuff" "peru" "pink" "plum" "powderblue" "purple" "rebeccapurple" "red" "rosybrown" "royalblue" "saddlebrown" "salmon" "sandybrown" "seagreen" "seashell" "sienna" "silver" "skyblue" "slateblue" "slategray" "slategrey" "snow" "springgreen" "steelblue" "tan" "teal" "thistle" "tomato" "turquoise" "violet" "wheat" "white" "whitesmoke" "yellow" "yellowgreen")
     ("yes" "no"))
-  "List of text rotation sets.")
+)
 
 (defun rotate-region (beg end)
   "Rotate all matches in `rotate-text-rotations' between point and mark."
@@ -1632,7 +1633,48 @@ This function is called at the very end of Spacemacs initialization."
  '(tempbuf-kill-hook nil)
  '(tooltip-use-echo-area t)
  '(use-dialog-box t)
+ '(use-package-always-demand t)
+ '(use-package-check-before-init t)
+ '(use-package-compute-statistics t)
+ '(use-package-defaults
+   '((:straight
+      '(t)
+      straight-use-package-by-default)
+     (:config
+      '(t)
+      t)
+     (:init nil t)
+     (:catch t
+             (lambda
+               (name args)
+               (not use-package-expand-minimally)))
+     (:defer use-package-always-defer
+             (lambda
+               (name args)
+               (and use-package-always-defer
+                    (not
+                     (plist-member args :defer))
+                    (not
+                     (plist-member args :demand)))))
+     (:demand use-package-always-demand
+              (lambda
+                (name args)
+                (and use-package-always-demand
+                     (not
+                      (plist-member args :defer))
+                     (not
+                      (plist-member args :demand)))))
+     (:ensure
+      (list use-package-always-ensure)
+      (lambda
+        (name args)
+        (and use-package-always-ensure
+             (not
+              (plist-member args :load-path)))))
+     (:pin use-package-always-pin use-package-always-pin)))
  '(use-package-expand-minimally nil)
+ '(use-package-minimum-reported-time 0)
+ '(use-package-verbose 'debug)
  '(vc-annotate-background "#282a36")
  '(vc-annotate-color-map
    (list
@@ -1717,7 +1759,7 @@ This function is called at the very end of Spacemacs initialization."
  '(org-todo ((t (:foreground "#ffb86c" :weight bold))))
  '(org-verbatim ((t (:inherit font-lock-variable-name-face :family "Fira Code"))))
  '(origami-fold-replacement-face ((t (:inherit 'font-lock-builtin-face))))
- '(outshine-level-1 ((t (:inherit outline-1 :weight bold :height 1.2 :family "San Francisco"))))
+ '(outshine-level-1 ((t (:inherit outline-1 :weight bold :height 1.1 :family "San Francisco"))))
  '(spacemacs-transient-state-title-face ((t (:inherit mode-line :height 0.8))))
  '(speedbar-button-face ((t nil)))
  '(speedbar-file-face ((t nil)))
