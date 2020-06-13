@@ -579,6 +579,9 @@
                'point
                :managed t))))
 
+(use-package browse-at-remote
+  :straight t)
+
 (use-package magithub
   :straight t
   :disabled
@@ -602,7 +605,7 @@
 
 (use-package magit-gh-pulls
   :straight t
-  :disabled
+  ;; :disabled
   :demand t
   :catch t
   :after magit-popup
@@ -618,6 +621,9 @@
 (use-package evil-magit
   :straight t
   :config (evil-magit-init))
+
+(use-package org-link-minor-mode
+  :straight t)
 
 (use-package poporg
   :straight t
@@ -815,7 +821,7 @@ So it safe to call it many times like in a minor mode hook."
 
 (use-package persp-mode
   :straight t
-  :demand t
+  ;; :demand t
   :after projectile
   :custom
   (persp-auto-save-num-of-backups 10)
@@ -848,8 +854,8 @@ So it safe to call it many times like in a minor mode hook."
 
 (use-package persp-mode-projectile-bridge
   :straight t
-  :demand t
-  :after (projectile persp-mode)
+  ;; :defer t
+  ;; :after (projectile persp-mode)
   :init
   (add-hook 'persp-mode-projectile-bridge-mode-hook
             #'(lambda ()
@@ -860,8 +866,15 @@ So it safe to call it many times like in a minor mode hook."
   :config
   (persp-mode-projectile-bridge-mode 1))
 
+(use-package dired-k
+  :straight t
+  :init
+  (add-hook 'dired-initial-position-hook 'hl-line-mode)
+  (add-hook 'dired-initial-position-hook 'dired-k))
+
 (use-package sublimity
   :straight t
+  :disabled
   :init
   (require 'sublimity)
   (require 'sublimity-scroll)
@@ -897,14 +910,68 @@ So it safe to call it many times like in a minor mode hook."
 
     (and (fboundp 'temp-buffer-resize-mode) (temp-buffer-resize-mode t)))
 
-(use-package rspec-simple
-  :straight (rspec-simple :type git :host github :repo "code-mancers/rspec-simple"))
+(use-package rspec-mode
+  :straight t
+  :config
+  (eval-after-load 'rspec-mode
+    '(rspec-install-snippets))
 
+  (defun rspec-runner ()
+    "Return command line to run rspec."
+    (let ((bundle-command (if (rspec-bundle-p) "bundle exec " ""))
+          (zeus-command (if (rspec-zeus-p) "zeus " nil))
+          (spring-command (if (rspec-spring-p) "SKIP_COV=true spring " nil)))
+      (concat (or zeus-command spring-command bundle-command)
+              (if (rspec-rake-p)
+                  (concat rspec-rake-command " spec")
+                rspec-spec-command)))))
+
+(use-package yard-mode
+  :straight t
+  :defer t
+  :hook
+  (ruby-mode-hook . yard-mode))
+
+(use-package inf-ruby
+  :straight t
+  :hook
+  (ruby-mode . inf-ruby-minor-mode)
+  (inf-ruby-mode . siren-inf-ruby-mode-setup)
+  (compilation-filter . inf-ruby-auto-enter)
+
+  :init
+  (defun siren-inf-ruby-mode-setup ()
+    (company-mode -1))
+  (autoload 'inf-ruby-minor-mode "inf-ruby" "Run an inferior Ruby process" t)
+
+  :config
+  (unbind-key "C-c C-r" inf-ruby-minor-mode-map)
+  (unbind-key "C-c C-s" inf-ruby-minor-mode-map))
+
+(use-package direnv
+  :straight t
+  :config
+  (direnv-mode))
+
+(use-package exec-path-from-shell
+  :straight t
+  :custom
+  (exec-path-from-shell-variables '("PATH"
+                                    "MANPATH"
+                                    "TMPDIR"
+                                    "GOPATH"
+                                    "KUBECONFIG"))
+  (exec-path-from-shell-arguments '("-l" "-i"))
+  (exec-path-from-shell-check-startup-files t)
+  (exec-path-from-shell-debug nil)
+
+  :config
+  (when (memq window-system '(mac ns x))
+    (exec-path-from-shell-initialize)))
+
+;; TODO: not loading on startup!
 (use-package amx
   :straight t
-  :demand t
-  :catch t
-  ;; :disabled
   :init
   (defun spacemacs/amx ()
     "Execute amx with a better prompt."
@@ -918,6 +985,7 @@ So it safe to call it many times like in a minor mode hook."
     (let ((amx-prompt-string (format "%s commands: " major-mode)))
       (amx-major-mode-commands)))
 
+  :config
   (progn
     (setq-default amx-history-length 32
                   amx-save-file (concat spacemacs-cache-directory
@@ -942,15 +1010,15 @@ So it safe to call it many times like in a minor mode hook."
   (global-wakatime-mode t))
 
 (use-package hl-block-mode
-  :straight (hl-block-mode :type git :host github :repo "emacsmirror/hl-block-mode")
+  :straight (hl-block-mode :type git
+                           :host github :repo "emacsmirror/hl-block-mode")
   :disabled
   :config
   (global-hl-block-mode t))
 
 (use-package evil-ruby-text-objects
   :straight t
-  :disabled
-  :init
+  :config
   (add-hook 'ruby-mode-hook 'evil-ruby-text-objects-mode)
   (add-hook 'enh-ruby-mode-hook 'evil-ruby-text-objects-mode))
 
