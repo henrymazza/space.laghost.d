@@ -329,7 +329,8 @@ So it safe to call it many times like in a minor mode hook."
 (defun hmz-misc/init-tempbuf ()
   ;; (unload-feature 'tempbuf)
   (use-package tempbuf
-    ;; :straight t
+    :straight t
+    :disabled
     :load-path  "~/spacemacs.d/layers/hmz-misc/local/tempbuf/tempbuf.el"
     :config
     ;; modified from jmjeong / jmjeong-emacs
@@ -564,7 +565,6 @@ So it safe to call it many times like in a minor mode hook."
   ) (process-buffer proc))
     (run-with-timer 60 nil (lambda (p)
   (kill-buffer p)
-  (message "Killed buffer %s" p)
   ) (process-buffer proc)))
       (alert (process-name proc) :title string))
 

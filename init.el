@@ -67,7 +67,7 @@ values."
         auto-completion-complete-with-key-sequence-delay 0.01)
 
     ;; custom layers
-    ;; hmz-tabbar
+    hmz-tabbar
     ;; hmz-misc
     ;; hmz-misc2
     hmz-color-identifiers
@@ -394,10 +394,19 @@ executes.
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
 
-  ;; commit edit in a new windows
+  ;; echo-area customization
+  (with-current-buffer " *Echo Area 0*" (face-remap-add-relative 'default '(:height 180 :weight bold)))
+
+  ;; set posframe parameters
+  (setq ivy-posframe-parameters '((alpha . 85)))
+
+  ;; make frames reusable (one is aware of the other)
   (add-to-list 'display-buffer-alist
-                 '(".*COMMIT_EDITMSG". ((display-buffer-pop-up-window) .
-                                        ((inhibit-same-window . t)))))
+               '("." nil (reusable-frames . t)))
+
+  ;; make frames reusable II, the revenge?!
+  ;; NOTE: this is the obsolete version (since 24.3)
+  (setq display-buffer-reuse-frames t)
 
   ;; brew install coreutils
   (if (executable-find "gls")
@@ -647,6 +656,26 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loa,
 you should place you code here."
+
+  ;; from https://emacs.stackexchange.com/questions/3900/command-to-visit-github-pull-request-of-current-branch-with-magit
+  (defun endless/visit-pull-request-url ()
+    "Visit the current branch's PR on Github."
+    (interactive)
+    (browse-url (format "https://github.com/%s/pull/new/%s"
+                        (replace-regexp-in-string
+                         "\\`.+github\\.com:\\(.+\\)\\.git\\'" "\\1"
+                         (magit-get "remote" (magit-get-push-remote) "url"))
+                        (magit-get-current-branch))))
+
+
+  ;; change rspec compilation faces
+  (add-hook 'rspec-compilation-mode-hook
+            #'(lambda ()
+                (with-current-buffer "*rspec-compilation*"
+                  (face-remap-add-relative 'default
+                                           '(:height "110" :family "crystal" :background "gray10")))
+                ))
+
   (setq display-buffer-reuse-frames t)
   (windmove-default-keybindings)
 
@@ -909,6 +938,16 @@ move to the next field. Call `open-line' if nothing else applies."
     (s-replace "" "\n" output)
 
     )
+
+  (prodigy-define-service
+    :name "Vavato's Spring Server"
+    :command "spring"
+    :args '("server" "start" "SKIP_COV=true")
+    :env '(("SKIP_COV" "true"))
+    :cwd "/Users/HMz/Development/Vavato/vavato-backend/"
+    :tags '(vavato work)
+    :stop-signal 'sigkill
+    :kill-process-buffer-on-stop t)
 
   (prodigy-define-service
     :name "Vavato's Guard Backend"
@@ -1507,7 +1546,7 @@ Example:
   "Return frame title with current project name, where applicable."
   (let ((file buffer-file-name))
     (if (and file (projectile-project-p))
-  (concat (file-relative-name (projectile-expand-root file) (projectile-project-root))
+  (concat ;;(file-relative-name (projectile-expand-root file) (projectile-project-root))
     (when (and (bound-and-true-p projectile-mode)
          (projectile-project-p))
       (format " [%s] 👽" (projectile-project-name))))
@@ -1681,6 +1720,10 @@ This function is called at the very end of Spacemacs initialization."
  '(ibuffer-default-sorting-mode 'recency)
  '(ibuffer-sidebar-width 22)
  '(ispell-highlight-face 'flyspell-incorrect)
+ '(ivy-height 20)
+ '(ivy-mode t)
+ '(ivy-posframe-border-width 3)
+ '(ivy-posframe-mode t nil (ivy-posframe))
  '(jdee-db-active-breakpoint-face-colors (cons "#1E2029" "#bd93f9"))
  '(jdee-db-requested-breakpoint-face-colors (cons "#1E2029" "#50fa7b"))
  '(jdee-db-spec-breakpoint-face-colors (cons "#1E2029" "#565761"))
@@ -1905,6 +1948,9 @@ This function is called at the very end of Spacemacs initialization."
  '(highlight-indent-guides-character-face ((t (:foreground "#3df1410a539f"))))
  '(hydra-face-red ((t (:foreground "#FF0000" :weight bold))))
  '(indent-guide-face ((t (:inherit font-lock-constant-face :slant normal))))
+ '(ivy-highlight-face ((t (:inherit highlight :underline t :weight bold))))
+ '(ivy-posframe ((t (:inherit default :height 1.1))))
+ '(ivy-posframe-border ((t (:inherit default :background "DarkOrchid2"))))
  '(line-number ((t (:background "#282a36" :foreground "#565761" :slant normal :height 0.8))))
  '(line-number-current-line ((t (:inherit (font-lock-keyword-face hl-line line-number)))))
  '(link ((t (:foreground "#AAF" :underline nil :family "San Francisco"))))
@@ -1939,7 +1985,7 @@ This function is called at the very end of Spacemacs initialization."
  '(speedbar-selected-face ((t nil)))
  '(speedbar-separator-face ((t nil)))
  '(speedbar-tag-face ((t nil)))
- '(tabbar-default ((t (:inherit (hl-line header-line) :box nil :underline nil :weight light :height 0.8))))
+ '(tabbar-default ((t (:inherit header-line :box nil :underline nil :weight thin :height 0.85))))
  '(tabbar-icon-unselected ((t (:box nil :inherit 'tabbar-default :underline t))))
  '(which-key-posframe-border ((t (:inherit default :background "gray50" :underline t))))
  '(window-divider ((t (:foreground "black"))))
