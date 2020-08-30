@@ -417,6 +417,8 @@ So it safe to call it many times like in a minor mode hook."
 
 (defun hmz-misc/init-indent-guide ()
   (use-package indent-guide
+    :disabled
+    sh
     :straight t
     :if window-system
     :init
@@ -435,8 +437,8 @@ So it safe to call it many times like in a minor mode hook."
     (add-hook 'prog-mode-hook
   (lambda() (indent-guide-mode t)))
 
-    (highlight-indent-guides-mode -1)
-    (highlight-indentation-mode -1)))
+    (highlight-indent-guides-mode 1)
+    (highlight-indentation-mode 1)))
 
 (defun hmz-misc/init-highlight-indent-guides ()
   (use-package highlight-indent-guides
@@ -855,10 +857,6 @@ So it safe to call it many times like in a minor mode hook."
     (setq neo-auto-indent-point t)
     (setq neo-autorefresh nil)
 
-    ;; hide line number in Neotree buffer
-    (display-line-numbers-mode nil)
-    (linum-mode nil)
-
     ;;TODO: it crawls to a death in big dirs, going to bet on refreshing on
     ;;      buffer change. Possibly adding a timeout for it to occur.
     (setq neo-banner-message "")
@@ -875,6 +873,11 @@ So it safe to call it many times like in a minor mode hook."
     (setq neo-window-fixed-size nil)
     (setq neo-window-position (quote right))
 
+    (setq neo-hidden-regexp-list
+    '("^\\." "\\.pyc$" "~$" "^#.*#$" "\\.elc$" "\\.o$" ;; defaults
+      ;; add yours:
+      "__.*__"))
+
     :config
     (defun hmz-winum-assign-func ()
       (cond
@@ -886,7 +889,6 @@ So it safe to call it many times like in a minor mode hook."
   nil)))
 
     (setq winum-assign-func 'hmz-winum-assign-func)
-
 
     (defun neo-buffer--insert-dir-entry (node depth expanded)
       "Overriden function to get rid of useless typography."
@@ -1055,10 +1057,17 @@ So it safe to call it many times like in a minor mode hook."
     (global-set-key (kbd "H-r") 'neo-opens-outwards)
 
     (defun hmz-neotree-mode-hook ()
+      (interactive)
       ;; (face-remap-add-relative 'default :background-color "blue")
       ;; (set-background-color "black")
       ;; (setq buffer-face-mode-face `(:background "red"))
 
+      ;; hide line numbers
+      (display-line-numbers-mode nil)
+      (linum-mode nil)
+
+
+      ;; go away with modeline
       (hidden-mode-line-mode t)
 
       ;; custom doesn't work, neither does setting on init file
@@ -1083,9 +1092,15 @@ So it safe to call it many times like in a minor mode hook."
       ;; for them.
       (text-scale-set -1)
 
+      ;; no line wrap
+      (toggle-word-wrap 1)
+      (set-default 'truncate-lines t)
+      (toggle-truncate-lines 1)
+
       ;; Set width here so it takes scaled font size
-      (setq neo-window-width 24)
+      (setq neo-window-width 34)
       (setq neo-window-fixed-size nil))
+
 
     (add-hook 'neotree-mode-hook 'hmz-neotree-mode-hook)
 

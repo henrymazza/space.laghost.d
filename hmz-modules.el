@@ -1,572 +1,190 @@
+(require 'use-package)
 (setq use-package-verbose 'debug)
 
 (add-to-list 'load-path (expand-file-name "~/.spacemacs.develop.d/straight/repos/all-the-icons"))
+
+(use-package docker
+  :straight t
+  :ensure t
+  :bind ("C-c d" . docker))
+
+(use-package request
+  :straight (request :type git :host github :repo "tkf/emacs-request"))
+
+(use-package polymode
+  :straight t)
+
+(define-hostmode poly-ng2-ts-hostmode
+  :mode 'ng2-ts-mode)
+
+(define-innermode poly-ng2-ts-doc-markdown-innermode
+  :mode 'markdown-mode
+  :head-matcher "/*"
+  :tail-matcher "*/"
+  :head-mode 'host
+  :tail-mode 'host)
+
+(define-polymode poly-ng2-ts-mode
+  :hostmode 'poly-ng2-ts-hostmode
+  :innermodes '(poly-ng2-ts-doc-markdown-innermode))
+
+(use-package poly-ruby
+  :straight t
+  :mode ("\\.rb" . poly-ruby-mode)
+  :init
+  (define-key ruby-mode-map (kbd "C-c m") 'toggle-poly-ruby-mode))
+
+(use-package poly-markdown
+  :straight t
+  :ensure polymode
+  :defer t
+  :mode ("\\.md" . poly-markdown-mode))
+
+
+
+(defun run-in-vterm-kill (process event)
+  "A process sentinel. Kills PROCESS's buffer if it is live."
+  (let ((b (process-buffer process)))
+    (and (buffer-live-p b)
+         (kill-buffer b))))
+
+;; (defun run-in-vterm (command)
+;;   "Execute string COMMAND in a new vterm.
+
+;; Interactively, prompt for COMMAND with the current buffer's file
+;; name supplied. When called from Dired, supply the name of the
+;; file at point.
+
+;; Like `async-shell-command`, but run in a vterm for full terminal features.
+
+;; The new vterm buffer is named in the form `*foo bar.baz*`, the
+;; command and its arguments in earmuffs.
+
+;; When the command terminates, the shell remains open, but when the
+;; shell exits, the buffer is killed."
+;;   (interactive
+;;    (list
+;;     (let* ((f (cond (buffer-file-name)
+;;                     ((eq major-mode 'dired-mode)
+;;                      (dired-get-filename nil t))))
+;;            (filename (concat " " (shell-quote-argument (and f (file-relative-name f))))))
+;;       (read-shell-command "Terminal command: "
+;;                           (cons filename 0)
+;;                           (cons 'shell-command-history 1)
+;;                           (list filename)))))
+;;   (with-current-buffer (vterm (concat "*" command "*"))
+;;     (set-process-sentinel vterm--process #'run-in-vterm-kill)
+;;     (vterm-send-string command)
+;;     (vterm-send-return)))
+
+;; Typescript
+(use-package tide
+  :straight t
+  :disabled
+  :after (typescript-mode company flycheck)
+  :hook ((typescript-mode . tide-setup)
+         (typescript-mode . tide-hl-identifier-mode)
+         (before-save . tide-format-before-save))
+  :init
+  (add-hook 'js2-mode-hook #'setup-tide-mode)
+;; configure javascript-tide checker to run after your default javascript checker
+  (flycheck-add-next-checker 'javascript-eslint 'javascript-tide 'append)
+
+  ;; this seems to work (from [[https://github.com/ananthakumaran/tide/issues/67][flycheck doesn't use next syntax checker (tslint) after tide · Issue #67 · ananthakumaran/tide]])
+  (defun setup-tide-mode ()
+    (interactive)
+    (tide-setup)
+    (flycheck-add-next-checker 'typescript-tide '(t . typescript-tslint) 'append)
+    (eldoc-mode +1)
+    (company-mode +1))
+
+  ;; aligns annotation to the right hand side
+  (setq company-tooltip-align-annotations t)
+
+  ;; formats the buffer before saving
+  (add-hook 'before-save-hook 'tide-format-before-save)
+  (add-hook 'typescript-mode-hook #'setup-tide-mode)
+
+  (add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode))
+  (add-hook 'web-mode-hook
+          (lambda ()
+          (when (string-equal "tsx" (file-name-extension buffer-file-name))
+            (setup-tide-mode)))))
+
+(use-package ng2-mode
+  :straight t)
+
+(use-package popup-switcher
+  :straight t
+  :init
+  (setq psw-popup-position 'center)
+  (setq psw-highlight-previous-buffer t)
+  :config
+  (spacemacs/set-leader-keys "bv" 'psw-switch-buffer)
+  ;; (global-set-key [f2] 'psw-switch-buffer)
+  )
+
+;; Quit, Exit, Escape
+(use-package evil-escape
+  :commands evil-escape-mode
+  :init
+  (setq evil-escape-excluded-states '(normal visual multiedit emacs motion)
+        evil-escape-excluded-major-modes '(neotree-mode)
+        evil-escape-key-sequence "kj"
+        evil-escape-delay 0.25)
+  (add-hook 'after-init-hook #'evil-escape-mode)
+  :config
+  ;; no `evil-escape' in minibuffer
+  (cl-pushnew #'minibufferp evil-escape-inhibit-functions :test #'eq)
+
+  ;; (define-key evil-insert-state-map  (kbd "C-g") #'evil-escape)
+  ;; (define-key evil-replace-state-map (kbd "C-g") #'evil-escape)
+  ;; (define-key evil-visual-state-map  (kbd "C-g") #'evil-escape)
+  ;; (define-key evil-operator-state-map (kbd "C-g") #'evil-escape)
+  (defun evil-keyboard-quit ()
+    "Keyboard quit and force normal state."
+    (interactive)
+    (and evil-mode (evil-force-normal-state))
+    (keyboard-escape-quit)
+    (message "Me!")
+    )
+
+  (define-key evil-insert-state-map   (kbd "Esc") #'evil-keyboard-quit)
+
+  ;; (defun my-esc (prompt)
+  ;;   "Functionality for escaping generally. Includes exiting Evil
+  ;;    insert state and C-g binding. "
+  ;;   (cond
+  ;;    ((or (evil-insert-state-p)
+  ;;         ;; (evil-normal-state-p)
+  ;;         (evil-replace-state-p)
+  ;;         (evil-visual-state-p)) [escape])))
+  ;; (define-key key-translation-map (kbd "C-g") 'my-esc)
+
+  (define-key evil-normal-state-map   (kbd "C-g") #'evil-keyboard-quit)
+  (define-key evil-motion-state-map   (kbd "C-g") #'evil-keyboard-quit)
+  (define-key evil-insert-state-map   (kbd "C-g") #'evil-keyboard-quit)
+  (define-key evil-window-map         (kbd "C-g") #'evil-keyboard-quit)
+  (define-key evil-operator-state-map (kbd "C-g") #'evil-keyboard-quit)
+  ;; (define-key key-translation-map (kbd "ESC") (kbd "C-g"))
+  ;; (define-key key-translation-map (kbd "C-g") (kbd "ESC"))
+  )
+
+;; (use-package leuven-theme
+;;   :config
+;;   (load-theme 'leuven-dark t))
+
+(use-package org-cliplink
+  :straight t)
+
+(use-package org-download
+    :straight t)
 
 (use-package all-the-icons
   :straight t
   :disabled
   :catch t
   :demand t)
-
-;; * Tabbar
-;; ;; (use-package tabbar
-;; ;;     :straight t
-;; ;;     :disabled
-;; ;;     :demand t
-;; ;;     :catch t
-;; ;;     :bind ("s-b" . tabbar-mode)
-;; ;;     :after (helm-lib all-the-icons)
-;; ;;     :config
-;; ;;       (defun ido-switch-tab-group ()
-;; ;;         "Switch tab groups using ido."
-;; ;;       (interactive)
-;; ;;         (let* ((tab-buffer-list (mapcar
-;; ;;                 #'(lambda (b)
-;; ;;                     (with-current-buffer b
-;; ;;                       (list (current-buffer)
-;; ;;                             (buffer-name)
-;; ;;                             (funcall tabbar-buffer-groups-function) )))
-;; ;;                     (funcall tabbar-buffer-list-function)))
-;; ;;             (groups (delete-dups
-;; ;;               (mapcar #'(lambda (group)
-;; ;;                 (car (car (cdr (cdr group))))) tab-buffer-list)))
-;; ;;             (group-name (ido-completing-read "Groups: " groups)) )
-;; ;;           (catch 'done
-;; ;;             (mapc
-;; ;;               #'(lambda (group)
-;; ;;                 (when (equal group-name (car (car (cdr (cdr group)))))
-;; ;;                   (throw 'done (switch-to-buffer (car (cdr group))))))
-;; ;;               tab-buffer-list) )))
-
-;; ;;       (defun switch-tab-group (group-name)
-;; ;;         "Switch to a specific tab group."
-;; ;;         (let ((tab-buffer-list (mapcar
-;; ;;                 #'(lambda (b)
-;; ;;                     (with-current-buffer b
-;; ;;                       (list (current-buffer)
-;; ;;                             (buffer-name)
-;; ;;                             (funcall tabbar-buffer-groups-function) )))
-;; ;;                     (funcall tabbar-buffer-list-function))))
-;; ;;           (catch 'done
-;; ;;             (mapc
-;; ;;               #'(lambda (group)
-;; ;;                 (when (equal group-name (format "%s" (car (car (cdr (cdr group))))))
-;; ;;                   (throw 'done (switch-to-buffer (car (cdr group))))))
-;; ;;               tab-buffer-list) )))
-
-;; ;;       (defun switch-to-tab-group-n ()
-;; ;;       "Switch to a predefined existing tab group named `N`."
-;; ;;       (interactive)
-;; ;;         (switch-tab-group "N"))
-
-;; ;;       (defun switch-to-tab-group-a ()
-;; ;;       "Switch to a predefined existing tab group named `A`."
-;; ;;       (interactive)
-;; ;;         (switch-tab-group "A"))
-
-;; ;;       (global-set-key [(control ";")] 'switch-tab-group)
-
-;; ;;       (define-key evil-normal-state-map (kbd "C-;") 'ido-switch-tab-group)
-
-;; ;;     ;; END SWITCH BUFFER
-
-;; ;;     ;; safari like back and forward tabs
-;; ;;     (global-set-key [(control shift tab)] 'tabbar-backward-tab)
-;; ;;     (global-set-key [(control tab)] 'tabbar-forward-tab)
-
-;; ;;     ;; make tab and shift tab move between MRU buffers
-;; ;;     (define-key evil-normal-state-map (kbd "<S-tab>") 'previous-buffer)
-;; ;;     (define-key evil-normal-state-map (kbd "<tab>") 'next-buffer)
-
-;; ;;     ;; cycle groups
-;; ;;     (define-key evil-normal-state-map (kbd "s-[") 'tabbar-backward-group)
-;; ;;     (define-key evil-normal-state-map (kbd "s-]") 'tabbar-forward-group)
-;; ;;     (define-key evil-normal-state-map (kbd "{") 'tabbar-backward-group)
-;; ;;     (define-key evil-normal-state-map (kbd "}") 'tabbar-forward-group)
-
-;; ;;     ;; Sets command + 1 up to command + 0 as jump to group
-
-;; ;;     (seq-do (lambda (e)
-;; ;;               (global-set-key (kbd (concat "s-" (number-to-string e))) 'hmz-tabbar/goto-nth-group)
-;; ;;               )
-;; ;;             (number-sequence 1 9))
-
-;; ;;     (defun hmz-tabbar/goto-nth-group ()
-;; ;;       (interactive)
-;; ;;       (let* ((vect (recent-keys))
-;; ;;              (last-keystroke (aref vect (1- (length vect))))
-;; ;;              (invoked-with-keys (key-description (vector last-keystroke)))
-;; ;;              ;; start with zero
-;; ;;              (integer-argument (- (aref invoked-with-keys (1- (length invoked-with-keys))) 49))
-;; ;;              (new-group-tab (nth integer-argument (tabbar-tabs (tabbar-get-tabsets-tabset)))))
-
-;; ;;         (when new-group-tab
-;; ;;           (tabbar-click-on-tab new-group-tab))))
-
-;; ;;     ;; map mouse wheel events on header line
-;; ;;     (global-set-key [header-line triple-wheel-right] 'tabbar-press-scroll-right)
-;; ;;     (global-set-key [header-line double-wheel-right] 'tabbar-press-scroll-right)
-;; ;;     (global-set-key [header-line wheel-right] nil)
-;; ;;     (global-set-key [header-line triple-wheel-left] 'tabbar-press-scroll-left)
-;; ;;     (global-set-key [header-line double-wheel-left] 'tabbar-press-scroll-left)
-;; ;;     (global-set-key [header-line wheel-left] nil)
-
-;; ;;     (setq mouse-wheel-scroll-amount '(1 ((shift) . 1) ((control) . 30)))
-;; ;;     (setq mouse-wheel-progressive-speed nil)
-
-;; ;;     :config
-;; ;;     (defun plist-merge (&rest plists)
-;; ;;       (if plists
-;; ;;           (let ((result (copy-sequence (car plists))))
-;; ;;             (while (setq plists (cdr plists))
-;; ;;               (let ((plist (car plists)))
-;; ;;                 (while plist
-;; ;;                   (setq result (plist-put result (car plist) (car (cdr plist)))
-;; ;;                         plist (cdr (cdr plist))))))
-;; ;;             result)
-;; ;;         nil))
-
-
-;; ;;     (defun hmz-lighten-if-too-dark (icon-face)
-;; ;;       "Lighen color if (TODO) it's considered too dark."
-;; ;;       (color-lighten-name (face-attribute (plist-get icon-face :inherit) :foreground nil 'default) 2))
-
-;; ;;     ;; override so we can change default value instead of custom one
-;; ;;     (setq tabbar-separator (list 1.2))
-
-;; ;;     (defun hmz-tabbar-refresh-faces ()
-;; ;;       "Refreshes faces dependent of theme faces."
-
-;; ;;       (set-face-attribute 'tabbar-default nil
-;; ;;                           :inherit 'header-line
-;; ;;                           :foreground 'unspecified
-;; ;;                           :background 'unspecified
-;; ;;                           :underline nil
-;; ;;                           :weight 'light
-;; ;;                           :box nil)
-
-;; ;;       (set-face-attribute 'tabbar-selected-modified nil
-;; ;;                           :box nil
-;; ;;                           :foreground (face-attribute 'font-lock-keyword-face :foreground)
-;; ;;                           :inherit 'tabbar-selected
-;; ;;                           :overline nil
-;; ;;                           :weight 'normal)
-
-;; ;;       (set-face-attribute 'tabbar-selected nil
-;; ;;                           :box nil
-;; ;;                           :foreground 'unspecified
-;; ;;                           :background (face-attribute 'default :background)
-;; ;;                           :inherit 'tabbar-default
-;; ;;                           :underline (face-attribute 'font-lock-comment-face :background)
-;; ;;                           :overline nil
-;; ;;                           :weight 'normal)
-
-;; ;;       (set-face-attribute 'tabbar-highlight nil
-;; ;;                           :inherit 'tabbar-default
-;; ;;                           :foreground (face-attribute
-;; ;;                                        'font-lock-keyword-face :foreground)
-;; ;;                           :underline nil
-;; ;;                           :overline nil
-;; ;;                           :box nil)
-
-;; ;;       (set-face-attribute 'tabbar-modified nil
-;; ;;                           :box nil
-;; ;;                           :foreground (face-attribute 'font-lock-keyword-face :foreground)
-;; ;;                           :background 'unspecified
-;; ;;                           :weight 'normal
-;; ;;                           :inherit 'tabbar-default)
-
-;; ;;       (set-face-attribute 'tabbar-unselected nil
-;; ;;                           :foreground 'unspecified
-;; ;;                           :background 'unspecified
-;; ;;                           :box nil
-;; ;;                           :underline 'unspecified
-;; ;;                           :inherit 'tabbar-default)
-
-;; ;;       (set-face-attribute 'tabbar-button nil
-;; ;;                           :height 2.0
-;; ;;                           :inherit 'tabbar-default)
-
-;; ;;       (defface tabbar-icon-unselected '((t
-;; ;;                                          :foreground "#555555"
-;; ;;                                          :box nil
-;; ;;                                          :inherit 'tabbar-default
-;; ;;                                          ))
-;; ;;         "Unselected tab's icon foreground color."
-;; ;;         :group 'tabbar)
-
-;; ;;       ;; set colors through here so it can be dinamically redone
-;; ;;       (set-face-attribute 'tabbar-icon-unselected nil
-;; ;;                           :foreground (face-attribute 'font-lock-comment-face :foreground)
-;; ;;                           :background 'unspecified
-;; ;;                           :underline (face-attribute 'font-lock-variable-name-face :foreground)))
-
-;; ;;     (hmz-tabbar-refresh-faces)
-
-;; ;;     (use-package all-the-icons
-;; ;;       :config
-;; ;;       (add-to-list 'all-the-icons-icon-alist
-;; ;;                    '("\\.lua$" all-the-icons-wicon "moon-waning-crescent-3" :face all-the-icons-cyan)))
-
-;; ;;     (defun tabbar-buffer-help-on-tab (tab)
-;; ;;       "Return the help string shown when mouse is onto TAB. This function was overriden to show more useful information."
-;; ;;       (if tabbar--buffer-show-groups
-;; ;;           (let* ((tabset (tabbar-tab-tabset tab))
-;; ;;                  (tab (tabbar-selected-tab tabset)))
-;; ;;             (format "mouse-1: switch to buffer %S in group [%s]"
-;; ;;                     (buffer-name (tabbar-tab-value tab)) tabset))
-;; ;;         (propertize (format "%s"
-;; ;;                 (file-relative-name
-;; ;;                  (projectile-expand-root (buffer-file-name (tabbar-tab-value tab)))
-;; ;;                  (projectile-project-root))) 'face '(:height 1.2 :weight light))))
-
-;; ;;     ;; Override function that writes tab names so we can insert
-;; ;;     ;; an stylized text with icons
-;; ;;     (defsubst tabbar-line-tab (tab)
-      "Return the display representation of tab TAB.;; ;;
-;; ;; That is, a propertized string used as an `header-line-format' template
-;; ;; element.
-;; ;; Call `tabbar-tab-label-function' to obtain a label for TAB."
-
-;; ;;       (let*
-;; ;;           ((tab-face (cond ((and (tabbar-selected-p tab (tabbar-current-tabset))
-;; ;;                                  (tabbar-modified-p tab (tabbar-current-tabset)))
-;; ;;                             'tabbar-selected-modified)
-;; ;;                            ((tabbar-selected-p tab (tabbar-current-tabset))
-;; ;;                             'tabbar-selected)
-;; ;;                            ((tabbar-modified-p tab (tabbar-current-tabset))
-;; ;;                             'tabbar-modified)
-;; ;;                            (t 'tabbar-unselected)))
-
-;; ;;            (the-icon (all-the-icons-icon-for-file
-;; ;;                       (replace-regexp-in-string "<.*>" "" (format "%s"(tabbar-tab-value tab)))))
-
-;; ;;            (tab-is-active (tabbar-selected-p tab (tabbar-current-tabset)))
-
-;; ;;            (icon-face (plist-get (text-properties-at 0 the-icon) 'face)))
-
-;; ;;         (concat
-;; ;;          (propertize
-;; ;;                      " "
-;; ;;            (if tabbar-tab-label-function
-;; ;;                (funcall tabbar-tab-label-function tab)
-;; ;;              tab) " "
-;; ;;           'tabbar-tab tab
-;; ;;           'local-map (tabbar-make-tab-keymap tab)
-;; ;;           'help-echo 'tabbar-help-on-tab
-;; ;;           'mouse-face 'tabbar-highlight
-;; ;;           'face tab-face
-;; ;;           'display `(raise  0.0);;,(symbol-value 'hmz-tabbar-raise-text))
-;; ;;           'pointer 'hand)
-;; ;;          (propertize
-;; ;;           the-icon
-;; ;;           'face (plist-merge
-;; ;;                  ;; (get icon-face 'foreground)
-;; ;;                  (plist-get (text-properties-at 0 the-icon) 'face)
-;; ;;                  `(:background ,(face-attribute 'tabbar-default :background nil 'default))
-;; ;;                  (if tab-is-active
-;; ;;                      `(:overline nil;; ,(face-attribute tab-face :foreground nil 'default)
-;; ;;                                  :foreground ,(hmz-lighten-if-too-dark icon-face)
-;; ;;                                  :background ,(face-attribute 'tabbar-selected :background nil 'default))
-;; ;;                    `(:foreground ,(face-attribute 'tabbar-icon-unselected :foreground nil 'default)))
-;; ;;                  )
-;; ;;           'display (if tab-is-active '(raise 0.0) '(raise 0.0))
-;; ;;           'tabbar-tab tab
-;; ;;           'local-map (tabbar-make-tab-keymap tab)
-;; ;;           'help-echo 'tabbar-help-on-tab
-;; ;;           'mouse-face 'tabbar-highlight)
-
-;; ;;          (propertize
-;; ;;           (concat
-;; ;;            " "
-;; ;;            (if tabbar-tab-label-function
-;; ;;                (funcall tabbar-tab-label-function tab) tab) " ")
-;; ;;           'tabbar-tab tab
-;; ;;           'local-map (tabbar-make-tab-keymap tab)
-;; ;;           'help-echo 'tabbar-help-on-tab
-;; ;;           'mouse-face 'tabbar-highlight
-;; ;;           'face tab-face
-;; ;;           'display `(raise 0.2) ;;,(symbol-value 'hmz-tabbar-raise-text))
-;; ;;           'pointer 'hand)
-;; ;;          tabbar-separator-value)))
-
-;; ;;     (defsubst tabbar-line-button (name)
-;; ;;       "Return the display representation of button NAME.
-;; ;; That is, a propertized string used as an `header-line-format' template
-;; ;; element."
-;; ;;       (position
-;; ;;        (tabbar-current-tabset)
-;; ;;        (mapcar #'cdr
-;; ;;                (tabbar-tabs (tabbar-get-tabsets-tabset))))
-
-;; ;;       (let* ((label (if tabbar-button-label-function
-;; ;;                         (funcall tabbar-button-label-function name)
-;; ;;                       (cons name name)))
-
-;; ;;              (glyph
-;; ;;               (cond ((eq name 'home)
-;; ;;                      (concat " "
-;; ;;                              (all-the-icons-wicon
-;; ;;                               (nth
-
-;; ;;                                ;; Use current group to define icon
-;; ;;                                (or (position
-;; ;;                                     (tabbar-current-tabset)
-;; ;;                                     (mapcar #'cdr
-;; ;;                                             (tabbar-tabs (tabbar-get-tabsets-tabset)))
-;; ;;                                     ) 7)
-
-;; ;;                                ;; Use current window number to define the icon
-;; ;;                                ;; (if winum-mode (winum-get-number) 1)
-
-;; ;;                                    '("alien" "fire" "lightning" "barometer" "meteor" "earthquake" "snowflake-cold" "fire" "raindrop" "solar-eclipse" "night-clear" "raindrops" "sprinkle"))
-;; ;;                               :face '(:inherit tabbar-default :height 1.2))))
-
-;; ;;                           ((eq name 'scroll-left) (all-the-icons-material "chevron_left"))
-;; ;;                           ((eq name 'scroll-right) (all-the-icons-material "chevron_right"))
-;; ;;                           (t "X")))
-
-;; ;;              (raise-amount 0.0)
-
-;; ;;              (tabset-name (if (eq name 'scroll-left)
-;; ;;                               (propertize (format "%s" (tabbar-current-tabset))
-;; ;;                                           'face '(:inherit tabbar-default
-;; ;;                                                            :height 1.3)
-;; ;;                                           'display '(raise 0.1)) "")))
-
-;; ;;         (tabbar-set-template tabset nil)
-;; ;;         ;; Cache the display value of the enabled/disabled buttons in
-;; ;;         ;; variables `tabbar-NAME-button-value'.
-;; ;;         (set (intern (format "tabbar-%s-button-value" name))
-;; ;;              (cons
-;; ;;               (concat
-;; ;;                (propertize glyph
-;; ;;                            'tabbar-button name
-;; ;;                            'face (plist-merge
-;; ;;                                   '(:inherit tabbar-default)
-;; ;;                                   (plist-get (text-properties-at (- (length glyph) 1) glyph) 'face)
-;; ;;                                   `(:foreground ,(face-attribute 'font-lock-keyword-face :foreground nil))
-;; ;;                                   )
-;; ;;                            'display '(raise raise-amount)
-;; ;;                            ;; (list 'space :width (car tabbar-separator))
-;; ;;                            'mouse-face 'tabbar-button-highlight
-;; ;;                            'pointer 'hand
-;; ;;                            'local-map (tabbar-make-button-keymap name)
-;; ;;                            'help-echo 'tabbar-help-on-button)
-;; ;;                (unless (string-equal tabset-name "tabbar-tabsets-tabset") tabset-name))
-
-;; ;;               (concat
-;; ;;                (propertize glyph
-;; ;;                            'tabbar-button name
-;; ;;                            'face (plist-merge
-;; ;;                                   '(:inherit tabbar-default)
-;; ;;                                   (plist-get (text-properties-at 0 glyph) 'face))
-;; ;;                            'display '(raise raise-amount)
-;; ;;                            'mouse-face 'tabbar-button-highlight
-;; ;;                            'pointer 'hand
-;; ;;                            'local-map (tabbar-make-button-keymap name)
-;; ;;                            'help-echo 'tabbar-help-on-button)
-;; ;;                (unless (string-equal tabset-name "tabbar-tabsets-tabset") tabset-name)
-;; ;;                )))))
-
-;; ;;     (defadvice tabbar-line-format (after tabbar-button-cache-clearer 1 (tabset) activate)
-;; ;;       "Clear cached button values each time `tabbar-line-format' is called
-;; ;;        so tabbset name gets refreshed."
-;; ;;       (setq tabbar-scroll-left-button-value nil)
-;; ;;       (setq tabbar-scroll-right-button-value nil)
-;; ;;       (setq tabbar-home-button-value nil))
-
-;; ;;     (defun tabbar-buffer-tab-label (tab)
-;; ;;       "Return a label for TAB. That is, a string used to represent it on the
-;; ;;        tab bar. This was overriden to clean up unwanted chars."
-
-;; ;;       (let ((label (if tabbar--buffer-show-groups
-;; ;;                        (replace-regexp-in-string
-;; ;;                         "*" "" (format "%s" (tabbar-tab-tabset tab)))
-;; ;;                      (format "%s" (tabbar-tab-value tab)))))
-;; ;;         ;; Unless the tab bar auto scrolls to keep the selected tab
-;; ;;         ;; visible, shorten the tab label to keep as many tabs as possible
-;; ;;         ;; in the visible area of the tab bar.
-;; ;;         (if tabbar-auto-scroll-flag
-;; ;;             label
-;; ;;           (tabbar-shorten
-;; ;;            label (max 1 (/ (window-width)
-;; ;;                            (length (tabbar-view
-;; ;;                                     (tabbar-current-tabset)))))))))
-
-;; ;;     (defun advice-unadvice (sym)
-;; ;;       "Remove all advices from symbol SYM."
-;; ;;       (interactive "Function symbol: ")
-;; ;;       (advice-mapc (lambda (advice _props) (advice-remove sym advice)) sym))
-
-;; ;;     (defun my-make-throttler-3 ()
-;; ;;       (lexical-let ((last-time (+ 10 (float-time) ))
-;; ;;                     (last-args 'dummy)
-;; ;;                     (last-val ()))
-;; ;;         (lambda (&rest args)
-;; ;;           (if (and (< 10 (- (float-time) last-time))
-;; ;;                    (equal args last-args))
-;; ;;               last-val
-;; ;;             (setq last-time (float-time))
-;; ;;             (setq last-args args)
-;; ;;             (setq last-val (apply args))))))
-
-;; ;;     (advice-unadvice 'tabbar-buffer-update-groups)
-;; ;;     (advice-add 'tabbar-buffer-update-groups :around (my-make-throttler-3))
-
-;; ;;     (defun tabbar-buffer-update-groups ()
-;; ;;       "Update tab sets from groups of existing buffers.
-;; ;;   Return the the first group where the current buffer is."
-;; ;;       ;; (message "update groups")
-;; ;;       (let ((bl (sort
-;; ;;                  (mapcar
-;; ;;                   ;; for each buffer, create list: buffer, buffer name, groups-list
-;; ;;                   ;; sort on buffer name; store to bl (buffer list)
-;; ;;                   #'(lambda (b)
-;; ;;                       (with-current-buffer b
-;; ;;                         (list (current-buffer)
-;; ;;                                 (format "%10s" (nth 0 (nth 5 (file-attributes (buffer-file-name )))))
-;; ;;                               ;; (format "%10d" (buffer-chars-modified-tick))
-;; ;;                               (if tabbar-buffer-groups-function
-;; ;;                                   (funcall tabbar-buffer-groups-function)
-;; ;;                                 '("Common")))))
-;; ;;                   (and tabbar-buffer-list-function
-;; ;;                        (funcall tabbar-buffer-list-function)))
-;; ;;                  #'(lambda (e1 e2)
-;; ;;                      (string-lessp (nth 1 e1) (nth 1 e2))))))
-;; ;;         ;; If the cache has changed, update the tab sets.
-;; ;;         (unless (equal bl tabbar--buffers)
-;; ;;           ;; Add new buffers, or update changed ones.
-;; ;;           (dolist (e bl) ;; loop through buffer list
-;; ;;             (dolist (g (nth 2 e)) ;; for each member of groups-list for current buffer
-;; ;;               (let ((tabset (tabbar-get-tabset g))) ;; get group from group name
-;; ;;                 (if tabset ;; if group exists
-;; ;;                     ;; check if current buffer is same as any cached buffer
-;; ;;                     ;; (search buffer list for matching buffer)
-;; ;;                     (unless (equal e (assq (car e) tabbar--buffers)) ;; if not,...
-;; ;;                       ;; This is a new buffer, or a previously existing
-;; ;;                       ;; buffer that has been renamed, or moved to another
-;; ;;                       ;; group.  Update the tab set, and the display.
-;; ;;                       (tabbar-add-tab tabset (car e) t) ;; add to end of tabset
-;; ;;                       (tabbar-set-template tabset nil))
-;; ;;                   ;;if tabset doesn't exist, make a new tabset with this buffer
-;; ;;                   (tabbar-make-tabset g (car e))))))
-;; ;;           ;; Remove tabs for buffers not found in cache or moved to other
-;; ;;           ;; groups, and remove empty tabsets.
-;; ;;           (mapc 'tabbar-delete-tabset ;; delete each tabset named in following list:
-;; ;;                 (tabbar-map-tabsets ;; apply following function to each tabset:
-;; ;;                  #'(lambda (tabset)
-;; ;;                      (dolist (tab (tabbar-tabs tabset)) ;; for each tab in tabset
-;; ;;                        (let ((e (assq (tabbar-tab-value tab) bl))) ;; get buffer
-;; ;;                          (or (and e (memq tabset ;; skip if buffer exists and tabset is a member of groups-list for this buffer
-;; ;;                                           (mapcar 'tabbar-get-tabset
-;; ;;                                                   (nth 2 e))))
-;; ;;                              (tabbar-delete-tab tab)))) ;; else remove tab from this set
-;; ;;                      ;; Return empty tab sets
-;; ;;                      (unless (tabbar-tabs tabset)
-;; ;;                        tabset)))) ;; return list of tabsets, replacing non-empties with nil
-;; ;;           ;; NOTE: it looks like tabbar--buffers is getting nil'ed somewhre,
-;; ;;           ;; using an alternative cache.
-;; ;;           ;; The new cache becomes the current one.
-;; ;;            (setq tabbar--buffers bl)
-
-;; ;;           ))
-;; ;;       ;; Return the first group the current buffer belongs to.
-;; ;;       (car (nth 2 (assq (current-buffer) tabbar--buffers))))
-
-;; ;;     ;; Tabbar Groups Definition
-;; ;;     (defun tabbar-buffer-groups ()
-;; ;;       "Returns the name of the tab group names the current buffer belongs to.
-;; ;;       There are two groups: Emacs buffers (those whose name starts with '*', plus
-;; ;;       dired buffers), and the rest."
-;; ;;       (list (if (member (buffer-name)
-;; ;;                         (helm-skip-entries
-;; ;;                          (mapcar #'buffer-name (buffer-list))
-;; ;;                          (append '("\\`[:\\*]\\(Back\\|Help\\)")
-;; ;;                                  helm-boring-buffer-regexp-list)
-;; ;;                          helm-white-buffer-regexp-list))
-;; ;;                 (cond
-;; ;;                  ((file-remote-p default-directory)
-;; ;;                   (string-join
-;; ;;                    `( ,(file-remote-p default-directory 'user)
-;; ;;                       ,(file-remote-p default-directory 'host))
-;; ;;                    "@")
-;; ;;                   )
-
-;; ;;                  ((string-match-p "*" (buffer-name))
-;; ;;                   (if (or (get-buffer-process (current-buffer))
-;; ;;                           (eq major-mode 'eshell-mode))
-;; ;;                       "proc"
-;; ;;                     "limbo"))
-;; ;;                  ((eq major-mode 'dired-mode) "dired")
-;; ;;                  ((string-match-p "magit" (symbol-name major-mode))
-;; ;;                   "magit")
-;; ;;                  ((projectile-project-p) (projectile-project-name))
-;; ;;                  ((buffer-file-name) "other")
-;; ;;                  (t "limbo"))
-;; ;;               "limbo")))
-
-;; ;;     (defun hmz-tabbar-refresh-tabs ()
-;; ;;       (if tabbar-mode
-;; ;;           (progn(tabbar-mode 0)
-;; ;;                 (setq tabbar-scroll-left-button-value nil)
-;; ;;                 (setq tabbar-scroll-right-button-value nil)
-;; ;;                 (setq tabbar-home-button-value nil)
-
-;; ;;                 (hmz-tabbar-refresh-faces)
-
-;; ;;                 (tabbar-mode 1))))
-
-;; ;;     (unless (boundp 'after-load-theme-hook)
-;; ;;       (defvar after-load-theme-hook nil
-;; ;;         "Hook run after a color theme is loaded using `load-theme'.")
-;; ;;       (defadvice load-theme (after run-after-load-theme-hook activate)
-;; ;;        "Run `after-load-theme-hook'."
-;; ;;         (run-hooks 'after-load-theme-hook)))
-
-;; ;;     (add-hook 'after-load-theme-hook 'hmz-tabbar-refresh-tabs)
-;; ;;     (add-hook 'after-save-hook 'hmz-tabbar-refresh-tabs)
-;; ;;     (add-hook 'first-change-hook 'hmz-tabbar-refresh-tabs)
-
-;; ;;     ;; init me!
-;; ;;   (tabbar-mode 1)
-;; ;;   ;; redefine tabbar-add-tab so that it alphabetizes / sorts the tabs
-;; ;;   ;; TODO: better treat non-file buffers in sort
-;; ;;   (defun tabbar-add-tab (tabset object &optional append)
-;; ;;     "Add to TABSET a tab with value OBJECT if there isn't one there yet.
-;; ;;   If the tab is added, it is added at the beginning of the tab list,
-;; ;;   unless the optional argument APPEND is non-nil, in which case it is
-;; ;;   added at the end."
-;; ;;     (let ((tabs (tabbar-tabs tabset)))
-;; ;;       (if (tabbar-get-tab object tabset)
-;; ;;           tabs
-;; ;;         (let* (
-;; ;;             (tab (tabbar-make-tab object tabset))
-;; ;;             (tentative-new-tabset
-;; ;;               (if append
-;; ;;                 (append tabs (list tab))
-;; ;;                 (cons tab tabs)))
-;; ;;             (new-tabset
-;; ;;               (sort
-;; ;;                 tentative-new-tabset
-;; ;;                 #'(lambda (e1 e2)
-;; ;;                     (setq file1 (buffer-local-value 'buffer-file-name (get-buffer (car e1)))
-;; ;;                           file2 (buffer-local-value 'buffer-file-name (get-buffer (car e2))))
-;; ;;                     (if (and file1 file2)
-;; ;;                       (not (time-less-p
-;; ;;                             (file-attribute-modification-time
-;; ;;                              (file-attributes (expand-file-name file1)))
-;; ;;                             (file-attribute-modification-time
-
-;; ;;                              (file-attributes (expand-file-name file2)))
-;; ;;                             ))
-;; ;;                       t)
-
-;; ;;                     ))))
-;; ;;           (tabbar-set-template tabset nil)
-;; ;;           (set tabset new-tabset))))))
-
-
 
 ;; * Here =hmz-misc= packages
 (use-package indicators
@@ -653,18 +271,18 @@
   :straight (outshine :type git :host github :repo "alphapapa/outshine")
   :config
   (defvar outline-minor-mode-prefix "\M-#")
-  (add-hook 'prog-mode-hook 'outshine-mode)
-  )
+  (add-hook 'prog-mode-hook 'outshine-mode))
 
-(use-package helm-org-rifle
-  :straight t)
+;; not loading
+;; (use-package helm-org-rifle
+;;   :straight t)
 
-(use-package org-super-links
-  :straight (org-super-links :type git :host github :repo "toshism/org-super-links")
-  :after (org helm-org-rifle)
-  :bind (("C-c s s" . sl-link)
-     ("C-c s l" . sl-store-link)
-     ("C-c s C-l" . sl-insert-link)))
+;; (use-package org-super-links
+;;   :straight (org-super-links :type git :host github :repo "toshism/org-super-links")
+;;   :after (org helm-org-rifle)
+;;   :bind (("C-c s s" . sl-link)
+;;      ("C-c s l" . sl-store-link)
+;;      ("C-c s C-l" . sl-insert-link)))
 
 (use-package doom-modeline
   :straight t
@@ -785,9 +403,75 @@ So it safe to call it many times like in a minor mode hook."
   (setq ibuffer-sidebar-use-custom-font t)
   (add-hook 'ibuffer-sidebar-mode-hook #'j-ibuffer-projectile-run))
 
-(use-package dired-sidebar
+   (use-package dired
+     :straight nil
+     :hook
+     (dired-mode . hl-line-mode)
+     (dired-mode . dired-hide-details-mode)
+     (dired-mode . +dired-mode-faces)
+     :custom
+     (dired-listing-switches "-al --group-directories-first")
+     ;; Always copy/delete recursively
+     (dired-recursive-copies  'always)
+     (dired-recursive-deletes 'top)
+     :init
+     (defun +dired-mode-faces ()
+       (face-remap-add-relative 'hl-line
+                                :background (face-background 'isearch))))
+  (use-package dired-sidebar
+    :straight t
+      :hook
+      (dired-sidebar-mode . hide-mode-line-mode)
+      (dired-sidebar-mode . hl-line-mode)
+      (dired-sidebar-mode . variable-pitch-mode)
+      (dired-sidebar-mode . +dired-sidebar-setup)
+      ;; :general
+      ;; (:keymaps
+      ;;  'global
+      ;;  "C-x C-n" 'dired-sidebar-toggle-sidebar)
+      :init
+      (defun +dired-sidebar-setup ()
+        (setq cursor-type nil)
+        (stripe-buffer-mode 0)
+        ;; Disable conflicting icons
+        (all-the-icons-dired-mode 0)))
+
+(use-package dired-subtree
   :straight t
-  :commands (dired-sidebar-toggle-sidebar))
+  :bind
+  (:map dired-mode-map
+    ("i" . dired-subtree-insert))
+  :config
+  (bind-key "<tab>" #'dired-subtree-toggle dired-mode-map)
+  (bind-key "<backtab>" #'dired-subtree-cycle dired-mode-map)
+  (progn
+    ;; Function to customize the line prefixes (I simply indent the lines a bit)
+    (setq dired-subtree-line-prefix (lambda (depth) (make-string (* 2 depth) ?\s)))
+    (setq dired-subtree-use-backgrounds nil)))
+
+    (use-package stripe-buffer
+      :straight t
+      :disabled
+      :hook
+      (dired-mode . stripe-buffer-mode))
+
+    (use-package all-the-icons-dired
+      :straight t
+      :diminish all-the-icons-dired-mode
+      :hook
+      (dired-mode . all-the-icons-dired-mode))
+
+(use-package vscode-icon
+  :straight t)
+
+(use-package awesome-tab
+  :disabled
+  :straight (awesome-tab :type git
+                           :host github :repo "manateelazycat/awesome-tab")
+  ;; :load-path "path/to/your/awesome-tab"
+  :config
+  (setq awesome-tab-height 140)
+  (awesome-tab-mode t))
 
 (use-package centaur-tabs
     :straight t
@@ -825,6 +509,15 @@ So it safe to call it many times like in a minor mode hook."
   :disabled
   :init)
 
+(use-package lsp-mode
+  :straight t
+  :commands lsp
+  :diminish lsp-mode
+  :hook
+  (elixir-mode . lsp)
+  :init
+  (add-to-list 'exec-path "~/Development/elixir-ls/"))
+
 (use-package persp-mode
   :straight t
   ;; :demand t
@@ -832,7 +525,7 @@ So it safe to call it many times like in a minor mode hook."
   :custom
   (persp-auto-save-num-of-backups 10)
   (persp-autokill-buffer-on-remove 'kill-weak)
-  (persp-interactive-completion-system 'ido)
+  ;; (persp-interactive-completion-system 'ido)
   (persp-keymap-prefix "")
   (persp-nil-name "nil")
 
@@ -860,7 +553,8 @@ So it safe to call it many times like in a minor mode hook."
 
 (use-package persp-mode-projectile-bridge
   :straight t
-  :after (projectile persp-mode)
+  ;; :after (projectile persp-mode)
+  :defer t
   :init
   (add-hook 'persp-mode-projectile-bridge-mode-hook
             #'(lambda ()
@@ -978,6 +672,7 @@ So it safe to call it many times like in a minor mode hook."
   :straight t
   :disabled
   :init
+  (ivy-mode 1)
   (ido-mode 1)
   (ido-everywhere 1)
   (ido-ubiquitous-mode 1))
@@ -988,10 +683,10 @@ So it safe to call it many times like in a minor mode hook."
   :init
   (ido-yes-or-no-mode 1))
 
-;; TODO: not loading on startup!
+;; FIXME: not loading on startup!
 (use-package amx
   :straight t
-  :defer t
+
   :init
   (defun spacemacs/amx ()
     "Execute amx with a better prompt."
@@ -1012,7 +707,7 @@ So it safe to call it many times like in a minor mode hook."
                                         ".amx-items"))
     (amx-mode 1)
     (ivy-mode 0)
-    (ido-mode 1)
+    ;; (ido-mode 1)
     (setq ivy-re-builders-alist
       '((ivy-switch-buffer . ivy--regex-plus)
         (t . ivy--regex-fuzzy)))
@@ -1021,12 +716,16 @@ So it safe to call it many times like in a minor mode hook."
     (add-hook 'emacs-startup-hook
               (lambda () (spacemacs/set-leader-keys
                            dotspacemacs-emacs-command-key 'spacemacs/amx)))
-    (spacemacs/set-leader-keys ":" 'spacemacs/amx-major-mode-commands)
-    (spacemacs/set-leader-keys "SPC" 'spacemacs/amx)
-    (global-set-key (kbd "M-x") 'spacemacs/amx)
-    (global-set-key (kbd "M-X") 'spacemacs/amx-major-mode-commands)))
 
-(straight-use-package 'ri)
+    )
+  (spacemacs/set-leader-keys ":" 'spacemacs/amx-major-mode-commands)
+  (spacemacs/set-leader-keys "SPC" 'spacemacs/amx)
+  (global-set-key (kbd "M-x") 'spacemacs/amx)
+  (global-set-key (kbd "M-X") 'spacemacs/amx-major-mode-commands)
+
+  (define-key evil-normal-state-map (kbd "SPC SPC") 'spacemacs/amx)
+  (evil-leader/set-key "SPC" 'spacemacs/amx)
+  (spacemacs/set-leader-keys "SPC" 'spacemacs/amx))
 
 (use-package wakatime-mode
   :straight t
@@ -1035,7 +734,12 @@ So it safe to call it many times like in a minor mode hook."
   :config
   (global-wakatime-mode t))
 
+(use-package dtrt-indent
+  :straight (dtrt-indent :type git
+                         :host github :repo "jscheid/dtrt-indent"))
+
 (use-package hl-block-mode
+
   :straight (hl-block-mode :type git
                            :host github :repo "emacsmirror/hl-block-mode")
   :disabled
@@ -1047,25 +751,6 @@ So it safe to call it many times like in a minor mode hook."
   :config
   (add-hook 'ruby-mode-hook 'evil-ruby-text-objects-mode)
   (add-hook 'enh-ruby-mode-hook 'evil-ruby-text-objects-mode))
-
-(use-package indent-guide
-  :straight t
-  :if window-system
-  :init
-  (setq indent-guide-delay 0.8)
-  (setq indent-guide-char "·")
-  (setq indent-guide-threshold 1)
-
-  ;; retard removing highlights so I can find myself after long jumps in big
-  ;; blocks
-  (defun indent-guide-pre-command-hook ()
-    ;; some commands' behavior may affected by indent-guide overlays, so
-    ;; remove all overlays in pre-command-hook.
-    (run-with-timer 0.4 nil
-                    (lambda () (indent-guide-remove))))
-
-  (add-hook 'prog-mode-hook
-            (lambda() (indent-guide-mode t))))
 
 (use-package doom-todo-ivy
   ;; :disabled
@@ -1372,7 +1057,7 @@ So it safe to call it many times like in a minor mode hook."
     (defun hmz-misc/bpr-on-completion (process)
       (hmz-misc/mac-notify (format "Ended with status %d" (process-exit-status process)) (process-name process)))
 
-    (spacemacs/set-leader-keys "a b" 'bpr-spawn)
+    (spacemacs/set-leader-keys "a w" 'bpr-spawn)
 
     (setq bpr-on-error 'hmz-misc/bpr-on-error)
     (setq bpr-on-success 'hmz-misc/bpr-on-success)
@@ -1455,6 +1140,7 @@ So it safe to call it many times like in a minor mode hook."
 
 (use-package switch-buffer-functions
   :straight t
+  :disabled
   :config
   (setq switch-buffer-functions nil)
   (add-hook 'switch-buffer-functions
@@ -1463,7 +1149,6 @@ So it safe to call it many times like in a minor mode hook."
                           (string= (buffer-name) neo-buffer-name))
                 (if (and (not hmz-neotree-hidden) (buffer-file-name))
                     (neotree-refresh t)
-
                   (neotree-hide))))))
 
 ;; NOTE: the following two are incompatible with Ruby code so they are
@@ -1630,16 +1315,16 @@ So it safe to call it many times like in a minor mode hook."
                           :foreground (face-attribute 'font-lock-keyword-face :foreground)
                           :inherit 'tabbar-selected
                           :overline nil
-                          :weight 'normal)
+                          :weight 'bold)
 
       (set-face-attribute 'tabbar-selected nil
                           :box nil
                           :foreground 'unspecified
                           :background (face-attribute 'default :background)
                           :inherit 'tabbar-default
-                          :underline (face-attribute 'font-lock-comment-face :background)
+                          :underline (face-attribute 'font-lock-comment-face :foreground)
                           :overline nil
-                          :weight 'normal)
+                          :weight 'bold)
 
       (set-face-attribute 'tabbar-highlight nil
                           :inherit 'tabbar-default
@@ -1688,7 +1373,7 @@ So it safe to call it many times like in a minor mode hook."
       (add-to-list 'all-the-icons-icon-alist
                    '("\\.lua$" all-the-icons-wicon "moon-waning-crescent-3" :face all-the-icons-cyan)))
 
-    (defun tabbar-buffer-help-on-tab (tab)
+    (defun x-tabbar-buffer-help-on-tab (tab)
       "Return the help string shown when mouse is onto TAB. This function was overriden to show more useful information."
       (if tabbar--buffer-show-groups
           (let* ((tabset (tabbar-tab-tabset tab))
@@ -1856,7 +1541,7 @@ element."
       (setq tabbar-scroll-right-button-value nil)
       (setq tabbar-home-button-value nil))
 
-    (defun tabbar-buffer-tab-label (tab)
+    (defun x-tabbar-buffer-tab-label (tab)
       "Return a label for TAB. That is, a string used to represent it on the
        tab bar. This was overriden to clean up unwanted chars."
 
@@ -1894,7 +1579,7 @@ element."
     (advice-unadvice 'tabbar-buffer-update-groups)
     (advice-add 'tabbar-buffer-update-groups :around (my-make-throttler-3))
 
-    (defun tabbar-buffer-update-groups ()
+    (defun x-tabbar-buffer-update-groups ()
       "Update tab sets from groups of existing buffers.
   Return the the first group where the current buffer is."
       ;; (message "update groups")
@@ -1955,7 +1640,7 @@ element."
       (car (nth 2 (assq (current-buffer) tabbar--buffers))))
 
     ;; Tabbar Groups Definition
-    (defun tabbar-buffer-groups ()
+    (defun x-tabbar-buffer-groups ()
       "Returns the name of the tab group names the current buffer belongs to.
       There are two groups: Emacs buffers (those whose name starts with '*', plus
       dired buffers), and the rest."
@@ -1988,14 +1673,16 @@ element."
 
     (defun hmz-tabbar-refresh-tabs ()
       (if tabbar-mode
-          (progn(tabbar-mode 0)
-                (setq tabbar-scroll-left-button-value nil)
-                (setq tabbar-scroll-right-button-value nil)
-                (setq tabbar-home-button-value nil)
+      (progn
+        ;; (tabbar-mode 0)
+        (setq tabbar-scroll-left-button-value nil)
+        (setq tabbar-scroll-right-button-value nil)
+        (setq tabbar-home-button-value nil)
 
-                (hmz-tabbar-refresh-faces)
+        (hmz-tabbar-refresh-faces)
 
-                (tabbar-mode 1))))
+        ;; (tabbar-mode 1)
+        )))
 
     (unless (boundp 'after-load-theme-hook)
       (defvar after-load-theme-hook nil
@@ -2012,7 +1699,7 @@ element."
   (tabbar-mode 1)
   ;; redefine tabbar-add-tab so that it alphabetizes / sorts the tabs
   ;; TODO: better treat non-file buffers in sort
-  (defun tabbar-add-tab (tabset object &optional append)
+  (defun x-tabbar-add-tab (tabset object &optional append)
     "Add to TABSET a tab with value OBJECT if there isn't one there yet.
   If the tab is added, it is added at the beginning of the tab list,
   unless the optional argument APPEND is non-nil, in which case it is
@@ -2047,6 +1734,3 @@ element."
           (set tabset new-tabset))))))
 
 (provide 'hmz-modules)
-
-
-;; ===============================================================

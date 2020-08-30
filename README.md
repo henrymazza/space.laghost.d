@@ -9,3 +9,14 @@ Includes some useful spacemacs layers for:
 ![Scary Space.](https://github.com/henrymazza/spaceghost.d/raw/master/images/screenshot.png)
 
 _Cursor can't take a photo without blinking._
+
+```html
+<p>Jujuba</p>
+<div>The Div!</div>
+```
+
+```ruby
+def jujuba
+  puts "hi!"
+end
+```

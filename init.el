@@ -40,7 +40,9 @@ values."
    ;; load. If it is the symbol `all' instead
   ;; of a list then all discovered layers will be installed.
   dotspacemacs-configuration-layers
-  '(
+  '(shell-scripts
+    elixir
+    lsp
     php
     html
     rust
@@ -67,8 +69,8 @@ values."
         auto-completion-complete-with-key-sequence-delay 0.01)
 
     ;; custom layers
-    hmz-tabbar
-    ;; hmz-misc
+    ;; hmz-tabbar
+    hmz-misc
     ;; hmz-misc2
     hmz-color-identifiers
     ;; FIXME: pourpose window infinite recursion bug; delete desktop files?
@@ -77,10 +79,13 @@ values."
     ;; github
     better-defaults
     emacs-lisp
+    neotree
     ;; evil-cleverparens
     evil-commentary
     git
-    javascript
+    dtrt-indent
+    (javascript :variables
+                javascript-backend 'tide)
     ;; (spacemacs-layouts :variables spacemacs-layouts-restrict-spc-tab t
     ;;       dotspacemacs-auto-resume-layouts t)
     markdown
@@ -90,11 +95,14 @@ values."
     (ruby :variables
     ruby-version-manager 'rbenv
     ruby-enable-enh-ruby-mode nil)
+    syntax-checking
     (spell-checking :variables
         spell-checking-enable-by-default t)
-    ;; syntax-checking
-    ;; themes-megapack
     themes
+    tide
+
+    (typescript :variables
+                typescript-backendd 'tide)
     typography
     ;; uninpaired
     version-control
@@ -114,7 +122,10 @@ values."
   dotspacemacs-additional-packages
   '(;; desktop-plus
     ;; exec-path-from-shell
+    bug-hunter
     discover-my-major
+    docker-tramp
+    dockerfile-mode
     doom-themes
     dracula-theme
     enh-ruby-mode
@@ -122,6 +133,7 @@ values."
     evil-matchit
     fic-mode
     fringe-helper
+    graphql-mode
     handlebars-sgml-mode
     highlight-indent-guides
     ido-completing-read+
@@ -129,23 +141,28 @@ values."
     ivy
     memory-usage
     ns-auto-titlebar
+    org-bullets
     persistent-scratch
     prodigy
     simpleclip
     sr-speedbar
     sublimity
+    unobtrusive-magit-theme
+    use-package
     zencoding-mode)
 
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages
    '(
+     ws-butler
      git-gutter+
      fancy-battery
      smex
+     ;; treemacs
+     ;; treemacs-icons-dired
      ;; powerline
      ;; spaceline
      ;; spaceline-all-the-icons
-     ;; flycheck
      vi-tilde-fringe )
 
    ;; Defines the behaviour of Spacemacs when installing packages.
@@ -178,7 +195,7 @@ values."
    ;; Maximum allowed time in seconds to contact an ELPA repository.
    dotspacemacs-elpa-timeout 5
    ;; If non nil then spacemacs will check for updates at startup
-   ;; when the current branch is not `develop'. (default t)
+   ;; when the current branch is not `de
    dotspacemacs-check-for-update t
    ;; One of `vim', `emacs' or `hybrid'. Evil is always enabled but if the
    ;; variable is `emacs' then the `holy-mode' is enabled at startup. `hybrid'
@@ -285,7 +302,7 @@ values."
    ;; If non nil then `ido' replaces `helm' for some commands. For now only
    ;; `find-files' (SPC f f), `find-spacemacs-file' (SPC f e s), and
    ;; `find-contrib-file' (SPC f e c) are replaced. (default nil)
-   dotspacemacs-use-ido nil
+   dotspacemacs-use-ido t
    ;; If non nil, `helm' will try to minimize the space it uses. (default nil)
    dotspacemacs-helm-resize nil
    ;; if non nil, the helm header is hidden when there is only one source.
@@ -379,7 +396,7 @@ values."
    ;; `trailing' to delete only the whitespace at end of lines, `changed'to
    ;; delete only whitespace for changed lines or `nil' to disable cleanup.
    ;; (default nil)
-   dotspacemacs-whitespace-cleanup 'all
+   dotspacemacs-whitespace-cleanup 'changed
 
    dotspacemacs-frame-title-format "%I@%S"
 
@@ -393,6 +410,24 @@ executes.
  This function is mostly useful for variables that need to be set
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
+
+
+  (setq org-todo-keyword-faces
+        '(("TODO" . (:foreground "#df6903" :weight bold))
+          ("WAIT" . "#654474")
+          ("CANCELED" . (:foreground "white" :background "#4d4d4d" :weight bold))
+          ("DELEGATED" . "pink")
+          ("POSTPONED" . "#008080")))
+
+  ;; my org-mode settings
+  (defun hmz-init/org-config ()
+    (interactive)
+    (spacemacs/toggle-visual-line-navigation-on)
+    (org-indent-mode t)
+    (org-bullets-mode 1)
+    (setq-local word-wrap nil))
+
+  (add-hook 'org-mode-hook 'hmz-init/org-config)
 
   ;; echo-area customization
   (with-current-buffer " *Echo Area 0*" (face-remap-add-relative 'default '(:height 180 :weight bold)))
@@ -470,19 +505,9 @@ before packages are loaded. If you are unsure, you should try in setting them in
   (setq locale-coding-system 'utf-8)
   (prefer-coding-system 'utf-8)
 
-  (defun hmz-init/org-config ()
-    (interactive)
-    (spacemacs/toggle-visual-line-navigation-on)
-    (org-indent-mode t)
-    (org-bullets-mode)
-    (setq-local word-wrap nil))
-
-  (add-hook 'org-mode-hook 'hmz-init/org-config)
-
   (defun hmz-init/popwin-config ()
     (interactive)
-    (with-current-buffer
-      ))
+    (with-current-buffer))
 
   (remove-hook 'popwin-mode-hook 'hmz-init/popwin-config)
 
@@ -657,6 +682,36 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loa,
 you should place you code here."
 
+  ;; disable centaur and similar in ispell choices
+  (add-hook 'ispell-update-post-hook
+  (lambda ()
+    (with-current-buffer ispell-choices-buffer
+      (setq header-line-format nil))))
+
+  ;; dockerfile-mode config
+  (put 'dockerfile-image-name 'safe-local-variable #'stringp)
+
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+
+  ;; manualy fix python indentation
+  (setq python-indent-guess-indent-offset nil)
+  (setq python-indent-offset 4)
+
+  ;; C-o for add heading above in org-mode
+  ;; TODO: move it to a layer/file about org-mode
+  (defun org-insert-heading-above ()
+    (interactive)
+    (move-beginning-of-line nil)
+    (org-insert-heading))
+
+  (add-hook 'org-mode-hook
+          (lambda ()
+            (define-key org-mode-map (kbd "C-o") 'org-insert-heading-above)))
+
+  ;; fix for broken HELM on spacemacs
+  (with-eval-after-load 'helm
+    (setq helm-display-function 'helm-default-display-buffer))
+
   ;; from https://emacs.stackexchange.com/questions/3900/command-to-visit-github-pull-request-of-current-branch-with-magit
   (defun endless/visit-pull-request-url ()
     "Visit the current branch's PR on Github."
@@ -669,11 +724,12 @@ you should place you code here."
 
 
   ;; change rspec compilation faces
+  ;; (setq rspec-compilation-mode-hook nil)
   (add-hook 'rspec-compilation-mode-hook
             #'(lambda ()
                 (with-current-buffer "*rspec-compilation*"
                   (face-remap-add-relative 'default
-                                           '(:height "110" :family "crystal" :background "gray10")))
+                                           '(:family "crystal" :background "gray10")))
                 ))
 
   (setq display-buffer-reuse-frames t)
@@ -710,13 +766,11 @@ you should place you code here."
   (defun hmz-init/org-mode-prettify-symbols ()
     "Beautify Org Checkbox Symbol"
     (interactive)
-    (push ("#+BEGIN_SRC" . "***") prettify-symbols-alist)
-    (push ("#+END_SRC" . "***") prettify-symbols-alist)
     (push '("[ ]" .  "☐") prettify-symbols-alist)
     (push '("[X]" . "☑" ) prettify-symbols-alist)
     (push '("[-]" . "❍" ) prettify-symbols-alist)
     (prettify-symbols-mode 1))
-  (add-hook 'org-mode-hook 'hmz-init/org-mode-prettify-symbols)
+  (remove-hook 'org-mode-hook 'hmz-init/org-mode-prettify-symbols)
 
   ;; config C-o as yasnippet expansion and defaults to open line if everything
   ;; fails
@@ -790,7 +844,7 @@ move to the next field. Call `open-line' if nothing else applies."
   (defun hmz-prog-mode-hook ()
     (interactive)
 
-    (which-function-mode 1)
+    (which-function-mode 0)
 
     (face-remap-add-relative 'default '(:height 140))
 
@@ -809,7 +863,7 @@ move to the next field. Call `open-line' if nothing else applies."
     (if (featurep 'fic-mode)
   (fic-mode t))
 
-    ;; (flycheck-mode -1)
+    (flycheck-mode 1)
 
     (rainbow-identifiers-mode t)
     (rainbow-delimiters-mode-enable)
@@ -911,7 +965,7 @@ move to the next field. Call `open-line' if nothing else applies."
   (global-hl-line-mode -1)
 
   ;; this is better than fancy-battery
-  (display-battery-mode t)
+  (display-battery-mode nil)
 
   ;; cycle throgh frames (macOS's windows)
   ;; * in insert mode it reads command +
@@ -1153,6 +1207,9 @@ move to the next field. Call `open-line' if nothing else applies."
   (define-key evil-normal-state-map (kbd "j") 'evil-next-visual-line)
   (define-key evil-normal-state-map (kbd "k") 'evil-previous-visual-line)
 
+  ;; command-`
+  ;; (global-set-key (kbd "s-`") 'next-multiframe-window)
+
   ;; command-t
   (global-set-key (kbd "s-t") 'helm-projectile-find-file)
   (global-set-key (kbd "H-t") 'helm-projectile-find-file)
@@ -1198,7 +1255,7 @@ move to the next field. Call `open-line' if nothing else applies."
   (global-set-key (kbd "M-?") 'mark-paragraph)
   (global-set-key (kbd "C-h") 'delete-backward-char)
   (global-set-key (kbd "M-h") 'backward-kill-word)
-  (global-set-key (kbd "C-g") 'evil-force-normal-state)
+  ;; (global-set-key (kbd "C-g") 'evil-force-normal-state)
 
   (setq-default indent-tabs-mode nil)
   (setq-default tab-width 2)
@@ -1207,6 +1264,13 @@ move to the next field. Call `open-line' if nothing else applies."
 
   ;; Coffeescript specific tabbing requirements
   (custom-set-variables '(coffee-tab-width 2))
+
+  ;; force web-mode
+  (use-package web-mode
+    :custom
+    (web-mode-markup-indent-offset 2)
+    (web-mode-css-indent-offset 2)
+    (web-mode-code-indent-offset 2))
 
   (defun hmz-dotfile/setup-indent (&optional n)
     (interactive
@@ -1264,7 +1328,7 @@ move to the next field. Call `open-line' if nothing else applies."
      (evil-replace-state-p)
      (evil-visual-state-p)) [escape])))
    (define-key key-translation-map (kbd "C-g") 'my-esc)
-   (define-key key-translation-map (kbd "C-c") 'my-esc)
+   ;; (define-key key-translation-map (kbd "C-c") 'my-esc)
 
    (defun hide-application ()
      "Hides Emacs if trying to close last frame."
@@ -1568,6 +1632,12 @@ Example:
     (function (lambda ()
           (local-set-key (kbd "s-k") 'clear-comint-buffer))))
 
+(define-key global-map (kbd "C-0") 'iterm-here)
+
+(defun iterm-here ()
+  (interactive)
+  (dired-smart-shell-command "open -a iTerm $PWD" nil nil))
+
 (require 'hmz-modules (concat (expand-file-name user-emacs-directory) "../.spacemacs.d/hmz-modules.el"))
 
 ) ;; end user-config
@@ -1686,6 +1756,8 @@ This function is called at the very end of Spacemacs initialization."
  '(centaur-tabs-set-close-button t)
  '(coffee-tab-width 2)
  '(csv-separators '("," ";") t)
+ '(custom-safe-themes
+   '("7451f243a18b4b37cabfec57facc01bd1fe28b00e101e488c61e1eed913d9db9" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "eb5c79b2e9a91b0a47b733a110d10774376a949d20b88c31700e9858f0f59da7" "a41b81af6336bd822137d4341f7e16495a49b06c180d6a6417bf9fd1001b6d2b" "57bd93e7dc5fbb5d8d27697185b753f8563fe0db5db245592bab55a8680fdd8c" "890a1a44aff08a726439b03c69ff210fe929f0eff846ccb85f78ee0e27c7b2ea" "819ab08867ef1adcf10b594c2870c0074caf6a96d0b0d40124b730ff436a7496" default))
  '(default-justification 'left)
  '(desktop-minor-mode-table
    '((defining-kbd-macro nil)
@@ -1696,6 +1768,11 @@ This function is called at the very end of Spacemacs initialization."
      (company-posframe-mode nil)))
  '(dired-hide-details-hide-information-lines nil)
  '(dired-k-human-readable t)
+ '(dired-k-padding 1)
+ '(dired-listing-switches "-al" nil nil "Customized with use-package dired")
+ '(dired-recursive-copies 'always)
+ '(dired-recursive-deletes 'top)
+ '(display-buffer-alist '(("." nil (reusable-frames . t))))
  '(doom-modeline-buffer-encoding nil)
  '(doom-modeline-height 15)
  '(doom-modeline-indent-info nil)
@@ -1704,6 +1781,10 @@ This function is called at the very end of Spacemacs initialization."
  '(ember-serve-command "ember serve  --output-path dist")
  '(ember-test-command "ember test --serve")
  '(evil-want-Y-yank-to-eol t)
+ '(exec-path-from-shell-arguments '("-l" "-i"))
+ '(exec-path-from-shell-check-startup-files t)
+ '(exec-path-from-shell-debug nil t)
+ '(exec-path-from-shell-variables '("PATH" "MANPATH" "TMPDIR" "GOPATH" "KUBECONFIG"))
  '(fci-rule-color "#6272a4")
  '(fic-highlighted-words '("FIXME" "TODO" "BUG" "HACK" "XXX" "OPTIMIZE" "NOTE"))
  '(fill-column 80)
@@ -1719,11 +1800,10 @@ This function is called at the very end of Spacemacs initialization."
  '(highlight-indentation-offset 4)
  '(ibuffer-default-sorting-mode 'recency)
  '(ibuffer-sidebar-width 22)
+ '(inhibit-eol-conversion t)
  '(ispell-highlight-face 'flyspell-incorrect)
  '(ivy-height 20)
  '(ivy-mode t)
- '(ivy-posframe-border-width 3)
- '(ivy-posframe-mode t nil (ivy-posframe))
  '(jdee-db-active-breakpoint-face-colors (cons "#1E2029" "#bd93f9"))
  '(jdee-db-requested-breakpoint-face-colors (cons "#1E2029" "#50fa7b"))
  '(jdee-db-spec-breakpoint-face-colors (cons "#1E2029" "#565761"))
@@ -1734,7 +1814,9 @@ This function is called at the very end of Spacemacs initialization."
  '(message-sent-hook '((lambda nil (message (buffer-name)))))
  '(midnight-mode t)
  '(mode-line-in-non-selected-windows t)
- '(neo-vc-integration '(face char))
+ '(neo-hide-cursor t)
+ '(neo-theme 'arrow t)
+ '(neo-vc-integration '(face char) t)
  '(neo-vc-state-char-alist
    '((up-to-date . 32)
      (edited . 10041)
@@ -1749,7 +1831,8 @@ This function is called at the very end of Spacemacs initialization."
      (user . 85)
      (unregistered . 32)
      (nil . 8942)))
- '(neo-window-width 20)
+ '(neo-window-position 'right t)
+ '(neo-window-width 40 t)
  '(objed-cursor-color "#ff5555")
  '(org-blank-before-new-entry '((heading) (plain-list-item)))
  '(org-bullets-bullet-list '("◉" "○" "●" "☞"))
@@ -1768,6 +1851,8 @@ This function is called at the very end of Spacemacs initialization."
          [imenu-create-index-function org-imenu-get-tree]
          2]
      flyspell-mode spacemacs/org-setup-evil-surround spacemacs/load-yasnippet toc-org-enable org-download-enable org-bullets-mode dotspacemacs//prettify-spacemacs-docs spacemacs//org-babel-do-load-languages spacemacs//evil-org-mode org-eldoc-load hmz-init/org-config spacemacs//init-company-org-mode company-mode))
+ '(org-modules
+   '(ol-bbdb ol-bibtex ol-docview ol-eww ol-gnus org-habit ol-info ol-irc ol-mhe ol-rmail ol-w3m org-mac-link))
  '(origami-parser-alist
    '((ruby-mode origami-markers-parser "do" "end")
      (java-mode . origami-java-parser)
@@ -1911,9 +1996,10 @@ This function is called at the very end of Spacemacs initialization."
     (cons 360 "#6272a4")))
  '(vc-annotate-very-old-color nil)
  '(volatile-highlights-mode t)
- '(wakatime-api-key "79de0de9-6375-48d1-b78f-440418c5e5a0")
+ '(wakatime-api-key "2a72165b-23d6-47e5-ba80-d97f7d2d3f02")
  '(wakatime-cli-path "/usr/local/bin/wakatime")
- '(wakatime-python-bin "/usr/local/bin/python3")
+ '(wakatime-python-bin nil)
+ '(web-mode-markup-indent-offset 2)
  '(workgroups-mode t)
  '(yascroll:delay-to-hide 1.5)
  '(yascroll:disabled-modes '(Custom-mode org-mode))
@@ -1946,11 +2032,10 @@ This function is called at the very end of Spacemacs initialization."
  '(header-line ((t (:background "#44475a" :underline "gray20" :height 1.0 :family "San Francisco"))))
  '(hi-yellow ((t nil)))
  '(highlight-indent-guides-character-face ((t (:foreground "#3df1410a539f"))))
+ '(hl-line ((t nil)))
  '(hydra-face-red ((t (:foreground "#FF0000" :weight bold))))
  '(indent-guide-face ((t (:inherit font-lock-constant-face :slant normal))))
  '(ivy-highlight-face ((t (:inherit highlight :underline t :weight bold))))
- '(ivy-posframe ((t (:inherit default :height 1.1))))
- '(ivy-posframe-border ((t (:inherit default :background "DarkOrchid2"))))
  '(line-number ((t (:background "#282a36" :foreground "#565761" :slant normal :height 0.8))))
  '(line-number-current-line ((t (:inherit (font-lock-keyword-face hl-line line-number)))))
  '(link ((t (:foreground "#AAF" :underline nil :family "San Francisco"))))
@@ -1974,7 +2059,7 @@ This function is called at the very end of Spacemacs initialization."
  '(org-level-2 ((t (:inherit nil :foreground "gray80" :height 1.0))))
  '(org-link ((t (:inherit link :underline nil))))
  '(org-quote ((t (:inherit nil :background "gray20" :foreground "gray80" :slant italic))))
- '(org-todo ((t (:foreground "#ffb86c" :weight bold))))
+ '(org-todo ((t (:background "#373844" :foreground "#ffb86c" :weight bold :height 0.7))))
  '(org-verbatim ((t (:inherit font-lock-variable-name-face :family "Fira Code"))))
  '(origami-fold-replacement-face ((t (:inherit 'font-lock-builtin-face))))
  '(outshine-level-1 ((t (:inherit outline-1 :weight bold :height 1.1 :family "San Francisco"))))
@@ -1985,8 +2070,9 @@ This function is called at the very end of Spacemacs initialization."
  '(speedbar-selected-face ((t nil)))
  '(speedbar-separator-face ((t nil)))
  '(speedbar-tag-face ((t nil)))
- '(tabbar-default ((t (:inherit header-line :box nil :underline nil :weight thin :height 0.85))))
+ '(tabbar-default ((t (:inherit (hl-line header-line) :box nil :underline nil :weight light :height 0.8))))
  '(tabbar-icon-unselected ((t (:box nil :inherit 'tabbar-default :underline t))))
+ '(tabbar-selected ((t (:inherit tabbar-default :background "#282a36" :box nil :overline nil :weight bold))))
  '(which-key-posframe-border ((t (:inherit default :background "gray50" :underline t))))
  '(window-divider ((t (:foreground "black"))))
  '(yascroll:thumb-fringe ((t (:inherit font-lock-comment-face :background "MediumPurple4" :foreground "MediumPurple4")))))
