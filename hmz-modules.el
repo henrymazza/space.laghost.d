@@ -8,25 +8,29 @@
   :ensure t
   :bind ("C-c d" . docker))
 
+(message ">>> MODULES 1")
+
 (use-package request
   :straight (request :type git :host github :repo "tkf/emacs-request"))
 
 (use-package polymode
-  :straight t)
+  :straight t
+  :disabled
+  :config
+  (define-hostmode poly-ng2-ts-hostmode
+    :mode 'ng2-ts-mode)
 
-(define-hostmode poly-ng2-ts-hostmode
-  :mode 'ng2-ts-mode)
+  (define-innermode poly-ng2-ts-doc-markdown-innermode
+    :mode 'markdown-mode
+    :head-matcher "/*"
+    :tail-matcher "*/"
+    :head-mode 'host
+    :tail-mode 'host)
 
-(define-innermode poly-ng2-ts-doc-markdown-innermode
-  :mode 'markdown-mode
-  :head-matcher "/*"
-  :tail-matcher "*/"
-  :head-mode 'host
-  :tail-mode 'host)
+  (define-polymode poly-ng2-ts-mode
+    :hostmode 'poly-ng2-ts-hostmode
+    :innermodes '(poly-ng2-ts-doc-markdown-innermode)))
 
-(define-polymode poly-ng2-ts-mode
-  :hostmode 'poly-ng2-ts-hostmode
-  :innermodes '(poly-ng2-ts-doc-markdown-innermode))
 
 (use-package poly-ruby
   :straight t
@@ -40,6 +44,7 @@
   :defer t
   :mode ("\\.md" . poly-markdown-mode))
 
+(message ">>> MODULES 2")
 
 
 (defun run-in-vterm-kill (process event)
@@ -114,6 +119,7 @@
 (use-package ng2-mode
   :straight t)
 
+(message ">>> MODULES 3")
 (use-package popup-switcher
   :straight t
   :init
@@ -123,7 +129,7 @@
   (spacemacs/set-leader-keys "bv" 'psw-switch-buffer)
   ;; (global-set-key [f2] 'psw-switch-buffer)
   )
-
+(message ">>> Before Evil Escape")
 ;; Quit, Exit, Escape
 (use-package evil-escape
   :commands evil-escape-mode
@@ -137,10 +143,6 @@
   ;; no `evil-escape' in minibuffer
   (cl-pushnew #'minibufferp evil-escape-inhibit-functions :test #'eq)
 
-  ;; (define-key evil-insert-state-map  (kbd "C-g") #'evil-escape)
-  ;; (define-key evil-replace-state-map (kbd "C-g") #'evil-escape)
-  ;; (define-key evil-visual-state-map  (kbd "C-g") #'evil-escape)
-  ;; (define-key evil-operator-state-map (kbd "C-g") #'evil-escape)
   (defun evil-keyboard-quit ()
     "Keyboard quit and force normal state."
     (interactive)
@@ -200,14 +202,14 @@
 (use-package browse-at-remote
   :straight t)
 
-;; (use-package magithub
-;;   :straight t
-;;   :disabled
-;;   :after magit
-;;   :catch t
-;;   :config
-;;   (magithub-feature-autoinject t)
-;;   (setq magithub-clone-default-directory "~/github"))
+(use-package magithub
+  :straight t
+  :disabled
+  :after magit
+  :catch t
+  :config
+  (magithub-feature-autoinject t)
+  (setq magithub-clone-default-directory "~/github"))
 
 ;; (use-package magit-popup
 ;;   :straight t
@@ -221,13 +223,6 @@
 ;;   :disable
 ;;   :straight t
 ;;   :after magit)
-
-;; (use-package magithub
-;;   :straight t
-;;   :after magit
-;;   :config
-;;   (magithub-feature-autoinject t)
-;;   (setq magithub-clone-default-directory "~/github"))
 
 (use-package magit-gh-pulls
   :straight t
@@ -243,7 +238,7 @@
 
   :config
   (remove-hook 'magit-mode-hook 'turn-on-magit-gh-pulls))
-
+(message ">>> MODULES 3")
 (use-package evil-magit
   :straight t
   :config (evil-magit-init))
@@ -668,15 +663,6 @@ So it safe to call it many times like in a minor mode hook."
   (when (memq window-system '(mac ns x))
     (exec-path-from-shell-initialize)))
 
-(use-package ido-completing-read+
-  :straight t
-  :disabled
-  :init
-  (ivy-mode 1)
-  (ido-mode 1)
-  (ido-everywhere 1)
-  (ido-ubiquitous-mode 1))
-
 (use-package ido-yes-or-no
   :straight t
   :disabled
@@ -705,9 +691,9 @@ So it safe to call it many times like in a minor mode hook."
     (setq-default amx-history-length 32
                   amx-save-file (concat spacemacs-cache-directory
                                         ".amx-items"))
-    (amx-mode 1)
     (ivy-mode 0)
-    ;; (ido-mode 1)
+    (amx-mode 1)
+    (ido-mode 1)
     (setq ivy-re-builders-alist
       '((ivy-switch-buffer . ivy--regex-plus)
         (t . ivy--regex-fuzzy)))
@@ -729,6 +715,7 @@ So it safe to call it many times like in a minor mode hook."
 
 (use-package wakatime-mode
   :straight t
+  :disabled
   :init
   (setq wakatime-python-path "/usr/local/bin/python3")
   :config
@@ -739,7 +726,6 @@ So it safe to call it many times like in a minor mode hook."
                          :host github :repo "jscheid/dtrt-indent"))
 
 (use-package hl-block-mode
-
   :straight (hl-block-mode :type git
                            :host github :repo "emacsmirror/hl-block-mode")
   :disabled
@@ -1733,4 +1719,5 @@ element."
           (tabbar-set-template tabset nil)
           (set tabset new-tabset))))))
 
+(message ">>> END HMZ MODULES")
 (provide 'hmz-modules)

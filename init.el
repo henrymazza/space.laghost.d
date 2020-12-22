@@ -41,24 +41,21 @@ values."
   ;; of a list then all discovered layers will be installed.
   dotspacemacs-configuration-layers
   '(shell-scripts
-    elixir
+    ;; elixir
     lsp
-    php
+    ;; php
     html
-    rust
+    github
+    ;; rust
     python
-    nginx
+    ;; nginx
     (ibuffer :variables ibuffer-group-buffers-by 'projects)
-    typescript
+    ;; typescript
     yaml
     csv
-     ;; ----------------------------------------------------------------
-     ;; Example of useful layers you may want to use right away.
-     ;; Uncomment some layer names and press <SPC f e R> (Vim style) or
-     ;; <M-m f e R> (Emacs style) to install them.
-     ;; ----------------------------------------------------------------
     (version-control :variables
       version-control-diff-tool 'git-gutter)
+
     (auto-completion :variables
         auto-completion-return-key-behavior 'complete
         auto-completion-tab-key-behavior 'cycle
@@ -70,11 +67,11 @@ values."
 
     ;; custom layers
     ;; hmz-tabbar
-    hmz-misc
-    ;; hmz-misc2
-    hmz-color-identifiers
+    ;; hmz-misc ;; use hmz-modules
+    ;; hmz-misc2 ;; use hmz-modules
     ;; FIXME: pourpose window infinite recursion bug; delete desktop files?
-    ;; hmz-desktop
+    hmz-desktop
+    hmz-color-identifiers
 
     ;; github
     better-defaults
@@ -98,7 +95,7 @@ values."
     syntax-checking
     (spell-checking :variables
         spell-checking-enable-by-default t)
-    themes
+    ;; themes
     tide
 
     (typescript :variables
@@ -135,10 +132,10 @@ values."
     fringe-helper
     graphql-mode
     handlebars-sgml-mode
-    highlight-indent-guides
+    ;; highlight-indent-guides
     ido-completing-read+
     itail
-    ivy
+    jist
     memory-usage
     ns-auto-titlebar
     org-bullets
@@ -411,6 +408,24 @@ executes.
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
 
+  ;; org-mode prettify symbols
+  (defun hmz-init/org-prettify ()
+    "Beautify Org Block Symbols"
+    (interactive)
+    (prettify-symbols-mode 0)
+    (push '("#+begin_src shell" . ?❯) prettify-symbols-alist)
+    (push '("#+end_src" . ?❮) prettify-symbols-alist)
+    (push '("#+header:" . ?☰) prettify-symbols-alist)
+    (push '("#+begin_comment" . 301F) prettify-symbols-alist)
+    (push '("#+end_comment" . 301E) prettify-symbols-alist)
+    (push '("#+begin_notes" . ?❝) prettify-symbols-alist)
+    (push '("#+end_notes" . ?❞) prettify-symbols-alist)
+    (push '("#+begin_quote" . ?❝) prettify-symbols-alist)
+    (push '("#+end_quote" .  ?❞) prettify-symbols-alist)
+    (prettify-symbols-mode 1)
+    )
+
+  (add-hook 'org-mode-hook 'hmz-init/org-prettify)
 
   (setq org-todo-keyword-faces
         '(("TODO" . (:foreground "#df6903" :weight bold))
@@ -422,6 +437,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
   ;; my org-mode settings
   (defun hmz-init/org-config ()
     (interactive)
+    (setq org-log-done 'time)
     (spacemacs/toggle-visual-line-navigation-on)
     (org-indent-mode t)
     (org-bullets-mode 1)
@@ -431,9 +447,6 @@ before packages are loaded. If you are unsure, you should try in setting them in
 
   ;; echo-area customization
   (with-current-buffer " *Echo Area 0*" (face-remap-add-relative 'default '(:height 180 :weight bold)))
-
-  ;; set posframe parameters
-  (setq ivy-posframe-parameters '((alpha . 85)))
 
   ;; make frames reusable (one is aware of the other)
   (add-to-list 'display-buffer-alist
@@ -672,6 +685,8 @@ before packages are loaded. If you are unsure, you should try in setting them in
   ;; disable smooth scroll on railwaycat's emacs fork
   (setq mac-mouse-wheel-smooth-scroll nil)
 
+  (message ">>> END USER INIT")
+
 )
 
 (defun dotspacemacs/user-config ()
@@ -682,11 +697,16 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loa,
 you should place you code here."
 
+  ;; org-mode grap-link shortcut
+  (add-hook 'org-mode-hook (lambda ()
+  (define-key org-mode-map (kbd "C-c g") 'org-mac-grab-link)))
+  (setq org-use-property-inheritance t)
+
   ;; disable centaur and similar in ispell choices
   (add-hook 'ispell-update-post-hook
-  (lambda ()
-    (with-current-buffer ispell-choices-buffer
-      (setq header-line-format nil))))
+            (lambda ()
+              (with-current-buffer ispell-choices-buffer
+                (setq header-line-format nil))))
 
   ;; dockerfile-mode config
   (put 'dockerfile-image-name 'safe-local-variable #'stringp)
@@ -705,8 +725,8 @@ you should place you code here."
     (org-insert-heading))
 
   (add-hook 'org-mode-hook
-          (lambda ()
-            (define-key org-mode-map (kbd "C-o") 'org-insert-heading-above)))
+            (lambda ()
+              (define-key org-mode-map (kbd "C-o") 'org-insert-heading-above)))
 
   ;; fix for broken HELM on spacemacs
   (with-eval-after-load 'helm
@@ -759,18 +779,18 @@ you should place you code here."
                    :internal-border-color "gray70")
 
     (with-current-buffer hmz-pos/name
-        (spacemacs/enable-transparency hmz-messages-frame 50))
+      (spacemacs/enable-transparency hmz-messages-frame 50))
     (posframe-delete-all))
 
   ;; prettify symbols for org-mode
-  (defun hmz-init/org-mode-prettify-symbols ()
-    "Beautify Org Checkbox Symbol"
-    (interactive)
-    (push '("[ ]" .  "☐") prettify-symbols-alist)
-    (push '("[X]" . "☑" ) prettify-symbols-alist)
-    (push '("[-]" . "❍" ) prettify-symbols-alist)
-    (prettify-symbols-mode 1))
-  (remove-hook 'org-mode-hook 'hmz-init/org-mode-prettify-symbols)
+  ;; (defun hmz-init/org-mode-prettify-symbols ()
+  ;;   "Beautify Org Checkbox Symbol"
+  ;;   (interactive)
+  ;;   (push '("[ ]" .  "☐") prettify-symbols-alist)
+  ;;   (push '("[X]" . "☑" ) prettify-symbols-alist)
+  ;;   (push '("[-]" . "❍" ) prettify-symbols-alist)
+  ;;   (prettify-symbols-mode 1))
+  ;; (remove-hook 'org-mode-hook 'hmz-init/org-mode-prettify-symbols)
 
   ;; config C-o as yasnippet expansion and defaults to open line if everything
   ;; fails
@@ -861,7 +881,7 @@ move to the next field. Call `open-line' if nothing else applies."
     ;; TODO: fix all that garbage
     ;; highlights FIXME, TODO, etc
     (if (featurep 'fic-mode)
-  (fic-mode t))
+        (fic-mode t))
 
     (flycheck-mode 1)
 
@@ -900,14 +920,14 @@ move to the next field. Call `open-line' if nothing else applies."
 
   ;; change executable for rspec
   (defun rspec-compile-on-line ()
-  (interactive)
-  (progn
-    (window-configuration-to-register 9)
-    (compile (format "cd %s;bundle exec spring rspec -f doc %s:%s"
-         (get-closest-gemfile-root)
-         (file-relative-name (buffer-file-name) (get-closest-gemfile-root))
-         (line-number-at-pos)
-         ) t)))
+    (interactive)
+    (progn
+      (window-configuration-to-register 9)
+      (compile (format "cd %s;bundle exec spring rspec -f doc %s:%s"
+                       (get-closest-gemfile-root)
+                       (file-relative-name (buffer-file-name) (get-closest-gemfile-root))
+                       (line-number-at-pos)
+                       ) t)))
   ;; auto refresh
   (add-hook 'ibuffer-mode-hook (lambda () (ibuffer-auto-mode 1)))
 
@@ -917,11 +937,11 @@ move to the next field. Call `open-line' if nothing else applies."
     (set-buffer-modified-p t)
     (message "Saving... %s" buffer-file-name)
     (if (file-exists-p (buffer-file-name))
-  (progn
-    (set-buffer-modified-p t)
-    (apply save-fun args))
+        (progn
+          (set-buffer-modified-p t)
+          (apply save-fun args))
       (if (y-or-n-p (concat "Buffer " (buffer-name) " has no file on disk! Create it?"))
-    (apply save-fun args))))
+          (apply save-fun args))))
 
 
   (advice-add 'save-buffer :around #'hmz-init/before-save)
@@ -929,34 +949,34 @@ move to the next field. Call `open-line' if nothing else applies."
   ;; Monkey Patch (or use functional magic) to show only first name of the
   ;; author in magit-log, as well abbrev. date.
   (use-package magit-log
-  :init
-  (progn
-    ;; (setq magit-log-margin '(t age magit-log-margin-width t 18)) ;Default value
-    (setq magit-log-margin '(t age-abbreviated magit-log-margin-width :author 11)))
-  :config
-  (progn
-    ;; Abbreviate author name. I added this so that I can view Magit log without
-    ;; too much commit message truncation even on narrow screens (like on phone).
-    (defun modi/magit-log--abbreviate-author (&rest args)
-      "The first arg is AUTHOR, abbreviate it.
+    :init
+    (progn
+      ;; (setq magit-log-margin '(t age magit-log-margin-width t 18)) ;Default value
+      (setq magit-log-margin '(t age-abbreviated magit-log-margin-width :author 11)))
+    :config
+    (progn
+      ;; Abbreviate author name. I added this so that I can view Magit log without
+      ;; too much commit message truncation even on narrow screens (like on phone).
+      (defun modi/magit-log--abbreviate-author (&rest args)
+        "The first arg is AUTHOR, abbreviate it.
       First Last  -> F Last
       First.Last  -> F Last
       Last, First -> F Last
       First       -> First (no change).
 
       It is assumed that the author has only one or two names."
-      ;; ARGS               -> '((REV AUTHOR DATE))
-      ;; (car ARGS)         -> '(REV AUTHOR DATE)
-      ;; (nth 1 (car ARGS)) -> AUTHOR
-      (let* ((author (nth 1 (car args)))
-       (author-abbr (if (string-match-p "," author)
-            ;; Last, First -> F Last
-            (replace-regexp-in-string "\\(.*?\\), *\\(.*\\)" "\\1" author)
-          ;; First Last -> F Last
-          (replace-regexp-in-string "\\(.*\\)[. ]+\\(.*\\)" "\\1" author))))
-  (setf (nth 1 (car args)) author-abbr))
-      (car args))                       ;'(REV AUTHOR-ABBR DATE)
-    (advice-add 'magit-log-format-margin :filter-args #'modi/magit-log--abbreviate-author)))
+        ;; ARGS               -> '((REV AUTHOR DATE))
+        ;; (car ARGS)         -> '(REV AUTHOR DATE)
+        ;; (nth 1 (car ARGS)) -> AUTHOR
+        (let* ((author (nth 1 (car args)))
+               (author-abbr (if (string-match-p "," author)
+                                ;; Last, First -> F Last
+                                (replace-regexp-in-string "\\(.*?\\), *\\(.*\\)" "\\1" author)
+                              ;; First Last -> F Last
+                              (replace-regexp-in-string "\\(.*\\)[. ]+\\(.*\\)" "\\1" author))))
+          (setf (nth 1 (car args)) author-abbr))
+        (car args))                       ;'(REV AUTHOR-ABBR DATE)
+      (advice-add 'magit-log-format-margin :filter-args #'modi/magit-log--abbreviate-author)))
 
   ;; linum-mode is the old ways
   (global-linum-mode -1)
@@ -969,13 +989,13 @@ move to the next field. Call `open-line' if nothing else applies."
 
   ;; cycle throgh frames (macOS's windows)
   ;; * in insert mode it reads command +
-   (global-set-key (kbd "s-1") 'next-multiframe-window)
+  (global-set-key (kbd "s-1") 'next-multiframe-window)
 
   ;; Initialize title bar appearence manager
-   (use-package ns-auto-titlebar
-     :if (memq window-system '(mac ns))
-     :config
-     (ns-auto-titlebar-mode))
+  (use-package ns-auto-titlebar
+    :if (memq window-system '(mac ns))
+    :config
+    (ns-auto-titlebar-mode))
 
   ;; TODO IT DOESN'T WORK!!!
   ;; disable mode-line in helm
@@ -1045,11 +1065,11 @@ move to the next field. Call `open-line' if nothing else applies."
     :name "Uni Chef Recipe on Weberver"
     :command "ssh"
     :args '("sampa3.officina.me"
-      "-t"
-      "sudo"
-      "chef-client"
-      "-o"
-      "\"recipe[uni]\"")
+            "-t"
+            "sudo"
+            "chef-client"
+            "-o"
+            "\"recipe[uni]\"")
     :cwd "/Users/HMz/Development/uni/"
     :tags '(work)
     :kill-process-buffer-on-stop t)
@@ -1079,22 +1099,22 @@ move to the next field. Call `open-line' if nothing else applies."
 
   (define-fringe-bitmap 'right-curly-arrow
     [#b00000000
-    #b00000000
-    #b00000000
-    #b00000000
-    #b01110000
-    #b00010000
-    #b00010000
-    #b00000000])
+     #b00000000
+     #b00000000
+     #b00000000
+     #b01110000
+     #b00010000
+     #b00010000
+     #b00000000])
   (define-fringe-bitmap 'left-curly-arrow
     [#b00000000
-    #b00001000
-    #b00001000
-    #b00001110
-    #b00000000
-    #b00000000
-    #b00000000
-    #b00000000])
+     #b00001000
+     #b00001000
+     #b00001110
+     #b00000000
+     #b00000000
+     #b00000000
+     #b00000000])
 
   ;; enable transparency for each new frame
   (add-hook 'after-make-frame-functions 'spacemacs/enable-transparency)
@@ -1113,24 +1133,24 @@ move to the next field. Call `open-line' if nothing else applies."
 
   ;; disable sublimity mode in magit-log buffers
   (add-hook 'magit-log-mode-hook
-      (lambda ()
-        (sublimity-mode -1)))
+            (lambda ()
+              (sublimity-mode -1)))
 
   ;; increase term buffer size
   (add-hook 'term-mode-hook
-      (lambda ()
-        (setq term-buffer-maximum-size 10000)))
+            (lambda ()
+              (setq term-buffer-maximum-size 10000)))
 
   ;; map control-r to helm search history
   (add-hook 'eshell-mode-hook
-      (lambda ()
-        (local-set-key (kbd "C-r") 'helm-eshell-history)))
+            (lambda ()
+              (local-set-key (kbd "C-r") 'helm-eshell-history)))
 
   ;; Emacs Lisp handies
   (spacemacs/set-leader-keys-for-major-mode 'emacs-lisp-mode "e p" 'eval-print-last-sexp)
 
   ;; keep scratch buffer throughout restarts
-  (persistent-scratch-setup-default)
+  ;; (persistent-scratch-setup-default)
 
   ;; Blink cursor so I know where I am!
   (blink-cursor-mode 1)
@@ -1150,9 +1170,9 @@ move to the next field. Call `open-line' if nothing else applies."
 
   (add-hook 'sgml-mode-hook 'zencoding-mode)
   (add-hook 'web-mode-hook (lambda ()
-           (zencoding-mode)
-           (snippet-mode 0)
-           (rainbow-identifiers t)))
+                             (zencoding-mode)
+                             (snippet-mode 0)
+                             (rainbow-identifiers t)))
 
   ;; Clear unused buffers
   (midnight-mode t)
@@ -1177,8 +1197,8 @@ move to the next field. Call `open-line' if nothing else applies."
     (interactive)
     (dolist (buf (projectile-project-buffers))
       (with-current-buffer buf
-  (when (and buffer-file-name (buffer-modified-p))
-    (save-buffer)))))
+        (when (and buffer-file-name (buffer-modified-p))
+          (save-buffer)))))
 
   ;; Salve all Projectile buffers
   (global-set-key (kbd "s-S") 'projectile-save-project-buffers)
@@ -1274,21 +1294,21 @@ move to the next field. Call `open-line' if nothing else applies."
 
   (defun hmz-dotfile/setup-indent (&optional n)
     (interactive
-      (unless n (setq n 2))
-      (setq web-mode-markup-indent-offset n)
-      ;; java/c/c++
-      (setq c-basic-offset n)
-      ;; web development
-      (setq coffee-tab-width n) ; coffeescript
-      (setq javascript-indent-level n) ; javascript-mode
-      (setq js-indent-level n) ; js-mode
-      (setq js2-basic-offset n) ; js2-mode, in latest js2-mode, it's alias of js-indent-level
-      (setq-default indent-tabs-mode nil)
-      (setq web-mode-markup-indent-offset n) ; web-mode, html tag in html file
-      (setq html-mode-markup-indent-offset n) ; web-mode, html tag in html file
-      (setq web-mode-css-indent-offset n) ; web-mode, css in html file
-      (setq web-mode-code-indent-offset n) ; web-mode, js code in html file
-      (setq css-indent-offset n))) ; css-mode
+     (unless n (setq n 2))
+     (setq web-mode-markup-indent-offset n)
+     ;; java/c/c++
+     (setq c-basic-offset n)
+     ;; web development
+     (setq coffee-tab-width n) ; coffeescript
+     (setq javascript-indent-level n) ; javascript-mode
+     (setq js-indent-level n) ; js-mode
+     (setq js2-basic-offset n) ; js2-mode, in latest js2-mode, it's alias of js-indent-level
+     (setq-default indent-tabs-mode nil)
+     (setq web-mode-markup-indent-offset n) ; web-mode, html tag in html file
+     (setq html-mode-markup-indent-offset n) ; web-mode, html tag in html file
+     (setq web-mode-css-indent-offset n) ; web-mode, css in html file
+     (setq web-mode-code-indent-offset n) ; web-mode, js code in html file
+     (setq css-indent-offset n))) ; css-mode
 
   (hmz-dotfile/setup-indent 2)
 
@@ -1298,7 +1318,7 @@ move to the next field. Call `open-line' if nothing else applies."
     (interactive
      (list (prefix-numeric-value current-prefix-arg) (use-region-p)))
     (if region
-  (kill-region (region-beginning) (region-end))
+        (kill-region (region-beginning) (region-end))
       (backward-kill-word arg)))
   (global-set-key (kbd "C-w") 'kill-region-or-backward-kill-word)
 
@@ -1307,340 +1327,343 @@ move to the next field. Call `open-line' if nothing else applies."
 
   (defun bsl/filter-buffers (buffer-list)
     (delq nil (mapcar
-         (lambda (buffer)
-     (cond
-      ((eq (with-current-buffer buffer major-mode)  'dired-mode) nil)
-      ((eq (with-current-buffer buffer major-mode)  'org-mode) nil)
-      ((eq (with-current-buffer buffer major-mode)  'org-agenda-mode) nil)
-      (t buffer)))
-         buffer-list)))
+               (lambda (buffer)
+                 (cond
+                  ((eq (with-current-buffer buffer major-mode)  'dired-mode) nil)
+                  ((eq (with-current-buffer buffer major-mode)  'org-mode) nil)
+                  ((eq (with-current-buffer buffer major-mode)  'org-agenda-mode) nil)
+                  (t buffer)))
+               buffer-list)))
 
   (advice-add 'helm-skip-boring-buffers :filter-return 'bsl/filter-buffers)
 
   (setq-default create-lockfiles nil)
 
-   (defun my-esc (prompt)
-     "Functionality for escaping generally. Includes exiting Evil
+  (defun my-esc (prompt)
+    "Functionality for escaping generally. Includes exiting Evil
      insert state and C-g binding. "
-     (cond
-      ((or (evil-insert-state-p)
-     ;; (evil-normal-state-p)
-     (evil-replace-state-p)
-     (evil-visual-state-p)) [escape])))
-   (define-key key-translation-map (kbd "C-g") 'my-esc)
-   ;; (define-key key-translation-map (kbd "C-c") 'my-esc)
+    (cond
+     ((or (evil-insert-state-p)
+          ;; (evil-normal-state-p)
+          (evil-replace-state-p)
+          (evil-visual-state-p)) [escape])))
+  (define-key key-translation-map (kbd "C-g") 'my-esc)
+  ;; (define-key key-translation-map (kbd "C-c") 'my-esc)
 
-   (defun hide-application ()
-     "Hides Emacs if trying to close last frame."
-     (condition-case nil
-   (ns-do-hide-emacs)
-       (error (do-applescript "
+  (defun hide-application ()
+    "Hides Emacs if trying to close last frame."
+    (condition-case nil
+        (ns-do-hide-emacs)
+      (error (do-applescript "
         tell application \"System Events\"
     set frontmostProcess to first process where it is frontmost
     set visible of frontmostProcess to false
         end tell"))))
 
-   (defun delete-window-or-frame (&optional window frame force)
-     (interactive)
-     (if (= 1 (length (window-list frame)))
-   (condition-case nil
-       (progn
-         ;;(kill-this-buffer)
-        (delete-frame frame force))
-     (error 'hide-application))
-       (delete-window window)))
+  (defun delete-window-or-frame (&optional window frame force)
+    (interactive)
+    (if (= 1 (length (window-list frame)))
+        (condition-case nil
+            (progn
+              ;;(kill-this-buffer)
+              (delete-frame frame force))
+          (error 'hide-application))
+      (delete-window window)))
 
-   (global-set-key (kbd "s-w") 'delete-window-or-frame)
+  (global-set-key (kbd "s-w") 'delete-window-or-frame)
 
-   (add-hook 'minibuffer-setup-hook
-       (lambda ()
-         ;; I don't know why minibuffer have this cursor color
-         (setq evil-emacs-state-cursor '("SkyBlue2" bar))
-         (text-scale-set 2)))
+  (add-hook 'minibuffer-setup-hook
+            (lambda ()
+              ;; I don't know why minibuffer have this cursor color
+              (setq evil-emacs-state-cursor '("SkyBlue2" bar))
+              (text-scale-set 2)))
 
-   ;; Always follow symlinks
-   (setq vc-follow-symlinks t)
+  ;; Always follow symlinks
+  (setq vc-follow-symlinks t)
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   ;; Messages Customs
+  ;; Messages Customs
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (message ">>>> MID0 user config")
+
+  (setq hmz-messages-frame nil)
+
+  (defun hmz-hide-mini-monitor ()
+    (interactive)
+    (setq hmz-neotree-hidden t)
+    (if (and hmz-messages-frame (frame-live-p hmz-messages-frame))
+        (delete-frame hmz-messages-frame)))
+
+  (add-hook 'kill-emacs-hook 'hmz-hide-mini-monitor)
+
+  (defun hmz-make-mini-monitor ()
+    (interactive)
+    ;; global
+    (if (and hmz-messages-frame (frame-live-p hmz-messages-frame))
+        (delete-frame hmz-messages-frame)
+
+      (let ((original-frame (selected-frame)))
+        (setq hmz-messages-frame
+              (make-frame
+               '((visibility . t)
+                 (name . "Monitor")
+                 (vertical-scroll-bars . t)
+
+
+                 (minibuffer . t)
+                 (height . 22) (width . 120)
+                 (top . 1000) (left . 0)
+                 (unsplittable . t))))
+
+        (with-selected-window (frame-selected-window hmz-messages-frame)
+          ;;TODO: (handle-switch-frame)
+          (switch-to-buffer "*Messages*" nil t)
+          (hidden-mode-line-mode t)    ;
+          (spacemacs/enable-transparency hmz-messages-frame 90)
+          (setq dotspacemacs-inactive-transparency 70)
+          (if (featurep 'tabbar)
+              (tabbar-local-mode 0))
+          (set-background-color "black")
+          (set-foreground-color "medium spring green")
+
+          (setq mode-line-format nil)
+
+          (setq buffer-face-mode-face `(:background "#333333"))
+          (buffer-face-mode 1)
+          (text-scale-set -1)
+          (set-frame-parameter hmz-messages-frame 'unsplittable t)
+          (set-window-dedicated-p (selected-window) t)
+
+          (spacemacs/toggle-maximize-buffer)
+
+          (setq-local header-line-format nil) ;; disables tabbar completly for that window
+          (setq left-fringe-width 0)
+          (setq right-fringe-width 0)
+          (set-window-fringes (selected-window) 0 0 nil))
+        ;; (message "%s" original-frame)
+        ;; (select-frame-set-input-focus original-frame)
+
+        ;; (setq hmz-neotree-hidden nil)
+        )))
+
+  (global-set-key (kbd "s-m") 'hmz-make-mini-monitor)
+
+  ;; keep last messages visible
+  (defadvice message (after message-tail activate)
+    "goto point max after a message"
+    ;;don't make anything if *Messages* is current
+    (unless (eq (current-buffer) "*Messages*")
+      (with-current-buffer "*Messages*"
+        (goto-char (point-max))
+
+        ;; There's a problem: minibuffer help messages activates this very same function
+        ;;
+        ;; (if (and hmz-messages-frame (frame-live-p hmz-messages-frame))
+        ;;     (with-selected-frame hmz-messages-frame
+        ;;       (spacemacs/enable-transparency hmz-messages-frame 80)
+        ;;       (run-with-timer 5 nil
+        ;;                       (lambda ()
+        ;;                         (spacemacs/enable-transparency hmz-messages-frame 20)
+        ;;                         ))))
+
+        (walk-windows (lambda (window)
+                        (if (string-equal (buffer-name (window-buffer window)) "*Messages*")
+                            (set-window-point window (point-max))))
+                      nil
+                      t))))
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-   (setq hmz-messages-frame nil)
+  (message "Garbage Collections During Startup: %s" gcs-done)
+  ;; should be handled by gcmh from now on
+  ;; Go back to sane values
+  ;; (run-with-idle-timer
+  ;;  15 nil
+  ;;  (lambda ()
+  ;;    (setq gc-cons-threshold 1000000)
+  ;;    (message "Init took %s secs, GC ran %s times. gc-cons-threshold restored to %S."
+  ;;             (emacs-init-time)
+  ;;             gcs-done
+  ;;             gc-cons-threshold)))
 
-   (defun hmz-hide-mini-monitor ()
-     (interactive)
-     (setq hmz-neotree-hidden t)
-     (if (and hmz-messages-frame (frame-live-p hmz-messages-frame))
-   (delete-frame hmz-messages-frame)))
+  ;; (face-remap-add-relative 'header-line :family "San Francisco" :height 1.0)
 
-   (add-hook 'kill-emacs-hook 'hmz-hide-mini-monitor)
+  ;; keep these configs here once customize loves to screw up
+  (set-face-attribute 'header-line nil :family "San Francisco" :height 1.0)
 
-   (defun hmz-make-mini-monitor ()
-     (interactive)
-     ;; global
-     (if (and hmz-messages-frame (frame-live-p hmz-messages-frame))
-   (delete-frame hmz-messages-frame)
+  ;; Stylize Echo Area (interestingly it ends up applying other faces styles)
+  (with-current-buffer (get-buffer " *Echo Area 0*")   ; the leading space character is correct
+    (setq-local face-remapping-alist
+                '((default (:height 0.9 :foreground "gray75") variable-pitch)))) ; etc.
 
-       (let ((original-frame (selected-frame)))
-  (setq hmz-messages-frame
-        (make-frame
-         '((visibility . t)
-     (name . "Monitor")
-     (vertical-scroll-bars . t)
+  ;; define hook unless already defined
+  (unless (boundp 'after-load-theme-hook)
+    (defvar after-load-theme-hook nil
+      "Hook run after a color theme is loaded using `load-theme'.")
+    (defadvice load-theme (after run-after-load-theme-hook activate)
+      "Run `after-load-theme-hook'."
+      (run-hooks 'after-load-theme-hook)))
 
-
-     (minibuffer . t)
-     (height . 22) (width . 120)
-     (top . 1000) (left . 0)
-     (unsplittable . t))))
-
-  (with-selected-window (frame-selected-window hmz-messages-frame)
-    ;;TODO: (handle-switch-frame)
-    (switch-to-buffer "*Messages*" nil t)
-    (hidden-mode-line-mode t)    ;
-    (spacemacs/enable-transparency hmz-messages-frame 90)
-    (setq dotspacemacs-inactive-transparency 70)
-    (if (featurep 'tabbar)
-        (tabbar-local-mode 0))
-    (set-background-color "black")
-    (set-foreground-color "medium spring green")
-
-    (setq mode-line-format nil)
-
-    (setq buffer-face-mode-face `(:background "#333333"))
-    (buffer-face-mode 1)
-    (text-scale-set -1)
-    (set-frame-parameter hmz-messages-frame 'unsplittable t)
-    (set-window-dedicated-p (selected-window) t)
-
-    (spacemacs/toggle-maximize-buffer)
-
-    (setq-local header-line-format nil) ;; disables tabbar completly for that window
-    (setq left-fringe-width 0)
-    (setq right-fringe-width 0)
-    (set-window-fringes (selected-window) 0 0 nil))
-  ;; (message "%s" original-frame)
-  ;; (select-frame-set-input-focus original-frame)
-
-  ;; (setq hmz-neotree-hidden nil)
-  )))
-
-       (global-set-key (kbd "s-m") 'hmz-make-mini-monitor)
-
-       ;; keep last messages visible
-       (defadvice message (after message-tail activate)
-   "goto point max after a message"
-   ;;don't make anything if *Messages* is current
-   (unless (eq (current-buffer) "*Messages*")
-     (with-current-buffer "*Messages*"
-       (goto-char (point-max))
-
-       ;; There's a problem: minibuffer help messages activates this very same function
-       ;;
-       ;; (if (and hmz-messages-frame (frame-live-p hmz-messages-frame))
-       ;;     (with-selected-frame hmz-messages-frame
-       ;;       (spacemacs/enable-transparency hmz-messages-frame 80)
-       ;;       (run-with-timer 5 nil
-       ;;                       (lambda ()
-       ;;                         (spacemacs/enable-transparency hmz-messages-frame 20)
-       ;;                         ))))
-
-       (walk-windows (lambda (window)
-           (if (string-equal (buffer-name (window-buffer window)) "*Messages*")
-         (set-window-point window (point-max))))
-         nil
-         t))))
-   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-       (message "Garbage Collections During Startup: %s" gcs-done)
-       ;; should be handled by gcmh from now on
-       ;; Go back to sane values
-       ;; (run-with-idle-timer
-       ;;  15 nil
-       ;;  (lambda ()
-       ;;    (setq gc-cons-threshold 1000000)
-       ;;    (message "Init took %s secs, GC ran %s times. gc-cons-threshold restored to %S."
-       ;;             (emacs-init-time)
-       ;;             gcs-done
-       ;;             gc-cons-threshold)))
-
-   ;; (face-remap-add-relative 'header-line :family "San Francisco" :height 1.0)
-
-   ;; keep these configs here once customize loves to screw up
-   (set-face-attribute 'header-line nil :family "San Francisco" :height 1.0)
-
-   ;; Stylize Echo Area (interestingly it ends up applying other faces styles)
-   (with-current-buffer (get-buffer " *Echo Area 0*")   ; the leading space character is correct
-     (setq-local face-remapping-alist
-     '((default (:height 0.9 :foreground "gray75") variable-pitch)))) ; etc.
-
-   ;; define hook unless already defined
-   (unless (boundp 'after-load-theme-hook)
-     (defvar after-load-theme-hook nil
-       "Hook run after a color theme is loaded using `load-theme'.")
-     (defadvice load-theme (after run-after-load-theme-hook activate)
-       "Run `after-load-theme-hook'."
-       (run-hooks 'after-load-theme-hook)))
-
-   (defun customize-theme-after-load ()
-     (message "THEME: %s" spacemacs--cur-theme)
-     (pcase spacemacs--cur-theme
-       ('spacemacs-light
-  (progn (set-face-attribute 'default nil :background "gray90")))
-       ('tango-dark ())
-       ('tango ())
-       ('dracula (message "Yeah!"))))
+  (defun customize-theme-after-load ()
+    (message "THEME: %s" spacemacs--cur-theme)
+    (pcase spacemacs--cur-theme
+      ('spacemacs-light
+       (progn (set-face-attribute 'default nil :background "gray90")))
+      ('tango-dark ())
+      ('tango ())
+      ('dracula (message "Yeah!"))))
 
 
-   (add-hook 'after-load-theme-hook 'customize-theme-after-load)
-   (add-hook 'after-init-hook 'customize-theme-after-load)
-   (message ">>> end user-config")
+  (add-hook 'after-load-theme-hook 'customize-theme-after-load)
+  (add-hook 'after-init-hook 'customize-theme-after-load)
 
-   ;; ) ;; end user-config
+  ;; ) ;; end user-config
 
+  (message "> MID1 user config")
 ;;;;;;;;;;;;;;;
-;; Rotate Text
+  ;; Rotate Text
 ;;;;;;;;;;;;;;;
-(setq max-lisp-eval-depth 10000)
-(setq rotate-text-rotations
-  '(("true" "false")
-    ("width" "height")
-    ("enable" "disable")
-    ("add-hook" "remove-hook")
-    ("enabled" "disabled")
-    ("describe" "context")
-    ("create" "build")
-    ("t" "nil")
-    ("it" "skip")
-    ("if" "unless")
-    ("top" "bottom")
-    ("left" "right")
-    ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")
-    ("relative" "absolute" "fixed" "static" "sticky")
-    ("yes" "no"))
-)
+  (setq max-lisp-eval-depth 10000)
+  (setq rotate-text-rotations
+        '(("true" "false")
+          ("width" "height")
+          ("enable" "disable")
+          ("add-hook" "remove-hook")
+          ("enabled" "disabled")
+          ("describe" "context")
+          ("create" "build")
+          ("t" "nil")
+          ("it" "skip")
+          ("if" "unless")
+          ("top" "bottom")
+          ("left" "right")
+          ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9")
+          ("relative" "absolute" "fixed" "static" "sticky")
+          ("yes" "no"))
+        )
 
-(defun rotate-region (beg end)
-  "Rotate all matches in `rotate-text-rotations' between point and mark."
-  (interactive "r")
-  (let ((regexp (rotate-convert-rotations-to-regexp
-     rotate-text-rotations))
-  (end-mark (copy-marker end)))
-    (save-excursion
-      (goto-char beg)
-      (while (re-search-forward regexp (marker-position end-mark) t)
-  (let* ((found (match-string 0))
-   (replace (rotate-next found)))
-    (replace-match replace))))))
+  (defun rotate-region (beg end)
+    "Rotate all matches in `rotate-text-rotations' between point and mark."
+    (interactive "r")
+    (let ((regexp (rotate-convert-rotations-to-regexp
+                   rotate-text-rotations))
+          (end-mark (copy-marker end)))
+      (save-excursion
+        (goto-char beg)
+        (while (re-search-forward regexp (marker-position end-mark) t)
+          (let* ((found (match-string 0))
+                 (replace (rotate-next found)))
+            (replace-match replace))))))
 
-(defun rotate-string (string &optional rotations)
-  "Rotate all matches in STRING using associations in ROTATIONS.
+  (defun rotate-string (string &optional rotations)
+    "Rotate all matches in STRING using associations in ROTATIONS.
 If ROTATIONS are not given it defaults to `rotate-text-rotations'."
-  (let ((regexp (rotate-convert-rotations-to-regexp
-     (or rotations rotate-text-rotations)))
-  (start 0))
-    (while (string-match regexp string start)
-      (let* ((found (match-string 0 string))
-       (replace (rotate-next
-     found
-     (or rotations rotate-text-rotations))))
-  (setq start (+ (match-end 0)
-     (- (length replace) (length found))))
-  (setq string (replace-match replace nil t string))))
-    string))
+    (let ((regexp (rotate-convert-rotations-to-regexp
+                   (or rotations rotate-text-rotations)))
+          (start 0))
+      (while (string-match regexp string start)
+        (let* ((found (match-string 0 string))
+               (replace (rotate-next
+                         found
+                         (or rotations rotate-text-rotations))))
+          (setq start (+ (match-end 0)
+                         (- (length replace) (length found))))
+          (setq string (replace-match replace nil t string))))
+      string))
 
-(defun rotate-next (string &optional rotations)
-  "Return the next element after STRING in ROTATIONS."
-  (let ((rots (rotate-get-rotations-for
-   string
-   (or rotations rotate-text-rotations))))
-    (if (> (length rots) 1)
-  (error (format "Ambiguous rotation for %s" string))
-      (if (< (length rots) 1)
-    ;; If we get this far, this should not occur:
-    (error (format "Unknown rotation for %s" string))
-  (let ((occurs-in-rots (member string (car rots))))
-    (if (null occurs-in-rots)
-  ;; If we get this far, this should *never* occur:
-  (error (format "Unknown rotation for %s" string))
-    (if (null (cdr occurs-in-rots))
-  (caar rots)
-      (cadr occurs-in-rots))))))))
+  (defun rotate-next (string &optional rotations)
+    "Return the next element after STRING in ROTATIONS."
+    (let ((rots (rotate-get-rotations-for
+                 string
+                 (or rotations rotate-text-rotations))))
+      (if (> (length rots) 1)
+          (error (format "Ambiguous rotation for %s" string))
+        (if (< (length rots) 1)
+            ;; If we get this far, this should not occur:
+            (error (format "Unknown rotation for %s" string))
+          (let ((occurs-in-rots (member string (car rots))))
+            (if (null occurs-in-rots)
+                ;; If we get this far, this should *never* occur:
+                (error (format "Unknown rotation for %s" string))
+              (if (null (cdr occurs-in-rots))
+                  (caar rots)
+                (cadr occurs-in-rots))))))))
 
-(defun rotate-get-rotations-for (string &optional rotations)
-  "Return the string rotations for STRING in ROTATIONS."
-  (remq nil (mapcar (lambda (rot) (if (member string rot) rot))
-  (or rotations rotate-text-rotations))))
+  (defun rotate-get-rotations-for (string &optional rotations)
+    "Return the string rotations for STRING in ROTATIONS."
+    (remq nil (mapcar (lambda (rot) (if (member string rot) rot))
+                      (or rotations rotate-text-rotations))))
 
-(defun rotate-convert-rotations-to-regexp (rotations)
-  (regexp-opt (rotate-flatten-list rotations)))
+  (defun rotate-convert-rotations-to-regexp (rotations)
+    (regexp-opt (rotate-flatten-list rotations)))
 
-(defun rotate-flatten-list (list-of-lists)
-  "Flatten LIST-OF-LISTS to a single list.
+  (defun rotate-flatten-list (list-of-lists)
+    "Flatten LIST-OF-LISTS to a single list.
 Example:
   (rotate-flatten-list '((a b c) (1 ((2 3)))))
     => (a b c 1 2 3)"
-  (if (null list-of-lists)
-      list-of-lists
-    (if (listp list-of-lists)
-  (append (rotate-flatten-list (car list-of-lists))
-    (rotate-flatten-list (cdr list-of-lists)))
-      (list list-of-lists))))
+    (if (null list-of-lists)
+        list-of-lists
+      (if (listp list-of-lists)
+          (append (rotate-flatten-list (car list-of-lists))
+                  (rotate-flatten-list (cdr list-of-lists)))
+        (list list-of-lists))))
 
-(defun rotate-word-at-point ()
-  "Rotate word at point based on sets in `rotate-text-rotations'."
-  (interactive)
-  (let ((bounds (bounds-of-thing-at-point 'word))
-  (opoint (point)))
-    (when (consp bounds)
-      (let ((beg (car bounds))
-      (end (copy-marker (cdr bounds))))
-  (rotate-region beg end)
-  (goto-char (if (> opoint end) end opoint))))))
+  (defun rotate-word-at-point ()
+    "Rotate word at point based on sets in `rotate-text-rotations'."
+    (interactive)
+    (let ((bounds (bounds-of-thing-at-point 'word))
+          (opoint (point)))
+      (when (consp bounds)
+        (let ((beg (car bounds))
+              (end (copy-marker (cdr bounds))))
+          (rotate-region beg end)
+          (goto-char (if (> opoint end) end opoint))))))
 
-(defun indent-or-rotate ()
-  "If point is at end of a word, then else indent the line."
-  (interactive)
-  (if (looking-at "\\>")
-      (rotate-region (save-excursion (forward-word -1) (point))
-   (point))
-    (indent-for-tab-command)))
+  (message ">>>> MID2 user config")
+  (defun indent-or-rotate ()
+    "If point is at end of a word, then else indent the line."
+    (interactive)
+    (if (looking-at "\\>")
+        (rotate-region (save-excursion (forward-word -1) (point))
+                       (point))
+      (indent-for-tab-command)))
 
-(defun hmz-init/frame-title-format ()
-  "Return frame title with current project name, where applicable."
-  (let ((file buffer-file-name))
-    (if (and file (projectile-project-p))
-  (concat ;;(file-relative-name (projectile-expand-root file) (projectile-project-root))
-    (when (and (bound-and-true-p projectile-mode)
-         (projectile-project-p))
-      (format " [%s] 👽" (projectile-project-name))))
-      "%b")))
+  (defun hmz-init/frame-title-format ()
+    "Return frame title with current project name, where applicable."
+    (let ((file buffer-file-name))
+      (if (and file (projectile-project-p))
+          (concat ;;(file-relative-name (projectile-expand-root file) (projectile-project-root))
+           (when (and (bound-and-true-p projectile-mode)
+                      (projectile-project-p))
+             (format " [%s] 👽" (projectile-project-name))))
+        "%b")))
 
-(setq frame-title-format '((:eval (hmz-init/frame-title-format))))
-;; (setq frame-title-format "👽")
+  (setq frame-title-format '((:eval (hmz-init/frame-title-format))))
+  ;; (setq frame-title-format "👽")
 
-;; function to clear read-only shell buffers
-(defun clear-comint-buffer ()
-  (interactive)
-  (let ((old-max comint-buffer-maximum-size))
-    (setq comint-buffer-maximum-size 0)
-    (comint-truncate-buffer)
-    (setq comint-buffer-maximum-size old-max)
-    (goto-char (point-max))))
+  ;; function to clear read-only shell buffers
+  (defun clear-comint-buffer ()
+    (interactive)
+    (let ((old-max comint-buffer-maximum-size))
+      (setq comint-buffer-maximum-size 0)
+      (comint-truncate-buffer)
+      (setq comint-buffer-maximum-size old-max)
+      (goto-char (point-max))))
 
-(add-hook 'comint-mode-hook
-    (function (lambda ()
-          (local-set-key (kbd "s-k") 'clear-comint-buffer))))
+  (add-hook 'comint-mode-hook
+            (function (lambda ()
+                        (local-set-key (kbd "s-k") 'clear-comint-buffer))))
 
-(define-key global-map (kbd "C-0") 'iterm-here)
+  (define-key global-map (kbd "C-0") 'iterm-here)
 
-(defun iterm-here ()
-  (interactive)
-  (dired-smart-shell-command "open -a iTerm $PWD" nil nil))
+  (defun iterm-here ()
+    (interactive)
+    (dired-smart-shell-command "open -a iTerm $PWD" nil nil))
 
-(require 'hmz-modules (concat (expand-file-name user-emacs-directory) "../.spacemacs.d/hmz-modules.el"))
+  (require 'hmz-modules (concat (expand-file-name user-emacs-directory) "../.spacemacs.d/hmz-modules.el"))
 
-) ;; end user-config
+  (message ">>>> END user config")
+  ) ;; end user-config
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -1766,6 +1789,7 @@ This function is called at the very end of Spacemacs initialization."
      (vc-dired-mode nil)
      (erc-track-minor-mode nil)
      (company-posframe-mode nil)))
+ '(diff-font-lock-prettify t)
  '(dired-hide-details-hide-information-lines nil)
  '(dired-k-human-readable t)
  '(dired-k-padding 1)
@@ -1788,6 +1812,8 @@ This function is called at the very end of Spacemacs initialization."
  '(fci-rule-color "#6272a4")
  '(fic-highlighted-words '("FIXME" "TODO" "BUG" "HACK" "XXX" "OPTIMIZE" "NOTE"))
  '(fill-column 80)
+ '(gist-ask-for-filename nil)
+ '(gist-view-gist nil)
  '(git-gutter-fr:side 'left-fringe)
  '(global-auto-highlight-symbol-mode t)
  '(global-prettify-symbols-mode t)
@@ -1837,6 +1863,7 @@ This function is called at the very end of Spacemacs initialization."
  '(org-blank-before-new-entry '((heading) (plain-list-item)))
  '(org-bullets-bullet-list '("◉" "○" "●" "☞"))
  '(org-export-backends '(ascii html icalendar latex md odt))
+ '(org-export-with-section-numbers 2 t)
  '(org-fontify-quote-and-verse-blocks t)
  '(org-mode-hook
    '(hmz-init/org-mode-prettify-symbols
@@ -1850,7 +1877,7 @@ This function is called at the very end of Spacemacs initialization."
      #[0 "\301\211\207"
          [imenu-create-index-function org-imenu-get-tree]
          2]
-     flyspell-mode spacemacs/org-setup-evil-surround spacemacs/load-yasnippet toc-org-enable org-download-enable org-bullets-mode dotspacemacs//prettify-spacemacs-docs spacemacs//org-babel-do-load-languages spacemacs//evil-org-mode org-eldoc-load hmz-init/org-config spacemacs//init-company-org-mode company-mode))
+     flyspell-mode spacemacs/org-setup-evil-surround spacemacs/load-yasnippet toc-org-enable org-download-enable org-bullets-mode dotspacemacs//prettify-spacemacs-docs spacemacs//org-babel-do-load-languages spacemacs//evil-org-mode org-eldoc-load hmz-init/org-config spacemacs//init-company-org-mode company-mode) t)
  '(org-modules
    '(ol-bbdb ol-bibtex ol-docview ol-eww ol-gnus org-habit ol-info ol-irc ol-mhe ol-rmail ol-w3m org-mac-link))
  '(origami-parser-alist
@@ -2027,6 +2054,7 @@ This function is called at the very end of Spacemacs initialization."
  '(fic-face ((t (:weight bold))))
  '(flyspell-duplicate ((t (:underline "DarkOrange"))))
  '(flyspell-incorrect ((t (:underline "Red1"))))
+ '(font-lock-comment-face ((t (:foreground "LightSteelBlue3"))))
  '(font-lock-warning-face ((t (:background "#373844" :foreground "#ffb86c" :underline (:color "red" :style wave)))))
  '(fringe ((t (:foreground "DeepSkyBlue" :background unspecified))))
  '(header-line ((t (:background "#44475a" :underline "gray20" :height 1.0 :family "San Francisco"))))
@@ -2054,10 +2082,13 @@ This function is called at the very end of Spacemacs initialization."
  '(neo-vc-added-face ((t (:foreground "#50fa7b"))))
  '(neo-vc-conflict-face ((t (:foreground "dark red"))))
  '(neo-vc-edited-face ((t (:foreground "#ff79c6"))))
- '(org-block ((t (:foreground "#ffb86c"))))
- '(org-level-1 ((t (:inherit link :foreground "DarkOrange3" :underline nil :weight bold :height 1.1 :family "San Francisco"))))
- '(org-level-2 ((t (:inherit nil :foreground "gray80" :height 1.0))))
- '(org-link ((t (:inherit link :underline nil))))
+ '(org-block ((t (:extend t :background "gray28" :foreground "#ffb86c"))))
+ '(org-done ((t (:foreground "gold"))))
+ '(org-headline-done ((t (:strike-through nil :weight bold))))
+ '(org-level-1 ((t (:inherit link :extend nil :foreground "DarkOrange3" :underline nil :weight bold :height 1.1 :family "San Francisco"))))
+ '(org-level-2 ((t (:inherit nil :extend nil :foreground "gray80" :weight bold :height 1.1))))
+ '(org-level-3 ((t (:extend nil :foreground "#50fa7b" :weight bold :height 1.1))))
+ '(org-link ((t (:inherit link :foreground "#8be9fd" :underline nil))))
  '(org-quote ((t (:inherit nil :background "gray20" :foreground "gray80" :slant italic))))
  '(org-todo ((t (:background "#373844" :foreground "#ffb86c" :weight bold :height 0.7))))
  '(org-verbatim ((t (:inherit font-lock-variable-name-face :family "Fira Code"))))
