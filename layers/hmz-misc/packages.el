@@ -11,6 +11,7 @@
     ;; undohist
     ;; which-key-posframe
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
     alert
     all-the-icons
     amx
@@ -33,6 +34,7 @@
     indent-guide
     list-processes
     ;; magit-gh-pulls
+
     ;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     neotree
     persp-mode
