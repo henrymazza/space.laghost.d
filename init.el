@@ -139,6 +139,7 @@ values."
     memory-usage
     ns-auto-titlebar
     org-bullets
+    ox-gfm ;; better markdown export
     persistent-scratch
     prodigy
     simpleclip
@@ -691,7 +692,6 @@ before packages are loaded. If you are unsure, you should try in setting them in
   ;; disable smooth scroll on railwaycat's emacs fork
   (setq mac-mouse-wheel-smooth-scroll nil)
 
-  (message ">>> END USER INIT")
 
 )
 
@@ -702,6 +702,9 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loa,
 you should place you code here."
+
+  ;; trying to stop newline at end of file madness
+  (setq mode-require-final-newline nil)
 
   ;; org-mode grap-link shortcut
   (add-hook 'org-mode-hook
@@ -772,7 +775,6 @@ you should place you code here."
     (defun hmz-rspec-sentinel (process event)
       (princ (format "Process: %s had the event '%s'" process event))
       (run-with-timer 5 nil (lambda ()
-                              (message ">>>> HEERE")
                               (posframe-delete hmz-pos/name))))
 
     (set-process-sentinel (get-process "hmz-rspec") 'hmz-rspec-sentinel)
@@ -1392,8 +1394,6 @@ move to the next field. Call `open-line' if nothing else applies."
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Messages Customs
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (message ">>>> MID0 user config")
-
   (setq hmz-messages-frame nil)
 
   (defun hmz-hide-mini-monitor ()
@@ -1627,7 +1627,6 @@ Example:
           (rotate-region beg end)
           (goto-char (if (> opoint end) end opoint))))))
 
-  (message ">>>> MID2 user config")
   (defun indent-or-rotate ()
     "If point is at end of a word, then else indent the line."
     (interactive)
@@ -1670,7 +1669,6 @@ Example:
 
   (require 'hmz-modules (concat (expand-file-name user-emacs-directory) "../.spacemacs.d/hmz-modules.el"))
 
-  (message ">>>> END user config")
   ) ;; end user-config
 
 (custom-set-faces
@@ -1951,6 +1949,7 @@ This function is called at the very end of Spacemacs initialization."
  '(prettify-symbols-unprettify-at-point 'right-edge)
  '(rainbow-identifiers-cie-l*a*b*-lightness 50)
  '(rainbow-identifiers-cie-l*a*b*-saturation 20)
+ '(require-final-newline nil)
  '(rspec-autosave-buffer t)
  '(rspec-spec-command "rspec -f doc")
  '(rustic-ansi-faces
@@ -2400,6 +2399,7 @@ This function is called at the very end of Spacemacs initialization."
  '(yascroll:delay-to-hide 1.5)
  '(yascroll:disabled-modes '(Custom-mode org-mode))
  '(yascroll:scroll-bar '(right-fringe left-fringe text-area)))
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

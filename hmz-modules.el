@@ -5,10 +5,9 @@
 
 (use-package docker
   :straight t
+  :disabled
   :ensure t
   :bind ("C-c d" . docker))
-
-(message ">>> MODULES 1")
 
 (use-package request
   :straight (request :type git :host github :repo "tkf/emacs-request"))
@@ -34,6 +33,7 @@
 
 (use-package poly-ruby
   :straight t
+  :disabled
   :mode ("\\.rb" . poly-ruby-mode)
   :init
   (define-key ruby-mode-map (kbd "C-c m") 'toggle-poly-ruby-mode))
@@ -43,9 +43,6 @@
   :ensure polymode
   :defer t
   :mode ("\\.md" . poly-markdown-mode))
-
-(message ">>> MODULES 2")
-
 
 (defun run-in-vterm-kill (process event)
   "A process sentinel. Kills PROCESS's buffer if it is live."
@@ -119,7 +116,6 @@
 (use-package ng2-mode
   :straight t)
 
-(message ">>> MODULES 3")
 (use-package popup-switcher
   :straight t
   :init
@@ -129,7 +125,7 @@
   (spacemacs/set-leader-keys "bv" 'psw-switch-buffer)
   ;; (global-set-key [f2] 'psw-switch-buffer)
   )
-(message ">>> Before Evil Escape")
+
 ;; Quit, Exit, Escape
 (use-package evil-escape
   :commands evil-escape-mode
@@ -238,7 +234,7 @@
 
   :config
   (remove-hook 'magit-mode-hook 'turn-on-magit-gh-pulls))
-(message ">>> MODULES 3")
+
 (use-package evil-magit
   :straight t
   :config (evil-magit-init))
@@ -506,6 +502,7 @@ So it safe to call it many times like in a minor mode hook."
 
 (use-package lsp-mode
   :straight t
+  :disabled
   :commands lsp
   :diminish lsp-mode
   :hook
