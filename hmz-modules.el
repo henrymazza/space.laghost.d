@@ -3,6 +3,11 @@
 
 (add-to-list 'load-path (expand-file-name "~/.spacemacs.develop.d/straight/repos/all-the-icons"))
 
+(use-package diredful
+  :straight t
+  :init
+  (diredful-mode 1))
+
 (use-package docker
   :straight t
   :disabled
@@ -607,6 +612,16 @@ So it safe to call it many times like in a minor mode hook."
   (eval-after-load 'rspec-mode
     '(rspec-install-snippets))
 
+  ;; somehow this function isn't defined but rspec-mode looks for it
+  (defun* get-closest-gemfile-root (&optional (file "Gemfile"))
+    (let ((root (expand-file-name "/")))
+      (loop
+       for d = default-directory then (expand-file-name ".." d)
+       if (file-exists-p (expand-file-name file d))
+       return d
+       if (equal d root)
+       return nil)))
+
   (defun rspec-runner ()
     "Return command line to run rspec."
     (let ((bundle-command (if (rspec-bundle-p) "bundle exec " ""))
@@ -781,7 +796,6 @@ So it safe to call it many times like in a minor mode hook."
 (use-package rubocopfmt
   :straight (rubocopfmt :type git :host github :repo "jimeh/rubocopfmt.el")
   :init
-  (add-to-list 'load-path "~/.spacemacs.d/layers/hmz-misc/local")
   (add-hook 'ruby-mode-hook #'rubocopfmt-mode))
 
 (use-package fira-code-mode
