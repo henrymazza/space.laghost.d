@@ -3,6 +3,9 @@
 
 (add-to-list 'load-path (expand-file-name "~/.spacemacs.develop.d/straight/repos/all-the-icons"))
 
+(use-package restclient
+  :straight t)
+
 (use-package diredful
   :straight t
   :init
@@ -13,6 +16,9 @@
   :disabled
   :ensure t
   :bind ("C-c d" . docker))
+
+(use-package ruby-tools
+  :straight (ruby-tools :type git :host github :repo "rejeep/ruby-tools.el"))
 
 (use-package request
   :straight (request :type git :host github :repo "tkf/emacs-request"))
@@ -33,7 +39,22 @@
 
   (define-polymode poly-ng2-ts-mode
     :hostmode 'poly-ng2-ts-hostmode
-    :innermodes '(poly-ng2-ts-doc-markdown-innermode)))
+    :innermodes '(poly-ng2-ts-doc-markdown-innermode))
+
+  (define-hostmode poly-ruby-hostmode
+    :mode 'ruby-mode)
+
+  (define-innermode poly-ruby-sql-innermode
+    :mode 'sql-mode
+    :head-matcher "SQL"
+    :tail-matcher "SQL"
+    :head-mode 'host
+    :tail-mode 'host)
+
+  (define-polymode poly-ruby-mode
+    :hostmode 'poly-ruby-hostmode
+    :innermodes '(poly-ruby-sql-innermode))
+  )
 
 
 (use-package poly-ruby
@@ -471,6 +492,7 @@ So it safe to call it many times like in a minor mode hook."
 
 (use-package centaur-tabs
     :straight t
+    ;; :disabled
     ;; :defer t
     ;; only load if hmz-tabbar isn't config's part
     :init
@@ -550,7 +572,7 @@ So it safe to call it many times like in a minor mode hook."
 
 (use-package persp-mode-projectile-bridge
   :straight t
-  ;; :after (projectile persp-mode)
+  :after (projectile persp-mode)
   :defer t
   :init
   (add-hook 'persp-mode-projectile-bridge-mode-hook
@@ -737,9 +759,9 @@ So it safe to call it many times like in a minor mode hook."
                          :host github :repo "jscheid/dtrt-indent"))
 
 (use-package hl-block-mode
+  :disabled
   :straight (hl-block-mode :type git
                            :host github :repo "emacsmirror/hl-block-mode")
-  :disabled
   :config
   (global-hl-block-mode t))
 
@@ -767,6 +789,7 @@ So it safe to call it many times like in a minor mode hook."
 
 (use-package highlight-indent-guides
   :straight t
+  :disabled
   :init
   (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
   (setq highlight-indent-guides-method 'character))
@@ -1160,11 +1183,12 @@ So it safe to call it many times like in a minor mode hook."
 
 (use-package tabbar
     :straight t
+    :disabled
     ;; :catch t
     ;; :defer t
-    :bind ("s-b" . tabbar-mode)
+    ;; :bind ("s-b" . tabbar-mode)
     ;; :after (helm-lib all-the-icons)
-    :config
+    :init
       (defun ido-switch-tab-group ()
         "Switch tab groups using ido."
       (interactive)
@@ -1351,12 +1375,12 @@ So it safe to call it many times like in a minor mode hook."
 
     (hmz-tabbar-refresh-faces)
 
-    (use-package all-the-icons
-      :config
-      (add-to-list 'all-the-icons-icon-alist
-                   '("\\.lua$" all-the-icons-wicon "moon-waning-crescent-3" :face all-the-icons-cyan)))
+    ;; (use-package all-the-icons
+    ;;   :config
+    ;;   (add-to-list 'all-the-icons-icon-alist
+    ;;                '("\\.lua$" all-the-icons-wicon "moon-waning-crescent-3" :face all-the-icons-cyan)))
 
-    (defun x-tabbar-buffer-help-on-tab (tab)
+    (defun tabbar-buffer-help-on-tab (tab)
       "Return the help string shown when mouse is onto TAB. This function was overriden to show more useful information."
       (if tabbar--buffer-show-groups
           (let* ((tabset (tabbar-tab-tabset tab))
@@ -1524,7 +1548,7 @@ element."
       (setq tabbar-scroll-right-button-value nil)
       (setq tabbar-home-button-value nil))
 
-    (defun x-tabbar-buffer-tab-label (tab)
+    (defun tabbar-buffer-tab-label (tab)
       "Return a label for TAB. That is, a string used to represent it on the
        tab bar. This was overriden to clean up unwanted chars."
 
@@ -1562,7 +1586,7 @@ element."
     (advice-unadvice 'tabbar-buffer-update-groups)
     (advice-add 'tabbar-buffer-update-groups :around (my-make-throttler-3))
 
-    (defun x-tabbar-buffer-update-groups ()
+    (defun tabbar-buffer-update-groups ()
       "Update tab sets from groups of existing buffers.
   Return the the first group where the current buffer is."
       ;; (message "update groups")
@@ -1623,7 +1647,7 @@ element."
       (car (nth 2 (assq (current-buffer) tabbar--buffers))))
 
     ;; Tabbar Groups Definition
-    (defun x-tabbar-buffer-groups ()
+    (defun tabbar-buffer-groups ()
       "Returns the name of the tab group names the current buffer belongs to.
       There are two groups: Emacs buffers (those whose name starts with '*', plus
       dired buffers), and the rest."
@@ -1646,13 +1670,13 @@ element."
                           (eq major-mode 'eshell-mode))
                       "proc"
                     "limbo"))
-                 ((eq major-mode 'dired-mode) "dired")
-                 ((string-match-p "magit" (symbol-name major-mode))
-                  "magit")
                  ((projectile-project-p) (projectile-project-name))
+                 ((eq major-mode 'dired-mode) "dired")
+                 ;; ((string-match-p "magit" (symbol-name major-mode))
+                  "magit")
                  ((buffer-file-name) "other")
                  (t "limbo"))
-              "limbo")))
+              "limbo"))
 
     (defun hmz-tabbar-refresh-tabs ()
       (if tabbar-mode
@@ -1682,7 +1706,7 @@ element."
   (tabbar-mode 1)
   ;; redefine tabbar-add-tab so that it alphabetizes / sorts the tabs
   ;; TODO: better treat non-file buffers in sort
-  (defun x-tabbar-add-tab (tabset object &optional append)
+  (defun tabbar-add-tab (tabset object &optional append)
     "Add to TABSET a tab with value OBJECT if there isn't one there yet.
   If the tab is added, it is added at the beginning of the tab list,
   unless the optional argument APPEND is non-nil, in which case it is
@@ -1715,7 +1739,6 @@ element."
                     ))))
           (tabbar-set-template tabset nil)
           (set tabset new-tabset))))))
-
 
 
 (use-package neotree

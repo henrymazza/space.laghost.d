@@ -40,7 +40,8 @@ values."
    ;; load. If it is the symbol `all' instead
   ;; of a list then all discovered layers will be installed.
   dotspacemacs-configuration-layers
-  '(shell-scripts
+  '(php
+    shell-scripts
     ;; elixir
     ;; lsp
     ;; php
@@ -86,7 +87,8 @@ values."
     ;; (spacemacs-layouts :variables spacemacs-layouts-restrict-spc-tab t
     ;;       dotspacemacs-auto-resume-layouts t)
     markdown
-    org
+    (org :variables
+       org-enable-org-journal-support t)
     prodigy
     ruby-on-rails
     (ruby :variables
@@ -703,6 +705,9 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loa,
 you should place you code here."
 
+  ;; fix tabs in dired
+  (add-hook 'dired-mode-hook (lambda () (setq tab-width 2)))
+
   ;; trying to stop newline at end of file madness
   (setq mode-require-final-newline nil)
 
@@ -992,7 +997,7 @@ move to the next field. Call `open-line' if nothing else applies."
   (global-linum-mode -1)
 
   ;; hilight current line
-  (global-hl-line-mode -1)
+  (global-hl-line-mode 1)
 
   ;; this is better than fancy-battery
   (display-battery-mode nil)
@@ -1825,6 +1830,8 @@ This function is called at the very end of Spacemacs initialization."
  '(global-auto-highlight-symbol-mode t)
  '(global-prettify-symbols-mode t)
  '(global-visual-line-mode t)
+ '(helm-boring-buffer-regexp-list
+   '("\\` " "\\`\\*helm" "\\`\\*Echo Area" "\\`\\*Minibuf" "magit-.*: .*" "\\*" "magit: .*"))
  '(helm-completion-style 'emacs)
  '(helm-mode-fuzzy-match t)
  '(highlight-indent-guides-character 183)
@@ -1872,19 +1879,6 @@ This function is called at the very end of Spacemacs initialization."
  '(org-export-backends '(ascii html icalendar latex md odt))
  '(org-export-with-section-numbers 2)
  '(org-fontify-quote-and-verse-blocks t)
- '(org-mode-hook
-   '(hmz-init/org-mode-prettify-symbols
-     #[0 "\300\301\302\303\304$\207"
-         [add-hook change-major-mode-hook org-show-all append local]
-         5]
-     #[0 "\300\301\302\303\304$\207"
-         [add-hook change-major-mode-hook org-babel-show-result-all append local]
-         5]
-     org-babel-result-hide-spec org-babel-hide-all-hashes
-     #[0 "\301\211\207"
-         [imenu-create-index-function org-imenu-get-tree]
-         2]
-     flyspell-mode spacemacs/org-setup-evil-surround spacemacs/load-yasnippet toc-org-enable org-download-enable org-bullets-mode dotspacemacs//prettify-spacemacs-docs spacemacs//org-babel-do-load-languages spacemacs//evil-org-mode org-eldoc-load hmz-init/org-config spacemacs//init-company-org-mode company-mode))
  '(org-modules
    '(ol-bbdb ol-bibtex ol-docview ol-eww ol-gnus org-habit ol-info ol-irc ol-mhe ol-rmail ol-w3m org-mac-link))
  '(org-todo-keywords
@@ -1942,6 +1936,7 @@ This function is called at the very end of Spacemacs initialization."
  '(require-final-newline nil)
  '(rspec-autosave-buffer t)
  '(rspec-spec-command "rspec -f doc")
+ '(rubocopfmt-include-unsafe-cops t)
  '(rustic-ansi-faces
    ["#282a36" "#ff5555" "#50fa7b" "#f1fa8c" "#61bfff" "#ff79c6" "#8be9fd" "#f8f8f2"])
  '(shell-pop-cleanup-buffer-at-process-exit t)
@@ -2064,12 +2059,13 @@ This function is called at the very end of Spacemacs initialization."
  '(hydra-face-red ((t (:foreground "#FF0000" :weight bold))))
  '(indent-guide-face ((t (:inherit font-lock-constant-face :slant normal))))
  '(ivy-highlight-face ((t (:inherit highlight :underline t :weight bold))))
- '(line-number ((t (:background "#282a36" :foreground "#565761" :slant normal :height 1.0))))
+ '(line-number ((t (:background "#282a36" :foreground "#565761" :slant normal :height 0.8))))
  '(line-number-current-line ((t (:inherit (font-lock-keyword-face hl-line line-number)))))
  '(link ((t (:foreground "#AAF" :underline nil :family "San Francisco"))))
  '(linum ((t (:inherit hl-line :background "#282a36" :foreground "#565761" :slant italic))))
  '(magit-blame-highlight ((t (:inherit (font-lock-comment-face hl-line) :height 0.8 :family "San Francisco"))))
  '(magit-blame-name ((t (:inherit font-lock-variable-name-face))) t)
+ '(magit-log-author ((t (:foreground "dark gray" :family "San Francisco"))))
  '(minibuffer-prompt ((t (:foreground "#ff79c6" :weight bold :height 1.0))))
  '(mode-line ((t (:foreground "White" :box (:line-width 1 :color "#44475a") :height 0.9 :family "San Francisco"))))
  '(mode-line-inactive ((t (:inherit mode-line :background "#373844" :foreground "#f8f8f2" :height 120))))
@@ -2101,6 +2097,7 @@ This function is called at the very end of Spacemacs initialization."
  '(speedbar-selected-face ((t nil)))
  '(speedbar-separator-face ((t nil)))
  '(speedbar-tag-face ((t nil)))
+ '(tab-line ((t (:inherit variable-pitch :background "#44475a" :foreground "#bd93f9" :underline t :height 1.0))))
  '(tabbar-default ((t (:inherit (hl-line header-line) :box nil :underline nil :weight light :height 0.8))))
  '(tabbar-icon-unselected ((t (:box nil :inherit 'tabbar-default :underline t))))
  '(tabbar-selected ((t (:inherit tabbar-default :background "#282a36" :box nil :overline nil :weight bold))))
