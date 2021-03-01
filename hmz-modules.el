@@ -539,7 +539,6 @@ So it safe to call it many times like in a minor mode hook."
 
 (use-package persp-mode
   :straight t
-  ;; :demand t
   :after projectile
   :custom
   (persp-auto-save-num-of-backups 10)
@@ -570,18 +569,24 @@ So it safe to call it many times like in a minor mode hook."
                         :on-match (lambda (perspective buffer after-match hook args)
                                     (persp-frame-switch perspective))))
 
-(use-package persp-mode-projectile-bridge
-  :straight t
+(use-package persp-mode-projectile-bridge.el
+  ;; :straight t
+  :straight (persp-mode-projectile-bridge.el :type git
+                                             :host github :repo "Bad-ptr/persp-mode-projectile-bridge.el")
   :after (projectile persp-mode)
   :defer t
-  :init
-  (add-hook 'persp-mode-projectile-bridge-mode-hook
-            #'(lambda ()
-                (if persp-mode-projectile-bridge-mode
-                    (persp-mode-projectile-bridge-find-perspectives-for-all-buffers)
-                  (persp-mode-projectile-bridge-kill-perspectives))))
   :config
-  (persp-mode-projectile-bridge-mode 1))
+  (persp-mode-projectile-bridge-mode 1)
+  (with-eval-after-load "persp-mode-projectile-bridge-autoloads"
+    (add-hook 'persp-mode-projectile-bridge-mode-hook
+              #'(lambda ()
+                  (if persp-mode-projectile-bridge-mode
+                      (persp-mode-projectile-bridge-find-perspectives-for-all-buffers)
+                    (persp-mode-projectile-bridge-kill-perspectives))))
+    (add-hook 'after-init-hook
+              #'(lambda ()
+                  (persp-mode-projectile-bridge-mode 1))
+              t)))
 
 (use-package dired-k
   :straight t

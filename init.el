@@ -40,8 +40,7 @@ values."
    ;; load. If it is the symbol `all' instead
   ;; of a list then all discovered layers will be installed.
   dotspacemacs-configuration-layers
-  '(php
-    shell-scripts
+  '(shell-scripts
     ;; elixir
     ;; lsp
     ;; php
@@ -84,8 +83,8 @@ values."
     dtrt-indent
     (javascript :variables
                 javascript-backend 'tide)
-    ;; (spacemacs-layouts :variables spacemacs-layouts-restrict-spc-tab t
-    ;;       dotspacemacs-auto-resume-layouts t)
+    (spacemacs-layouts :variables spacemacs-layouts-restrict-spc-tab nil
+          dotspacemacs-auto-resume-layouts t)
     markdown
     (org :variables
        org-enable-org-journal-support t)
@@ -121,6 +120,7 @@ values."
   dotspacemacs-additional-packages
   '(;; desktop-plus
     ;; exec-path-from-shell
+    fira-code-mode
     bug-hunter
     discover-my-major
     docker-tramp
@@ -134,7 +134,6 @@ values."
     fringe-helper
     graphql-mode
     handlebars-sgml-mode
-    ;; highlight-indent-guides
     ido-completing-read+
     itail
     jist
@@ -143,6 +142,7 @@ values."
     org-bullets
     ox-gfm ;; better markdown export
     persistent-scratch
+    ;; persp-mode-projectile-bridge
     prodigy
     simpleclip
     sr-speedbar
