@@ -147,6 +147,7 @@ which require an initialization must be listed explicitly in the list.")
                           :background 'unspecified
                           :underline nil
                           :weight 'light
+                          :height 1.0
                           :box nil)
 
       (set-face-attribute 'tabbar-selected-modified nil
@@ -162,6 +163,7 @@ which require an initialization must be listed explicitly in the list.")
                           :background (face-attribute 'default :background)
                           :inherit 'tabbar-default
                           :underline (face-attribute 'font-lock-comment-face :foreground)
+                          ;; :underline nil
                           :overline nil
                           :weight 'bold)
 
@@ -251,7 +253,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
 
         (concat
          (propertize
-          " "
+          ""
           (if tabbar-tab-label-function
               (funcall tabbar-tab-label-function tab)
             tab) " "
@@ -263,7 +265,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
           'display `(raise  0.0);;,(symbol-value 'hmz-tabbar-raise-text))
           'pointer 'hand)
          (propertize
-          the-icon
+          (concat " " the-icon "")
           'face (plist-merge
                  ;; (get icon-face 'foreground)
                  (plist-get (text-properties-at 0 the-icon) 'face)
@@ -480,7 +482,9 @@ element."
       ;; Return the first group the current buffer belongs to.
       (car (nth 2 (assq (current-buffer) tabbar--buffers))))
 
-    (defun tabbar-buffer-groups ()
+
+
+    (defun x-tabbar-buffer-groups ()
   "Return the list of group names the current buffer belongs to.
 Return a list of one element based on major mode."
   (list
@@ -515,15 +519,16 @@ Return a list of one element based on major mode."
      (if (local-variable-p 'project-name)
          (buffer-local-value 'project-name (current-buffer))
          ;; "jujuba"
-       "jojoca"
+       (symbol-name major-mode)
        ;; (progn
-       ;;   (if (projectile-project-p)
-       ;;       (progn
-       ;;         (defvar-local project-name (projectile-project-name))
-       ;;     (progn
-       ;;       (defvar-local project-name (major-mode))
-       ;;       )))
-       ;;   (buffer-local-value 'project-name (current-buffer)))
+         ;; (if (projectile-project-p)
+         ;;     (progn
+         ;;       (defvar-local project-name (projectile-project-name))
+         ;;   (progn
+         ;;     (defvar-local project-name (major-mode))
+         ;;     )))
+         ;; (defvar-local project-name (projectile-project-name))
+         ;; (buffer-local-value 'project-name (current-buffer)))
          )
 
      ;; Return `mode-name' if not blank, `major-mode' otherwise.
