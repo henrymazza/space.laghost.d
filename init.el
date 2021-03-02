@@ -66,7 +66,7 @@ values."
         auto-completion-complete-with-key-sequence-delay 0.01)
 
     ;; custom layers
-    ;; hmz-tabbar
+    hmz-tabbar
     ;; hmz-misc ;; use hmz-modules
     ;; hmz-misc2 ;; use hmz-modules
     ;; FIXME: pourpose window infinite recursion bug; delete desktop files?
