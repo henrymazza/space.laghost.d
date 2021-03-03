@@ -577,7 +577,9 @@ So it safe to call it many times like in a minor mode hook."
   :defer t
   :config
   (persp-mode-projectile-bridge-mode 1)
-  (persp-mode-projectile-bridge-find-perspectives-for-all-buffers)  (with-eval-after-load "persp-mode-projectile-bridge-autoloads"
+
+  (persp-mode-projectile-bridge-find-perspectives-for-all-buffers)
+  (with-eval-after-load "persp-mode-projectile-bridge-autoloads"
     (add-hook 'persp-mode-projectile-bridge-mode-hook
               #'(lambda ()
                   (if persp-mode-projectile-bridge-mode
