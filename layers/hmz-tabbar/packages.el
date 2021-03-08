@@ -287,9 +287,9 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
          (propertize
           (concat
            " "
-           (with-current-buffer (car tab)
-             (format "%s" (visited-file-modtime))
-             )
+           ;; (with-current-buffer (car tab)
+           ;;   (format "%s" (visited-file-modtime))
+           ;;   )
            (if tabbar-tab-label-function
                (funcall tabbar-tab-label-function tab) tab) " ")
           'tabbar-tab tab
@@ -432,7 +432,7 @@ Return the the first group where the current buffer is."
                             '("Common")))))
               (and tabbar-buffer-list-function
                    (funcall tabbar-buffer-list-function)))
-             #'(lambda (e1 e2)
+             #'(lambda (e2 e1)
                  (string-lessp (nth 1 e1) (nth 1 e2))))))
     ;; If the cache has changed, update the tab sets.
     (unless (equal bl tabbar--buffers)
@@ -470,7 +470,7 @@ Return the the first group where the current buffer is."
   ;; Return the first group the current buffer belongs to.
   (car (nth 2 (assq (current-buffer) tabbar--buffers))))
 
-    (defun x-tabbar-buffer-groups ()
+    (defun tabbar-buffer-groups ()
   "Return the list of group names the current buffer belongs to.
 Return a list of one element based on major mode."
   (list
@@ -482,8 +482,8 @@ Return a list of one element based on major mode."
           major-mode '(comint-mode compilation-mode)))
      "Process"
      )
-    ((member (buffer-name)
-             '("*scratch*" "*Messages*"))
+
+    ((string-match "^\s?\\*" (buffer-name))
      "Common"
      )
     ((eq major-mode 'dired-mode)
@@ -501,18 +501,21 @@ Return a list of one element based on major mode."
              gnus-article-mode score-mode gnus-browse-killed-mode))
      "Mail"
      )
-    (t
-     (if (local-variable-p 'project-name)
-         (buffer-local-value 'project-name (current-buffer))
-       (progn
-        (symbol-name major-mode)
-        (if (projectile-project-p)
-            (setq-local project-name (projectile-project-name))
-          (setq-local project-name major-mode))
+    ((local-variable-p 'project-name) (format "%s" (buffer-local-value 'project-name (current-buffer))))
+    (t "unset"
+     ;; (if (local-variable-p 'project-name)
+         ;; (buffer-local-value 'project-name (current-buffer))
+     ;;   "unset"
+       ;; (progn
+       ;;  (symbol-name major-mode)
+       ;;  (if (projectile-project-p)
+       ;;      (setq-local project-name (projectile-project-name))
+       ;;    (setq-local project-name major-mode))
 
-        (defvar-local project-name (projectile-project-name))
-        (buffer-local-value 'project-name (current-buffer))
-        ))
+       ;;  (defvar-local project-name (projectile-project-name))
+       ;;  (buffer-local-value 'project-name (current-buffer))
+       ;;  )
+       ;; )
 
      ;; Return `mode-name' if not blank, `major-mode' otherwise.
      ;; (unless (stringp (buffer-local-value 'project-name (current-buffer)))

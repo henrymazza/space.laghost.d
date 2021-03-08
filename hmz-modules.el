@@ -397,7 +397,6 @@ So it safe to call it many times like in a minor mode hook."
 
 (use-package undohist
   :straight t
-  :demand
   :config
   (undohist-initialize))
 
@@ -575,20 +574,13 @@ So it safe to call it many times like in a minor mode hook."
                                              :host github :repo "Bad-ptr/persp-mode-projectile-bridge.el")
   :after (projectile persp-mode)
   :defer t
-  :config
-  (persp-mode-projectile-bridge-mode 1)
-
-  (persp-mode-projectile-bridge-find-perspectives-for-all-buffers)
-  (with-eval-after-load "persp-mode-projectile-bridge-autoloads"
-    (add-hook 'persp-mode-projectile-bridge-mode-hook
-              #'(lambda ()
-                  (if persp-mode-projectile-bridge-mode
-                      (persp-mode-projectile-bridge-find-perspectives-for-all-buffers)
-                    (persp-mode-projectile-bridge-kill-perspectives))))
-    (add-hook 'after-init-hook
-              #'(lambda ()
-                  (persp-mode-projectile-bridge-mode 1))
-              t)))
+  :init
+  (add-hook 'persp-mode-projectile-bridge-mode-hook
+            #'(lambda ()
+                (if persp-mode-projectile-bridge-mode
+                    (persp-mode-projectile-bridge-find-perspectives-for-all-buffers)
+                  (persp-mode-projectile-bridge-kill-perspectives))))
+  (persp-mode-projectile-bridge-mode 1))
 
 (use-package dired-k
   :straight t
