@@ -290,17 +290,6 @@
   (defvar outline-minor-mode-prefix "\M-#")
   (add-hook 'prog-mode-hook 'outshine-mode))
 
-;; not loading
-;; (use-package helm-org-rifle
-;;   :straight t)
-
-;; (use-package org-super-links
-;;   :straight (org-super-links :type git :host github :repo "toshism/org-super-links")
-;;   :after (org helm-org-rifle)
-;;   :bind (("C-c s s" . sl-link)
-;;      ("C-c s l" . sl-store-link)
-;;      ("C-c s C-l" . sl-insert-link)))
-
 (use-package doom-modeline
   :straight t
   :catch t
@@ -312,6 +301,7 @@
   ;; The maximum displayed length of the branch name of version control.
   (setq doom-modeline-vcs-max-length 34)
   (setq doom-modeline-height 18)
+  (display-battery-mode 0)
 
   (doom-modeline-mode 1))
 
@@ -575,12 +565,20 @@ So it safe to call it many times like in a minor mode hook."
   :after (projectile persp-mode)
   :defer t
   :init
+  (add-hook 'after-init-hook
+                #'(lambda ()
+                    (message-box "Inside!")
+                    (persp-mode-projectile-bridge-mode 1))
+                t)
   (add-hook 'persp-mode-projectile-bridge-mode-hook
             #'(lambda ()
                 (if persp-mode-projectile-bridge-mode
                     (persp-mode-projectile-bridge-find-perspectives-for-all-buffers)
                   (persp-mode-projectile-bridge-kill-perspectives))))
-  (persp-mode-projectile-bridge-mode 1))
+
+  ;; shrug
+  (run-with-timer 10 nil (lambda () (persp-mode-projectile-bridge-mode 1)))
+  )
 
 (use-package dired-k
   :straight t
@@ -590,7 +588,7 @@ So it safe to call it many times like in a minor mode hook."
 
 (use-package sublimity
   :straight t
-  :disabled
+  ;; :disabled
   :init
   (require 'sublimity)
   (require 'sublimity-scroll)
@@ -600,7 +598,7 @@ So it safe to call it many times like in a minor mode hook."
 
 (use-package tempbuf
     :straight t
-    :disabled
+    ;; :disabled
     ;; :load-path  "~/spacemacs.d/layers/hmz-misc/local/tempbuf/tempbuf.el"
     :config
     ;; modified from jmjeong / jmjeong-emacs
@@ -700,7 +698,7 @@ So it safe to call it many times like in a minor mode hook."
   :straight t
   :disabled
   :init
-  (ido-yes-or-no-mode 1))
+  (ido-yes-or-no-mode 0))
 
 ;; FIXME: not loading on startup!
 (use-package amx
@@ -1155,19 +1153,6 @@ So it safe to call it many times like in a minor mode hook."
   (add-hook 'js-mode-hook (lambda () (ember-mode t)))
   (add-hook 'web-mode-hook (lambda () (ember-mode t))))
 
-;; NOTE: the following two are incompatible with Ruby code so they are
-;; disabled for good
-(use-package vimish-fold
-  :ensure
-  :disabled
-  :after evil)
-
-(use-package evil-vimish-fold
-  :ensure
-  :disabled
-  :after vimish-fold
-  :hook ((prog-mode conf-mode text-mode) . evil-vimish-fold-mode))
-
 (use-package command-log-mode
   :straight t
   :config
@@ -1223,12 +1208,9 @@ So it safe to call it many times like in a minor mode hook."
 
     (defun hmz-winum-assign-func ()
       (cond
-       ((equal (buffer-name) "*Calculator*")
-  10)
-       ((string-match-p (buffer-name) ".*\\*NeoTree\\*.*")
-  9)
-       (t
-  nil)))
+       ((equal (buffer-name) "*Calculator*") 10)
+       ((string-match-p (buffer-name) ".*\\*NeoTree\\*.*") 9)
+       (t nil)))
 
     (setq winum-assign-func 'hmz-winum-assign-func)
 
@@ -1267,7 +1249,7 @@ So it safe to call it many times like in a minor mode hook."
        (leafs (cdr contents))
        (default-directory path))
 
-  (if (> (length nodes) 100)
+  (if (> (length nodes) 200)
       (insert " ··· \n")
     (if (bound-and-true-p hmz-misc/neo-sort-dir-with-files)
         (let ((sorted (sort
@@ -1386,23 +1368,20 @@ So it safe to call it many times like in a minor mode hook."
       "Reveals Neotree expanding frame and tries to compensate internal size."
       (interactive)
       (if (neo-global--window-exists-p)
-    (progn
-      (setq hmz-neotree-hidden t)
-      (neotree-hide))
+          (progn
+            (setq hmz-neotree-hidden t)
+            (neotree-hide))
 
-  (let ((origin-buffer-file-name (buffer-file-name)))
-    (setq hmz-neotree-hidden nil)
-    (neotree-find (projectile-project-root))
-    (neotree-find origin-buffer-file-name))))
+        (let ((origin-buffer-file-name (buffer-file-name)))
+          (setq hmz-neotree-hidden nil)
+          (neotree-find (projectile-project-root))
+          (neotree-find origin-buffer-file-name))))
 
     (global-set-key (kbd "s-r") 'neo-opens-outwards)
     (global-set-key (kbd "H-r") 'neo-opens-outwards)
 
-    (defun hmz-neotree-mode-hook ()
+    (defun hmz-neotree-mode ()
       (interactive)
-      ;; (face-remap-add-relative 'default :background-color "blue")
-      ;; (set-background-color "black")
-      ;; (setq buffer-face-mode-face `(:background "red"))
 
       ;; hide line numbers
       (linum-mode 0)
@@ -1443,7 +1422,7 @@ So it safe to call it many times like in a minor mode hook."
       (setq neo-window-fixed-size nil))
 
 
-    (add-hook 'neotree-mode-hook 'hmz-neotree-mode-hook)
+    (add-hook 'neotree-mode-hook 'hmz-neotree-mode)
 
     (defadvice neo-buffer--refresh (after hmz-keep-hl-line-after-buffer-refresh 1 () activate)
       "Keep hl-line active after refreshing neotree's tree."

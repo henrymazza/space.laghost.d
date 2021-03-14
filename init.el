@@ -863,19 +863,6 @@ move to the next field. Call `open-line' if nothing else applies."
 
   (require 'window-purpose)
 
-  ;; FIXME: this one isn't being loaded at hmz-misc layer
-  ;; (use-package doom-modeline
-  ;;   ;; :if window-system
-  ;;   ;; :defer 2
-  ;;   :requires all-the-icons
-  ;;   :ensure t
-  ;;   :init
-  ;;   (doom-modeline-mode 1)
-  ;;   :config
-  ;;   ;; The maximum displayed length of the branch name of version control.
-  ;;   (setq doom-modeline-vcs-max-length 34)
-  ;;   (setq doom-modeline-height 18))
-
   (defun hmz-prog-mode-hook ()
     (interactive)
 
@@ -1792,7 +1779,7 @@ This function is called at the very end of Spacemacs initialization."
  '(coffee-tab-width 2)
  '(csv-separators '("," ";") t)
  '(custom-safe-themes
-   '("7451f243a18b4b37cabfec57facc01bd1fe28b00e101e488c61e1eed913d9db9" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "eb5c79b2e9a91b0a47b733a110d10774376a949d20b88c31700e9858f0f59da7" "a41b81af6336bd822137d4341f7e16495a49b06c180d6a6417bf9fd1001b6d2b" "57bd93e7dc5fbb5d8d27697185b753f8563fe0db5db245592bab55a8680fdd8c" "890a1a44aff08a726439b03c69ff210fe929f0eff846ccb85f78ee0e27c7b2ea" "819ab08867ef1adcf10b594c2870c0074caf6a96d0b0d40124b730ff436a7496" default))
+   '("76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "2dff5f0b44a9e6c8644b2159414af72261e38686072e063aa66ee98a2faecf0e" "7451f243a18b4b37cabfec57facc01bd1fe28b00e101e488c61e1eed913d9db9" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "eb5c79b2e9a91b0a47b733a110d10774376a949d20b88c31700e9858f0f59da7" "a41b81af6336bd822137d4341f7e16495a49b06c180d6a6417bf9fd1001b6d2b" "57bd93e7dc5fbb5d8d27697185b753f8563fe0db5db245592bab55a8680fdd8c" "890a1a44aff08a726439b03c69ff210fe929f0eff846ccb85f78ee0e27c7b2ea" "819ab08867ef1adcf10b594c2870c0074caf6a96d0b0d40124b730ff436a7496" default))
  '(default-justification 'left)
  '(desktop-minor-mode-table
    '((defining-kbd-macro nil)
@@ -1907,6 +1894,7 @@ This function is called at the very end of Spacemacs initialization."
  '(persp-interactive-completion-system 'ido nil nil "Customized with use-package persp-mode")
  '(persp-keymap-prefix "" nil nil "Customized with use-package persp-mode")
  '(persp-kill-foreign-buffer-behaviour 'kill)
+ '(persp-mode-projectile-bridge-mode t nil (persp-mode-projectile-bridge))
  '(persp-nil-name "nil" nil nil "Customized with use-package persp-mode")
  '(popwin-mode t)
  '(popwin:popup-window-width 80)
@@ -2103,5 +2091,4 @@ This function is called at the very end of Spacemacs initialization."
  '(tabbar-selected ((t (:inherit tabbar-default :background "#282a36" :box nil :overline nil :weight bold))))
  '(which-key-posframe-border ((t (:inherit default :background "gray50" :underline t))))
  '(window-divider ((t (:foreground "black"))))
- '(yascroll:thumb-fringe ((t (:inherit font-lock-comment-face :background "MediumPurple4" :foreground "MediumPurple4")))))
-)
+ '(yascroll:thumb-fringe ((t (:inherit font-lock-comment-face :background "MediumPurple4" :foreground "MediumPurple4"))))))

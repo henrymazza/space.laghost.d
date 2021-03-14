@@ -1,7 +1,8 @@
 ;; -*- lexical-binding:t -*-
 ;; -*- coding: utf-8; -*-
-
-;;(require 'req-package)
+;;
+;; TODO: run the following on every buffer when it opens/file system event/etc
+;; (setq-local project-name (projectile-project-name))
 
 (defvar hmz-tabbar-packages
   '(tabbar)
@@ -15,10 +16,6 @@ which require an initialization must be listed explicitly in the list.")
   "Tabbar customizations"
   (use-package tabbar
     :straight t
-    ;; :disabled
-    ;; :catch t
-    ;; :defer t
-    ;; :bind ("s-b" . tabbar-mode)
     ;; :after (helm-lib all-the-icons)
     :init
     (defun ido-switch-tab-group ()
@@ -214,7 +211,7 @@ which require an initialization must be listed explicitly in the list.")
     ;;   (add-to-list 'all-the-icons-icon-alist
     ;;                '("\\.lua$" all-the-icons-wicon "moon-waning-crescent-3" :face all-the-icons-cyan)))
 
-    (defun x-tabbar-buffer-help-on-tab (tab)
+    (defun tabbar-buffer-help-on-tab (tab)
       "Return the help string shown when mouse is onto TAB. This function was overriden to show more useful information."
       (if tabbar--buffer-show-groups
           (let* ((tabset (tabbar-tab-tabset tab))
@@ -266,7 +263,6 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
           'pointer 'hand)
          (propertize
           (concat " "
-
                   the-icon "")
           'face (plist-merge
                  ;; (get icon-face 'foreground)
@@ -316,7 +312,7 @@ element."
 
              (glyph
               (cond ((eq name 'home)
-                     (concat " "
+                     (concat "  "
                              (all-the-icons-wicon
                               (nth
 
@@ -333,16 +329,20 @@ element."
                                '("alien" "fire" "lightning" "barometer" "meteor" "earthquake" "snowflake-cold" "fire" "raindrop" "solar-eclipse" "night-clear" "raindrops" "sprinkle"))
                               :face '(:inherit tabbar-default :height 1.2))))
 
-                    ((eq name 'scroll-left) (all-the-icons-material "chevron_left"))
-                    ((eq name 'scroll-right) (all-the-icons-material "chevron_right"))
+                    ;; ((eq name 'scroll-left) (all-the-icons-material "chevron_left"))
+                    ;; ((eq name 'scroll-right) (all-the-icons-material "chevron_right"))
+                    ((eq name 'scroll-left) "  •")
+                    ((eq name 'scroll-right) "•")
+
                     (t "X")))
 
              (raise-amount 0.0)
 
              (tabset-name (if (eq name 'scroll-left)
-                              (propertize (format "%s" (tabbar-current-tabset))
-                                          'face '(:inherit tabbar-default
-                                                           :height 1.3)
+                              (propertize
+                               ;; (format "%s --" (tabbar-current-tabset))
+                               (format " ")
+                                          'face '(:inherit tabbar-default :height 1.3)
                                           'display '(raise 0.1)) "")))
 
         (tabbar-set-template tabset nil)
@@ -387,14 +387,24 @@ element."
       (setq tabbar-scroll-right-button-value nil)
       (setq tabbar-home-button-value nil))
 
-    (defun x-tabbar-buffer-tab-label (tab)
+    (defun tabbar-buffer-tab-label (tab)
       "Return a label for TAB. That is, a string used to represent it on the
        tab bar. This was overriden to clean up unwanted chars."
+
 
       (let ((label (if tabbar--buffer-show-groups
                        (replace-regexp-in-string
                         "*" "" (format "%s" (tabbar-tab-tabset tab)))
-                     (format "%s" (tabbar-tab-value tab)))))
+
+                     (with-current-buffer (car tab)
+                       (format "%s %s" (tabbar-tab-value tab)
+                               (format "%s"
+                                       (if nil (truncate
+                                        (float-time
+                                         (nth 5 (file-attributes (buffer-file-name)))))
+                                         "" ;; to debug tab ordering
+                                         )))))))
+
         ;; Unless the tab bar auto scrolls to keep the selected tab
         ;; visible, shorten the tab label to keep as many tabs as possible
         ;; in the visible area of the tab bar.
@@ -414,118 +424,124 @@ element."
     (advice-unadvice 'tabbar-buffer-update-groups)
 
     (defun tabbar-buffer-update-groups ()
-  "Update tab sets from groups of existing buffers.
+      "Update tab sets from groups of existing buffers.
 Return the the first group where the current buffer is."
-  (let ((bl (sort
-             (mapcar
-        ;; for each buffer, create list: buffer, buffer name, groups-list
-        ;; sort on buffer name; store to bl (buffer list)
-              #'(lambda (b)
-                  (with-current-buffer b
-                    (list (current-buffer)
-                          (format "%s" (visited-file-modtime))
-                          ;; (format "%10d" (buffer-modified-tick b))
-                          ;; (format "%s" (float-time (nth 5 (file-attributes (buffer-file-name)))))
-                          ;; (buffer-name)
-                          (if tabbar-buffer-groups-function
-                              (funcall tabbar-buffer-groups-function)
-                            '("Common")))))
-              (and tabbar-buffer-list-function
-                   (funcall tabbar-buffer-list-function)))
-             #'(lambda (e2 e1)
-                 (string-lessp (nth 1 e1) (nth 1 e2))))))
-    ;; If the cache has changed, update the tab sets.
-    (unless (equal bl tabbar--buffers)
-      ;; Add new buffers, or update changed ones.
-      (dolist (e bl) ;; loop through buffer list
-        (dolist (g (nth 2 e)) ;; for each member of groups-list for current buffer
-          (let ((tabset (tabbar-get-tabset g))) ;; get group from group name
-            (if tabset ;; if group exists
-    ;; check if current buffer is same as any cached buffer
-    ;; (search buffer list for matching buffer)
-                (unless (equal e (assq (car e) tabbar--buffers)) ;; if not,...
-                  ;; This is a new buffer, or a previously existing
-                  ;; buffer that has been renamed, or moved to another
-                  ;; group.  Update the tab set, and the display.
-                  (tabbar-add-tab tabset (car e) t) ;; add to end of tabset
-                  (tabbar-set-template tabset nil))
-        ;;if tabset doesn't exist, make a new tabset with this buffer
-              (tabbar-make-tabset g (car e))))))
-      ;; Remove tabs for buffers not found in cache or moved to other
-      ;; groups, and remove empty tabsets.
-      (mapc 'tabbar-delete-tabset ;; delete each tabset named in following list:
-            (tabbar-map-tabsets ;; apply following function to each tabset:
-             #'(lambda (tabset)
-                 (dolist (tab (tabbar-tabs tabset)) ;; for each tab in tabset
-                   (let ((e (assq (tabbar-tab-value tab) bl))) ;; get buffer
-                     (or (and e (memq tabset ;; skip if buffer exists and tabset is a member of groups-list for this buffer
-                                      (mapcar 'tabbar-get-tabset
-                                              (nth 2 e))))
-                         (tabbar-delete-tab tab)))) ;; else remove tab from this set
-                 ;; Return empty tab sets
-                 (unless (tabbar-tabs tabset)
-                   tabset)))) ;; return list of tabsets, replacing non-empties with nil
-      ;; The new cache becomes the current one.
-      (setq tabbar--buffers bl)))
-  ;; Return the first group the current buffer belongs to.
-  (car (nth 2 (assq (current-buffer) tabbar--buffers))))
+      (let ((bl (sort
+                 (mapcar
+                  ;; for each buffer, create list: buffer, buffer name, groups-list
+                  ;; sort on buffer name; store to bl (buffer list)
+                  #'(lambda (b)
+                      (with-current-buffer b
+                        (list (current-buffer)
+                              (format "%s" (visited-file-modtime))
+                              ;; (format "%10d" (buffer-modified-tick b))
+                              ;; (format "%s" (float-time (nth 5 (file-attributes (buffer-file-name)))))
+                              ;; (number-to-string (string-width (buffer-name)))
+                              (if tabbar-buffer-groups-function
+                                  (funcall tabbar-buffer-groups-function)
+                                '("Common")))))
+                  (and tabbar-buffer-list-function
+                       (funcall tabbar-buffer-list-function)))
+                 #'(lambda (e2 e1)
+                     (string-lessp (nth 1 e1) (nth 1 e2))))))
+        ;; If the cache has changed, update the tab sets.
+        (unless (equal bl tabbar--buffers)
+          ;; Add new buffers, or update changed ones.
+          (dolist (e bl) ;; loop through buffer list
+            (dolist (g (nth 2 e)) ;; for each member of groups-list for current buffer
+              (let ((tabset (tabbar-get-tabset g))) ;; get group from group name
+                (if tabset ;; if group exists
+                    ;; check if current buffer is same as any cached buffer
+                    ;; (search buffer list for matching buffer)
+                    (unless (equal e (assq (car e) tabbar--buffers)) ;; if not,...
+                      ;; This is a new buffer, or a previously existing
+                      ;; buffer that has been renamed, or moved to another
+                      ;; group.  Update the tab set, and the display.
+                      (tabbar-add-tab tabset (car e) t) ;; add to end of tabset
+                      (tabbar-set-template tabset nil))
+                  ;;if tabset doesn't exist, make a new tabset with this buffer
+                  (tabbar-make-tabset g (car e))))))
+          ;; Remove tabs for buffers not found in cache or moved to other
+          ;; groups, and remove empty tabsets.
+          (mapc 'tabbar-delete-tabset ;; delete each tabset named in following list:
+                (tabbar-map-tabsets ;; apply following function to each tabset:
+                 #'(lambda (tabset)
+                     (dolist (tab (tabbar-tabs tabset)) ;; for each tab in tabset
+                       (let ((e (assq (tabbar-tab-value tab) bl))) ;; get buffer
+                         (or (and e (memq tabset ;; skip if buffer exists and tabset is a member of groups-list for this buffer
+                                          (mapcar 'tabbar-get-tabset
+                                                  (nth 2 e))))
+                             (tabbar-delete-tab tab)))) ;; else remove tab from this set
+                     ;; Return empty tab sets
+                     (unless (tabbar-tabs tabset)
+                       tabset)))) ;; return list of tabsets, replacing non-empties with nil
+          ;; The new cache becomes the current one.
+          (setq tabbar--buffers bl)))
+      ;; Return the first group the current buffer belongs to.
+      (car (nth 2 (assq (current-buffer) tabbar--buffers))))
 
     (defun tabbar-buffer-groups ()
-  "Return the list of group names the current buffer belongs to.
+      "Return the list of group names the current buffer belongs to.
 Return a list of one element based on major mode."
-  (list
-   (cond
-    ((or (get-buffer-process (current-buffer))
-         ;; Check if the major mode derives from `comint-mode' or
-         ;; `compilation-mode'.
-         (tabbar-buffer-mode-derived-p
-          major-mode '(comint-mode compilation-mode)))
-     "Process"
-     )
+      (list
+       (cond
+        ((or (get-buffer-process (current-buffer))
+             ;; Check if the major mode derives from `comint-mode' or
+             ;; `compilation-mode'.
+             (tabbar-buffer-mode-derived-p
+              major-mode '(comint-mode compilation-mode)))
+         "Process")
 
-    ((string-match "^\s?\\*" (buffer-name))
-     "Common"
-     )
-    ((eq major-mode 'dired-mode)
-     "Dired"
-     )
-    ((memq major-mode
-           '(help-mode apropos-mode Info-mode Man-mode))
-     "Help"
-     )
-    ((memq major-mode
-           '(rmail-mode
-             rmail-edit-mode vm-summary-mode vm-mode mail-mode
-             mh-letter-mode mh-show-mode mh-folder-mode
-             gnus-summary-mode message-mode gnus-group-mode
-             gnus-article-mode score-mode gnus-browse-killed-mode))
-     "Mail"
-     )
-    ((local-variable-p 'project-name) (format "%s" (buffer-local-value 'project-name (current-buffer))))
-    (t "unset"
-     ;; (if (local-variable-p 'project-name)
-         ;; (buffer-local-value 'project-name (current-buffer))
-     ;;   "unset"
-       ;; (progn
-       ;;  (symbol-name major-mode)
-       ;;  (if (projectile-project-p)
-       ;;      (setq-local project-name (projectile-project-name))
-       ;;    (setq-local project-name major-mode))
+        ((string-match "^\s?\\*" (buffer-name))
+         "Common")
 
-       ;;  (defvar-local project-name (projectile-project-name))
-       ;;  (buffer-local-value 'project-name (current-buffer))
-       ;;  )
-       ;; )
+        ((eq major-mode 'dired-mode)
+         "Dried")
 
-     ;; Return `mode-name' if not blank, `major-mode' otherwise.
-     ;; (unless (stringp (buffer-local-value 'project-name (current-buffer)))
-              ;; Take care of preserving the match-data because this
-              ;; function is called when updating the header line.
-              ;; (save-match-data (string-match "[^ ]" mode-name)))
-       ;;   (buffer-local-value 'project-name (current-buffer))
-       ;; (symbol-name major-mode)
-       )
-     )))
+        ((memq major-mode
+               '(help-mode apropos-mode Info-mode Man-mode))
+         "Help")
+
+        ((memq major-mode
+               ;; XXX: perhaps use mode-derived?
+               '(magit-mode magit-diff-mode magit-status-mode magit-process-mode
+                            magit-revision-mode magit-reflog-mode))
+         "Magit")
+
+        ((memq major-mode
+               '(rmail-mode
+                 rmail-edit-mode vm-summary-mode vm-mode mail-mode
+                 mh-letter-mode mh-show-mode mh-folder-mode
+                 gnus-summary-mode message-mode gnus-group-mode
+                 gnus-article-mode score-mode gnus-browse-killed-mode))
+         "Mail")
+
+        ((local-variable-p 'project-name) (format "%s" (buffer-local-value 'project-name (current-buffer))))
+        (t
+         "unset"
+         (if (local-variable-p 'project-name)
+             (buffer-local-value 'project-name (current-buffer))
+           ;; "unset"
+           (progn
+             (symbol-name major-mode)
+             (if (projectile-project-p)
+                 (setq-local project-name (projectile-project-name))
+               (setq-local project-name major-mode))
+
+             (defvar-local project-name (projectile-project-name))
+             (buffer-local-value 'project-name (current-buffer))
+             )
+           )
+
+         ;; Return `mode-name' if not blank, `major-mode' otherwise.
+         ;; (unless (stringp (buffer-local-value 'project-name (current-buffer)))
+         ;; Take care of preserving the match-data because this
+         ;; function is called when updating the header line.
+         ;; (save-match-data (string-match "[^ ]" mode-name)))
+         ;;   (buffer-local-value 'project-name (current-buffer))
+         ;; (symbol-name major-mode)
+         )
+        )))
 
     ;; Tabbar Groups Definition
     (defun x-tabbar-buffer-groups ()
@@ -563,14 +579,14 @@ Return a list of one element based on major mode."
     (defun hmz-tabbar-refresh-tabs ()
       (if tabbar-mode
           (progn
-            ;; (tabbar-mode 0)
+            (tabbar-mode 0)
             (setq tabbar-scroll-left-button-value nil)
             (setq tabbar-scroll-right-button-value nil)
             (setq tabbar-home-button-value nil)
 
             (hmz-tabbar-refresh-faces)
 
-            ;; (tabbar-mode 1)
+            (tabbar-mode 1)
             )))
 
     (unless (boundp 'after-load-theme-hook)
