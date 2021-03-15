@@ -386,9 +386,14 @@ So it safe to call it many times like in a minor mode hook."
   (company-posframe-mode))
 
 (use-package undohist
-  :straight t
+  :straight (:host github :repo "halbtuerke/undohist-el"
+                   :branch "do-not-save-undo-file-for-ignored-files")
+  :defer t
+  :init
+  (autoload 'undohist-initialize "undohist")
+  (undohist-initialize)
   :config
-  (undohist-initialize))
+  (setq undohist-ignored-files '("\\.gpg\\'" "COMMIT_EDITMSG")))
 
 (use-package psession
   :straight t
