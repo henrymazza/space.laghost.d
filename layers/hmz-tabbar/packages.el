@@ -315,22 +315,15 @@ element."
                      (concat "  "
                              (all-the-icons-wicon
                               (nth
-
                                ;; Use current group to define icon
-                               (or (position
-                                    (tabbar-current-tabset)
-                                    (mapcar #'cdr
-                                            (tabbar-tabs (tabbar-get-tabsets-tabset)))
-                                    ) 7)
+                               (% (string-to-char (format "%s" (tabbar-current-tabset))) 13 )
 
-                               ;; Use current window number to define the icon
-                               ;; (if winum-mode (winum-get-number) 1)
+                               '("fire" "meteor" "lightning" "barometer" "raindrops" "earthquake"
+                                 "snowflake-cold" "fire" "raindrop" "solar-eclipse" "night-clear"
+                                 "alien" "sprinkle"))
 
-                               '("alien" "fire" "lightning" "barometer" "meteor" "earthquake" "snowflake-cold" "fire" "raindrop" "solar-eclipse" "night-clear" "raindrops" "sprinkle"))
                               :face '(:inherit tabbar-default :height 1.2))))
 
-                    ;; ((eq name 'scroll-left) (all-the-icons-material "chevron_left"))
-                    ;; ((eq name 'scroll-right) (all-the-icons-material "chevron_right"))
                     ((eq name 'scroll-left) "  •")
                     ((eq name 'scroll-right) "•")
 
