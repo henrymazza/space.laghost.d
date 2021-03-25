@@ -13,7 +13,6 @@
 
 (use-package docker
   :straight t
-  :disabled
   :ensure t
   :bind ("C-c d" . docker))
 
@@ -705,10 +704,16 @@ So it safe to call it many times like in a minor mode hook."
   :init
   (ido-yes-or-no-mode 0))
 
-;; FIXME: not loading on startup!
+;; FIXME: not loading at start time
 (use-package amx
   :straight t
   :init
+  (defun spacemacs/helm-M-x-fuzzy-matching ()
+    "Helm M-x with fuzzy matching enabled"
+    (interactive)
+    (let ((amx-prompt-string "Emacs commands: "))
+      (amx)))
+
   (defun spacemacs/amx ()
     "Execute amx with a better prompt."
     (interactive)
@@ -743,9 +748,15 @@ So it safe to call it many times like in a minor mode hook."
   (global-set-key (kbd "M-x") 'spacemacs/amx)
   (global-set-key (kbd "M-X") 'spacemacs/amx-major-mode-commands)
 
-  (define-key evil-normal-state-map (kbd "SPC SPC") 'spacemacs/amx)
-  (evil-leader/set-key "SPC" 'spacemacs/amx)
-  (spacemacs/set-leader-keys "SPC" 'spacemacs/amx))
+  ;; (define-key evil-normal-state-map (kbd "SPC SPC") 'spacemacs/amx)
+  ;; (evil-leader/set-key "SPC" 'spacemacs/amx)
+  ;; (spacemacs/set-leader-keys "SPC" 'spacemacs/amx)
+  )
+
+(use-package unicode-fonts
+  :straight t
+  :config
+  (unicode-fonts-setup))
 
 (use-package wakatime-mode
   :straight t

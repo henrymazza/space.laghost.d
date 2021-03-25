@@ -159,8 +159,8 @@ which require an initialization must be listed explicitly in the list.")
                           :foreground 'unspecified
                           :background (face-attribute 'default :background)
                           :inherit 'tabbar-default
-                          ;; :underline (face-attribute 'font-lock-comment-face :foreground)
-                          :underline nil
+                          :underline (face-attribute 'font-lock-constant-face :foreground)
+                          ;; :underline nil
                           :overline nil
                           :weight 'normal)
 
@@ -270,6 +270,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
                  `(:background ,(face-attribute 'tabbar-default :background nil 'default))
                  (if tab-is-active
                      `(:overline nil;; ,(face-attribute tab-face :foreground nil 'default)
+                                 :height 1.2
                                  :foreground ,(hmz-lighten-if-too-dark icon-face)
                                  :background ,(face-attribute 'tabbar-selected :background nil 'default))
                    `(:foreground ,(face-attribute 'tabbar-icon-unselected :foreground nil 'default))))
@@ -283,11 +284,8 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
          (propertize
           (concat
            " "
-           ;; (with-current-buffer (car tab)
-           ;;   (format "%s" (visited-file-modtime))
-           ;;   )
            (if tabbar-tab-label-function
-               (funcall tabbar-tab-label-function tab) tab) " ")
+               (funcall tabbar-tab-label-function tab) tab) "")
           'tabbar-tab tab
           'local-map (tabbar-make-tab-keymap tab)
           'help-echo 'tabbar-help-on-tab
@@ -295,6 +293,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
           'face tab-face
           'display `(raise 0.2) ;;,(symbol-value 'hmz-tabbar-raise-text))
           'pointer 'hand)
+
          tabbar-separator-value)))
 
     (defsubst tabbar-line-button (name)
@@ -322,7 +321,7 @@ element."
                                  "snowflake-cold" "fire" "raindrop" "solar-eclipse" "night-clear"
                                  "alien" "sprinkle"))
 
-                              :face '(:inherit tabbar-default :height 1.2))))
+                              :face '(:inherit tabbar-default :height 1.4))))
 
                     ((eq name 'scroll-left) "  •")
                     ((eq name 'scroll-right) "•")

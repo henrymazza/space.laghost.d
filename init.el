@@ -7,6 +7,7 @@
 ;; (require 'iso-transl)
 
 (setq debug-on-error nil)
+
 ;; it may cause problems with spacemacs own loader
 (setq straight-use-package-by-default nil)
 
@@ -40,7 +41,8 @@ values."
    ;; load. If it is the symbol `all' instead
   ;; of a list then all discovered layers will be installed.
   dotspacemacs-configuration-layers
-  '(shell-scripts
+  '(sql
+    shell-scripts
     ;; elixir
     ;; lsp
     ;; php
@@ -238,7 +240,9 @@ values."
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font. `powerline-scale' allows to quickly tweak the mode-line
    ;; size to make separators look not too crappy.
-   dotspacemacs-default-font '("Fira Code"
+   dotspacemacs-default-font '(
+                               ;; "DejaVu Sans Mono"
+                               "Fira Code"
              ;; "Inconsolata"
              ;; "Anonymous Pro Minus"
             :size 14
@@ -416,14 +420,22 @@ before packages are loaded. If you are unsure, you should try in setting them in
     "Beautify Org Block Symbols"
     (interactive)
     (prettify-symbols-mode 0)
+    (setq prettify-symbols-alist '())
     (push '("TODO:" . ?⚡) prettify-symbols-alist)
+    (push '("DONE:" . ?✓) prettify-symbols-alist)
+    (push '("CANCELED:" . ?✗) prettify-symbols-alist)
     (push '("#+begin_src sh" . ?❯) prettify-symbols-alist)
     (push '("#+begin_src shell" . ?❯) prettify-symbols-alist)
+    (push '("#+begin_src dockerfile" . ?🐋) prettify-symbols-alist)
     (push '("#+begin_src yaml" . ?Ӱ) prettify-symbols-alist)
+    (push '("#+begin_src ruby" . ?ᚱ) prettify-symbols-alist)
+    (push '("#+begin_src sql" . ?☷) prettify-symbols-alist)
     (push '("#+end_src" . ?❮) prettify-symbols-alist)
     (push '("#+header:" . ?☰) prettify-symbols-alist)
-    (push '("#+begin_comment" . 301F) prettify-symbols-alist)
-    (push '("#+end_comment" . 301E) prettify-symbols-alist)
+    (push '("#+begin_example" . ?❝) prettify-symbols-alist)
+    (push '("#+end_example" . ?❞) prettify-symbols-alist)
+    (push '("#+begin_comment" . ?❝) prettify-symbols-alist)
+    (push '("#+end_comment" . ?❞) prettify-symbols-alist)
     (push '("#+begin_notes" . ?❝) prettify-symbols-alist)
     (push '("#+end_notes" . ?❞) prettify-symbols-alist)
     (push '("#+begin_quote" . ?❝) prettify-symbols-alist)
@@ -1634,7 +1646,9 @@ Example:
           (concat ;;(file-relative-name (projectile-expand-root file) (projectile-project-root))
            (when (and (bound-and-true-p projectile-mode)
                       (projectile-project-p))
-             (format " [%s] 👽" (projectile-project-name))))
+             (format "[%s]" (projectile-project-name))
+             ;; (format " [%s] 👽" (projectile-project-name))
+             ))
         "%b")))
 
   (setq frame-title-format '((:eval (hmz-init/frame-title-format))))
@@ -1863,6 +1877,7 @@ This function is called at the very end of Spacemacs initialization."
  '(objed-cursor-color "#ff5555")
  '(org-blank-before-new-entry '((heading) (plain-list-item)))
  '(org-bullets-bullet-list '("◉" "○" "●" "☞"))
+ '(org-directory "~/Documents/org")
  '(org-export-backends '(ascii html icalendar latex md odt))
  '(org-export-with-section-numbers 2)
  '(org-fontify-quote-and-verse-blocks t)
@@ -1940,6 +1955,7 @@ This function is called at the very end of Spacemacs initialization."
  '(sublimity-scroll-weight 2.0)
  '(tempbuf-kill-hook nil)
  '(tooltip-use-echo-area t)
+ '(tramp-verbose 6)
  '(use-dialog-box t)
  '(use-package-always-demand t)
  '(use-package-check-before-init t)
@@ -2040,7 +2056,7 @@ This function is called at the very end of Spacemacs initialization."
  '(font-lock-comment-face ((t (:foreground "LightSteelBlue3"))))
  '(font-lock-warning-face ((t (:background "#373844" :foreground "#ffb86c" :underline (:color "red" :style wave)))))
  '(fringe ((t (:foreground "DeepSkyBlue" :background unspecified))))
- '(header-line ((t (:background "#44475a" :underline "gray20" :height 1.0 :family "San Francisco"))))
+ '(header-line ((t (:background "#44475a" :underline "gray20" :height 0.95 :family "San Francisco"))))
  '(hi-yellow ((t nil)))
  '(highlight-indent-guides-character-face ((t (:foreground "#3df1410a539f"))))
  '(hl-line ((t nil)))
@@ -2067,14 +2083,15 @@ This function is called at the very end of Spacemacs initialization."
  '(neo-vc-conflict-face ((t (:foreground "dark red"))))
  '(neo-vc-edited-face ((t (:foreground "#ff79c6"))))
  '(org-block ((t (:extend t :background "dark slate gray" :foreground "#ffb86c"))))
- '(org-done ((t (:foreground "gold"))))
- '(org-headline-done ((t (:strike-through nil :weight bold))))
+ '(org-block-begin-line ((t (:inherit org-meta-line :extend t :height 1.2))))
+ '(org-done ((t (:foreground "gold" :height 1.9))))
+ '(org-headline-done ((t (:foreground "cornflower blue" :strike-through nil :weight bold))))
  '(org-level-1 ((t (:inherit link :extend nil :foreground "DarkOrange3" :underline nil :weight bold :height 1.3 :family "San Francisco"))))
  '(org-level-2 ((t (:inherit nil :extend nil :foreground "goldenrod" :weight bold :height 1.15))))
  '(org-level-3 ((t (:extend nil :foreground "#50fa7b" :weight bold :height 1.1))))
  '(org-link ((t (:inherit link :foreground "SkyBlue2" :underline nil))))
  '(org-quote ((t (:inherit nil :background "gray20" :foreground "gray80" :slant italic))))
- '(org-todo ((t (:background "#373844" :foreground "#ffb86c" :weight bold :height 1.2))))
+ '(org-todo ((t (:foreground "#ffb86c" :weight bold :height 1.9))))
  '(org-verbatim ((t (:inherit font-lock-variable-name-face :family "Fira Code"))))
  '(origami-fold-replacement-face ((t (:inherit 'font-lock-builtin-face))))
  '(outshine-level-1 ((t (:inherit outline-1 :weight bold :height 1.1 :family "San Francisco"))))
@@ -2091,4 +2108,5 @@ This function is called at the very end of Spacemacs initialization."
  '(tabbar-selected ((t (:inherit tabbar-default :background "#282a36" :box nil :overline nil :weight bold))))
  '(which-key-posframe-border ((t (:inherit default :background "gray50" :underline t))))
  '(window-divider ((t (:foreground "black"))))
- '(yascroll:thumb-fringe ((t (:inherit font-lock-comment-face :background "MediumPurple4" :foreground "MediumPurple4"))))))
+ '(yascroll:thumb-fringe ((t (:inherit font-lock-comment-face :background "MediumPurple4" :foreground "MediumPurple4")))))
+)
