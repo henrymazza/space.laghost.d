@@ -323,7 +323,7 @@ element."
 
                               :face '(:inherit tabbar-default :height 1.4))))
 
-                    ((eq name 'scroll-left) "  •")
+                    ((eq name 'scroll-left) (concat "  •"))
                     ((eq name 'scroll-right) "•")
 
                     (t "X")))
@@ -332,8 +332,10 @@ element."
 
              (tabset-name (if (eq name 'scroll-left)
                               (propertize
-                               ;; (format "%s --" (tabbar-current-tabset))
-                               (format " ")
+                               (format " %s " (or (file-remote-p default-directory 'host) " ∑ "))
+                               ;;
+                               ;; (format "(file-remote-p default-directory 'host)%s --" (tabbar-current-tabset))
+                               ;; (format " !! ")
                                           'face '(:inherit tabbar-default :height 1.3)
                                           'display '(raise 0.1)) "")))
 

@@ -21,7 +21,7 @@
     dired-sidebar
     doom-modeline
     doom-todo-ivy
-    ember-mode
+    ;; ember-mode
     evil-ruby-text-objects
     evil-magit
     fira-code-mode

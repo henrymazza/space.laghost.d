@@ -540,6 +540,7 @@ So it safe to call it many times like in a minor mode hook."
   (persp-keymap-prefix "")
   (persp-nil-name "nil")
 
+
   :config
   (persp-def-auto-persp "dotfiles"
                         :mode 'prog-mode)

@@ -174,7 +174,7 @@ values."
    ;; `used-but-keep-unused' installs only the used packages but won't uninstall
    ;; them if they become unused. `all' installs *all* packages supported by
    ;; Spacemacs and never uninstall them. (default is `used-only')
-   dotspacemacs-install-packages 'used))
+   dotspacemacs-install-packages 'used-only))
 
 (defun dotspacemacs/init ()
   "Initialization function.
@@ -291,11 +291,11 @@ values."
    dotspacemacs-display-default-layout t
    ;; If non nil then the last auto saved layouts are resume automatically upon
    ;; start. (default nil)
-   dotspacemacs-auto-resume-layouts 500
+   dotspacemacs-auto-resume-layouts t
    ;; Size (in MB) above which spacemacs will prompt to open the large file
    ;; literally to avoid performance issues. Opening a file literally means that
    ;; no major mode or minor modes are active. (default is 1)
-   dotspacemacs-large-file-size 1
+   dotspacemacs-large-file-size 100
    ;; Location where to auto-save files. Possible values are `original' to
    ;; auto-save the file in-place, `cache' to auto-save the file to another
    ;; file stored in the cache directory and `nil' to disable auto-saving.
@@ -414,6 +414,8 @@ executes.
  This function is mostly useful for variables that need to be set
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
+
+  (customize-set-variable 'tramp-verbose 6 "Enable remote command traces")
 
   ;; org-mode prettify symbols
   (defun hmz-init/org-prettify ()
@@ -1088,25 +1090,25 @@ move to the next field. Call `open-line' if nothing else applies."
     :tags '(work)
     :kill-process-buffer-on-stop t)
 
-  (prodigy-define-service
-    :name "Uni Frontend Build Server"
-    :command "ember"
-    :args '("serve")
-    :cwd "/Users/HMz/Development/uni-fe/"
-    :url "localhost"
-    :port 4200
-    :tags '(work)
-    :stop-signal 'sigkill
-    :kill-process-buffer-on-stop t)
+  ;; (prodigy-define-service
+  ;;   :name "Uni Frontend Build Server"
+  ;;   :command "ember"
+  ;;   :args '("serve")
+  ;;   :cwd "/Users/HMz/Development/uni-fe/"
+  ;;   :url "localhost"
+  ;;   :port 4200
+  ;;   :tags '(work)
+  ;;   :stop-signal 'sigkill
+  ;;   :kill-process-buffer-on-stop t)
 
-  (prodigy-define-service
-    :name "Uni Test Server"
-    :command "ember"
-    :args '("test" "--serve" "--watcher" "node")
-    :cwd "/Users/HMz/Development/uni-fe/"
-    :tags '(work)
-    :stop-signal 'sigkill
-    :kill-process-buffer-on-stop t)
+  ;; (prodigy-define-service
+  ;;   :name "Uni Test Server"
+  ;;   :command "ember"
+  ;;   :args '("test" "--serve" "--watcher" "node")
+  ;;   :cwd "/Users/HMz/Development/uni-fe/"
+  ;;   :tags '(work)
+  ;;   :stop-signal 'sigkill
+  ;;   :kill-process-buffer-on-stop t)
 
   ;; Thou shall not pass the eightiegh column of thy code
   (global-column-enforce-mode 1)
