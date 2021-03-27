@@ -432,6 +432,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
     (push '("#+begin_src yaml" . ?Ӱ) prettify-symbols-alist)
     (push '("#+begin_src ruby" . ?ᚱ) prettify-symbols-alist)
     (push '("#+begin_src sql" . ?☷) prettify-symbols-alist)
+    (push '("#+begin_src elisp" . ?ε) prettify-symbols-alist)
     (push '("#+end_src" . ?❮) prettify-symbols-alist)
     (push '("#+header:" . ?☰) prettify-symbols-alist)
     (push '("#+begin_example" . ?❝) prettify-symbols-alist)
@@ -592,7 +593,12 @@ before packages are loaded. If you are unsure, you should try in setting them in
     (interactive)
     (mapc 'kill-buffer (-remove 'buffer-backed-by-file-p (buffer-list))))
 
-  (global-auto-revert-mode t)
+  ;; avoid for tramp performance
+  (global-auto-revert-mode nil)
+
+  ;; projectile don't go well with tramp
+  (defadvice projectile-project-root (around ignore-remote first activate)
+    (unless (file-remote-p default-directory) ad-do-it))
 
   ;; turn off magic comments for any ruby mode
   (setq enh-ruby-add-encoding-comment-on-save nil)
@@ -947,8 +953,6 @@ move to the next field. Call `open-line' if nothing else applies."
   ;; auto refresh
   (add-hook 'ibuffer-mode-hook (lambda () (ibuffer-auto-mode 1)))
 
-  (global-auto-revert-mode t)
-
   (defun hmz-init/before-save (save-fun &rest args)
     (set-buffer-modified-p t)
     (message "Saving... %s" buffer-file-name)
@@ -1020,7 +1024,7 @@ move to the next field. Call `open-line' if nothing else applies."
   (redraw-display)
 
   ;; avoid leaving stall branch information by VC
-  (setq auto-revert-check-vc-info t)
+  (setq auto-revert-check-vc-info nil)
 
   (defun prodigy-strip-ctrl-m (output)
     "Strip  line endings from OUTPUT."
@@ -1957,6 +1961,8 @@ This function is called at the very end of Spacemacs initialization."
  '(sublimity-scroll-weight 2.0)
  '(tempbuf-kill-hook nil)
  '(tooltip-use-echo-area t)
+ '(tramp-copy-size-limit 1000000)
+ '(tramp-inline-compress-start-size 1000000)
  '(tramp-verbose 6)
  '(use-dialog-box t)
  '(use-package-always-demand t)
@@ -2058,7 +2064,7 @@ This function is called at the very end of Spacemacs initialization."
  '(font-lock-comment-face ((t (:foreground "LightSteelBlue3"))))
  '(font-lock-warning-face ((t (:background "#373844" :foreground "#ffb86c" :underline (:color "red" :style wave)))))
  '(fringe ((t (:foreground "DeepSkyBlue" :background unspecified))))
- '(header-line ((t (:background "#44475a" :underline "gray20" :height 0.95 :family "San Francisco"))))
+ '(header-line ((t (:background "#44475a" :underline "gray20" :height 1.0 :family "San Francisco"))))
  '(hi-yellow ((t nil)))
  '(highlight-indent-guides-character-face ((t (:foreground "#3df1410a539f"))))
  '(hl-line ((t nil)))
