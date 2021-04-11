@@ -275,7 +275,7 @@ Call `tabbar-tab-label-function' to obtain a label for TAB."
                                  :background ,(face-attribute 'tabbar-selected :background nil 'default))
                    `(:foreground ,(face-attribute 'tabbar-icon-unselected :foreground nil 'default))))
 
-          'display (if tab-is-active '(raise 0.0) '(raise 0.0))
+          'display (if tab-is-active '(raise 0.2) '(raise 0.2))
           'tabbar-tab tab
           'local-map (tabbar-make-tab-keymap tab)
           'help-echo 'tabbar-help-on-tab
@@ -321,7 +321,7 @@ element."
                                  "snowflake-cold" "fire" "raindrop" "solar-eclipse" "night-clear"
                                  "alien" "sprinkle"))
 
-                              :face '(:inherit tabbar-default :height 1.4))))
+                              :face '(:inherit tabbar-default :height 1.3))))
 
                     ((eq name 'scroll-left) (concat "  •"))
                     ((eq name 'scroll-right) "•")

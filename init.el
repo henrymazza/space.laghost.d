@@ -6,7 +6,7 @@
 
 ;; (require 'iso-transl)
 
-(setq debug-on-error nil)
+(setq debug-on-error t)
 
 ;; it may cause problems with spacemacs own loader
 (setq straight-use-package-by-default nil)
@@ -41,7 +41,8 @@ values."
    ;; load. If it is the symbol `all' instead
   ;; of a list then all discovered layers will be installed.
   dotspacemacs-configuration-layers
-  '(sql
+  '(lua
+    sql
     shell-scripts
     ;; elixir
     ;; lsp
@@ -415,7 +416,14 @@ executes.
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
 
-  (customize-set-variable 'tramp-verbose 6 "Enable remote command traces")
+  ;; projectile will make slower indexing but use .projectile for ignore
+  (setq projectile-use-native-indexing t)
+  (setq projectile-enable-caching t)
+
+  (customize-set-variable 'tramp-verbose 10 "Enable remote command traces")
+  ;; to speed up tramp
+  (setq remote-file-name-inhibit-cache nil)
+  (setq vc-ignore-dir-regexp (format "%s\|%s" vc-ignore-dir-regexp tramp-file-name-regexp))
 
   ;; org-mode prettify symbols
   (defun hmz-init/org-prettify ()
@@ -446,8 +454,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
     (push '("[ ]" . "☐") prettify-symbols-alist)
     (push '("[X]" . "☑" ) prettify-symbols-alist)
     (push '("[-]" . "❍" ) prettify-symbols-alist)
-    (prettify-symbols-mode 1)
-    )
+    (prettify-symbols-mode 1))
 
   (add-hook 'org-mode-hook 'hmz-init/org-prettify)
 
@@ -461,16 +468,17 @@ before packages are loaded. If you are unsure, you should try in setting them in
   ;; my org-mode settings
   (defun hmz-init/org-config ()
     (interactive)
-    (setq org-log-done 'time)
+    (setq org-log-done nil)
     (spacemacs/toggle-visual-line-navigation-on)
     (org-indent-mode t)
     (org-bullets-mode 1)
+    (drag-stuff-mode 0)
     (setq-local word-wrap nil))
 
   (add-hook 'org-mode-hook 'hmz-init/org-config)
 
   ;; echo-area customization
-  (with-current-buffer " *Echo Area 0*" (face-remap-add-relative 'default '(:height 180 :weight bold)))
+  ;; (with-current-buffer " *Echo Area 0*" (face-remap-add-relative 'default '(:height 180 :weight bold)))
 
   ;; make frames reusable (one is aware of the other)
   (add-to-list 'display-buffer-alist
@@ -607,23 +615,6 @@ before packages are loaded. If you are unsure, you should try in setting them in
   ;; try to fix "unrecognized entry undo list ..."
   ;; seems promising
   (setq undo-tree-enable-undo-in-region nil)
-
-  ;; config shell-pop
-  (custom-set-variables
-   ;; custom-set-variables was added by Custom.
-   ;; If you edit it by hand, you could mess it up, so be careful.
-   ;; Your init file should contain only one such instance.
-   ;; If there is more than one, they won't work right.
-   ;; '(shell-pop-default-directory "/Users/kyagi/git")
-   ;; '(shell-pop-shell-type (quote ("ansi-term" "*ansi-term*" (lambda nil (ansi-term shell-pop-term-shell)))))
-   ;; '(shell-pop-term-shell "/bin/bash")
-   ;; '(shell-pop-universal-key "C-t")
-   '(shell-pop-window-size 30)
-   '(shell-pop-full-span nil)
-   '(shell-pop-window-position "left")
-   ;; '(shell-pop-autocd-to-working-dir t)
-   '(shell-pop-restore-window-configuration t)
-   '(shell-pop-cleanup-buffer-at-process-exit t))
 
   (setq initial-buffer-choice t)
 
@@ -1009,6 +1000,7 @@ move to the next field. Call `open-line' if nothing else applies."
 
   ;; cycle throgh frames (macOS's windows)
   ;; * in insert mode it reads command +
+  (global-set-key (kbd "s-`") 'next-multiframe-window)
   (global-set-key (kbd "s-1") 'next-multiframe-window)
 
   ;; Initialize title bar appearence manager
@@ -1301,9 +1293,6 @@ move to the next field. Call `open-line' if nothing else applies."
   (setq-default tab-width 2)
   (setq-default c-basic-offset 2)
   (setq indent-line-function 'insert-tab)
-
-  ;; Coffeescript specific tabbing requirements
-  (custom-set-variables '(coffee-tab-width 2))
 
   ;; force web-mode
   (use-package web-mode
@@ -1653,12 +1642,10 @@ Example:
            (when (and (bound-and-true-p projectile-mode)
                       (projectile-project-p))
              (format "[%s]" (projectile-project-name))
-             ;; (format " [%s] 👽" (projectile-project-name))
              ))
         "%b")))
 
   (setq frame-title-format '((:eval (hmz-init/frame-title-format))))
-  ;; (setq frame-title-format "👽")
 
   ;; function to clear read-only shell buffers
   (defun clear-comint-buffer ()
@@ -1681,95 +1668,8 @@ Example:
 
   (require 'hmz-modules (concat (expand-file-name user-emacs-directory) "../.spacemacs.d/hmz-modules.el"))
 
-  ) ;; end user-config
-
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(default ((((min-colors 16777216)) (:background "#282a36" :foreground "#f8f8f2")) (t (:background nil :foreground "#f8f8f2"))))
- '(ahs-definition-face ((t (:weight bold))))
- '(ahs-edit-mode-face ((t (:weight bold))))
- '(ahs-face ((t (:weight bold))))
- '(ahs-plugin-whole-buffer-face ((t nil)))
- '(evil-search-highlight-persist-highlight-face ((t (:inherit lazy-highlight))))
- '(fic-face ((t (:weight bold))))
- '(flyspell-duplicate ((t (:underline "DarkOrange"))))
- '(flyspell-incorrect ((t (:underline "Red1"))))
- '(header-line ((t (:background "#44475a" :underline "gray20" :height 1.0 :family "San Francisco"))))
- '(highlight-indent-guides-character-face ((t (:foreground "#3df1410a539f"))))
- '(hydra-face-red ((t (:foreground "#FF0000" :weight bold))))
- '(indent-guide-face ((t (:inherit font-lock-constant-face :slant normal))))
- '(line-number ((t (:background "#282a36" :foreground "#565761" :slant normal :height 0.8))))
- '(line-number-current-line ((t (:inherit (font-lock-keyword-face hl-line line-number)))))
- '(magit-blame-highlight ((t (:inherit (font-lock-comment-face hl-line) :height 0.8 :family "San Francisco"))))
- '(magit-blame-name ((t (:inherit font-lock-variable-name-face))) t)
- '(mode-line ((t (:foreground "White" :box (:line-width 1 :color "#44475a") :height 0.9 :family "San Francisco"))))
- '(mode-line-inactive ((t (:inherit mode-line :background "#373844" :foreground "#f8f8f2" :height 120))))
- '(neo-banner-face ((t (:inherit font-lock-constant-face :weight bold :family "San Francisco"))))
- '(neo-button-face ((t (:underline nil :family "San Francisco"))))
- '(neo-dir-link-face ((t (:foreground "DeepSkyBlue" :family "San Francisco"))))
- '(neo-file-link-face ((t (:foreground "White" :family "San Francisco"))))
- '(spacemacs-transient-state-title-face ((t (:inherit mode-line :height 0.8))))
- '(speedbar-button-face ((t nil)))
- '(speedbar-file-face ((t nil)))
- '(speedbar-highlight-face ((t nil)))
- '(speedbar-selected-face ((t nil)))
- '(speedbar-separator-face ((t nil)))
- '(speedbar-tag-face ((t nil)))
- '(tabbar-default ((t (:inherit (hl-line header-line) :box nil :underline nil :weight light :height 0.8))))
- '(tabbar-icon-unselected ((t (:box nil :inherit 'tabbar-default :underline t))))
- '(which-key-posframe-border ((t (:inherit default :background "gray50" :underline t)))))
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ahs-default-range 'ahs-range-whole-buffer)
- '(ahs-idle-interval 1.0)
- '(auto-revert-buffer-list-filter 'magit-auto-revert-buffer-p)
- '(auto-revert-verbose t)
- '(before-save-hook
-   '(time-stamp whitespace-cleanup spacemacs//python-sort-imports))
- '(coffee-tab-width 2)
- '(default-justification 'left)
- '(desktop-minor-mode-table
-   '((defining-kbd-macro nil)
-     (isearch-mode nil)
-     (vc-mode nil)
-     (vc-dired-mode nil)
-     (erc-track-minor-mode nil)
-    ;; (savehist-mode nil)
-     (company-posframe-mode nil)))
- '(doom-modeline-buffer-encoding nil)
- '(doom-modeline-height 15)
- '(doom-modeline-indent-info nil)
- '(doom-modeline-mode t)
- '(fic-highlighted-words '("FIXME" "TODO" "BUG" "HACK" "XXX" "OPTIMIZE" "NOTE"))
- '(fill-column 80)
- '(global-auto-highlight-symbol-mode t)
- '(highlight-indent-guides-character 183)
- '(highlight-indent-guides-method 'character)
- '(highlight-indent-guides-mode nil t)
- '(highlight-indentation-offset 4)
- '(ibuffer-default-sorting-mode 'recency)
- '(ibuffer-sidebar-width 22)
- '(message-sent-hook '((lambda nil (message (buffer-name)))))
- '(package-selected-packages
-   '(google-this modern-fringes terraform-mode enh-ruby-mode psession telega dired-sidebar centaur-tabs writeroom-mode workgroups memory-usage drupal-mode phpunit phpcbf php-auto-yasnippets php-mode zones sr-speedbar evil-ruby-text-objects tempbuf wakatime-mode rspec-simple ido-completing-read+ shrink-path amx ri-mode ri smooth-scrolling ivy-youtube wgrep ivy-hydra lv flyspell-correct-ivy counsel-projectile counsel swiper ivy doom-todo-ivy magit-todos todo-projectile hl-block hl-block-mode indent-guide-mode highlight-indent-guides-mode vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toml-mode toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocopfmt rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails prodigy popwin pip-requirements persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file ns-auto-titlebar nginx-mode mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-gutter-fringe gh-md gcmh fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme doom-themes doom-modeline discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby cargo bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))
- '(shell-pop-cleanup-buffer-at-process-exit t)
- '(shell-pop-full-span nil t)
- '(shell-pop-restore-window-configuration t)
- '(shell-pop-window-position "left" t)
- '(shell-pop-window-size 30 t)
- '(speedbar-use-images nil)
- '(tempbuf-kill-hook nil)
- '(use-dialog-box t)
- '(wakatime-api-key "79de0de9-6375-48d1-b78f-440418c5e5a0")
- '(wakatime-cli-path "/usr/local/bin/wakatime")
- '(wakatime-python-bin "/usr/local/bin/python3")
- '(workgroups-mode t))
+  (ido-mode 1)
+) ;; end user-config
 
 (defun dotspacemacs/emacs-custom-settings ()
   "Emacs custom settings.
@@ -1880,13 +1780,16 @@ This function is called at the very end of Spacemacs initialization."
      (nil . 8942)))
  '(neo-window-position 'right)
  '(neo-window-width 40)
+ '(nil nil t)
  '(objed-cursor-color "#ff5555")
  '(org-blank-before-new-entry '((heading) (plain-list-item)))
  '(org-bullets-bullet-list '("◉" "○" "●" "☞"))
  '(org-directory "~/Documents/org")
  '(org-export-backends '(ascii html icalendar latex md odt))
  '(org-export-with-section-numbers 2)
+ '(org-fontify-done-headline nil)
  '(org-fontify-quote-and-verse-blocks t)
+ '(org-log-done nil)
  '(org-modules
    '(ol-bbdb ol-bibtex ol-docview ol-eww ol-gnus org-habit ol-info ol-irc ol-mhe ol-rmail ol-w3m org-mac-link))
  '(org-todo-keywords
@@ -1908,7 +1811,7 @@ This function is called at the very end of Spacemacs initialization."
      (lisp-interaction-mode . origami-elisp-parser)
      (clojure-mode . origami-clj-parser)))
  '(package-selected-packages
-   '(google-this modern-fringes terraform-mode enh-ruby-mode psession telega dired-sidebar centaur-tabs writeroom-mode workgroups memory-usage drupal-mode phpunit phpcbf php-auto-yasnippets php-mode zones sr-speedbar evil-ruby-text-objects tempbuf wakatime-mode rspec-simple ido-completing-read+ shrink-path amx ri-mode ri smooth-scrolling ivy-youtube wgrep ivy-hydra lv flyspell-correct-ivy counsel-projectile counsel swiper ivy doom-todo-ivy magit-todos todo-projectile hl-block hl-block-mode indent-guide-mode highlight-indent-guides-mode vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toml-mode toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocopfmt rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails prodigy popwin pip-requirements persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file ns-auto-titlebar nginx-mode mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-gutter-fringe gh-md gcmh fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme doom-themes doom-modeline discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby cargo bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))
+   '(google-this modern-fringes terraform-mode enh-ruby-mode psession telega dired-sidebar centaur-tabs writeroom-mode workgroups memory-usage drupal-mode phpunit phpcbf php-auto-yasnippets php-mode zones sr-speedbar evil-ruby-text-objects tempbuf wakatime-mode rspec-simple ido-completing-read+ shrink-path amx ri-mode ri smooth-scrolling ivy-youtube wgrep lv flyspell-correct-ivy counsel-projectile counsel swiper ivy doom-todo-ivy magit-todos todo-projectile hl-block hl-block-mode indent-guide-mode highlight-indent-guides-mode vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toml-mode toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocopfmt rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails prodigy popwin pip-requirements persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file ns-auto-titlebar nginx-mode mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-gutter-fringe gh-md gcmh fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme doom-themes doom-modeline discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby cargo bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))
  '(pdf-view-midnight-colors (cons "#f8f8f2" "#282a36"))
  '(persp-auto-save-num-of-backups 10 nil nil "Customized with use-package persp-mode")
  '(persp-autokill-buffer-on-remove 'kill-weak nil nil "Customized with use-package persp-mode")
@@ -1918,6 +1821,7 @@ This function is called at the very end of Spacemacs initialization."
  '(persp-mode-projectile-bridge-mode t nil (persp-mode-projectile-bridge))
  '(persp-nil-name "nil" nil nil "Customized with use-package persp-mode")
  '(popwin-mode t)
+ '(popwin:popup-window-height 8)
  '(popwin:popup-window-width 80)
  '(popwin:special-display-config
    '(("^\\*RuboCop.+\\*$" :regexp t :height 0.4 :position bottom :noselect t :dedicated t :stick t :tail t)
@@ -1940,6 +1844,7 @@ This function is called at the very end of Spacemacs initialization."
      ("*Help*" :height 0.4 :position bottom :noselect t :dedicated t :stick t)))
  '(popwin:universal-display-config '(t))
  '(prettify-symbols-unprettify-at-point 'right-edge)
+ '(projectile-indexing-method 'alien)
  '(rainbow-identifiers-cie-l*a*b*-lightness 50)
  '(rainbow-identifiers-cie-l*a*b*-saturation 20)
  '(require-final-newline nil)
@@ -2030,9 +1935,9 @@ This function is called at the very end of Spacemacs initialization."
     (cons 360 "#6272a4")))
  '(vc-annotate-very-old-color nil)
  '(volatile-highlights-mode t)
- '(wakatime-api-key "2a72165b-23d6-47e5-ba80-d97f7d2d3f02")
+ '(wakatime-api-key "79de0de9-6375-48d1-b78f-440418c5e5a0")
  '(wakatime-cli-path "/usr/local/bin/wakatime")
- '(wakatime-python-bin nil)
+ '(wakatime-python-bin "/usr/local/bin/python3")
  '(web-mode-markup-indent-offset 2)
  '(workgroups-mode t)
  '(yascroll:delay-to-hide 1.5)
@@ -2043,7 +1948,6 @@ This function is called at the very end of Spacemacs initialization."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((((min-colors 16777216)) (:background "#282a36" :foreground "#f8f8f2")) (t (:background nil :foreground "#f8f8f2"))))
  '(ahs-definition-face ((t (:weight bold))))
  '(ahs-edit-mode-face ((t (:weight bold))))
  '(ahs-face ((t (:weight bold))))
@@ -2073,7 +1977,7 @@ This function is called at the very end of Spacemacs initialization."
  '(ivy-highlight-face ((t (:inherit highlight :underline t :weight bold))))
  '(line-number ((t (:background "#282a36" :foreground "#565761" :slant normal :height 0.8))))
  '(line-number-current-line ((t (:inherit (font-lock-keyword-face hl-line line-number)))))
- '(link ((t (:foreground "#AAF" :underline nil :family "San Francisco"))))
+ '(link ((t (:foreground "SkyBlue1" :underline nil :height 1.05 :family "San Francisco"))))
  '(linum ((t (:inherit hl-line :background "#282a36" :foreground "#565761" :slant italic))))
  '(magit-blame-highlight ((t (:inherit (font-lock-comment-face hl-line) :height 0.8 :family "San Francisco"))))
  '(magit-blame-name ((t (:inherit font-lock-variable-name-face))) t)
@@ -2093,7 +1997,7 @@ This function is called at the very end of Spacemacs initialization."
  '(org-block ((t (:extend t :background "dark slate gray" :foreground "#ffb86c"))))
  '(org-block-begin-line ((t (:inherit org-meta-line :extend t :height 1.2))))
  '(org-done ((t (:foreground "gold" :height 1.9))))
- '(org-headline-done ((t (:foreground "cornflower blue" :strike-through nil :weight bold))))
+ '(org-headline-done ((t (:inherit org-headline-todo :weight bold :height 1.2))))
  '(org-level-1 ((t (:inherit link :extend nil :foreground "DarkOrange3" :underline nil :weight bold :height 1.3 :family "San Francisco"))))
  '(org-level-2 ((t (:inherit nil :extend nil :foreground "goldenrod" :weight bold :height 1.15))))
  '(org-level-3 ((t (:extend nil :foreground "#50fa7b" :weight bold :height 1.1))))

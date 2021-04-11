@@ -1160,6 +1160,7 @@ So it safe to call it many times like in a minor mode hook."
 
 (use-package ember-mode
   :straight t
+  :disabled
   :config
   (defun ember--file-project-root (file)
     "Overriden function so it come back to the old behavior and
@@ -1235,13 +1236,13 @@ So it safe to call it many times like in a minor mode hook."
     "Overriden function to get rid of useless typography."
     (let ((node-short-name (neo-path--file-short-name node)))
       (insert
-       (propertize ">>>>>>>>> "
+       (propertize " "
                    'display `(space :width ,(* 2 (- depth 1)) )))
 
       (when (memq 'char neo-vc-integration)
 
         (insert
-         (propertize ">>>>>>>>> "
+         (propertize " "
                      'display `(space :width 0.35))))
 
       (neo-buffer--insert-fold-symbol
@@ -1292,7 +1293,6 @@ So it safe to call it many times like in a minor mode hook."
           (dolist (leaf leafs)
             (neo-buffer--insert-file-entry leaf depth))))))
 
-
   (defun neo-buffer--insert-file-entry (node depth)
     "Overriden so it can be configured to show files and directories together."
 
@@ -1327,15 +1327,15 @@ So it safe to call it many times like in a minor mode hook."
         (or (and (equal name 'open)
                  (insert
                   (propertize
-                   ">>>> "
+                   " "
                    'display '((raise 0)
                               (space :width 0.0)))
                   (propertize
-                   (concat ">>>> " (all-the-icons-octicon "triangle-down"))
+                   (concat " " (all-the-icons-octicon "triangle-down"))
                    'face `(:family ,(all-the-icons-octicon-family) :foreground "skyblue" :height 1.2)
                    'display '(raise -0.0))
                   (propertize
-                   " >>>>"
+                   " "
                    'display '((raise 0)
                               (space :width 0.3)))))
 
@@ -1343,7 +1343,7 @@ So it safe to call it many times like in a minor mode hook."
                  (insert
 
                   (propertize
-                   " >>>"
+                   " "
                    'display '((raise 0.00)
                               (space :width 0.50)))
                   (propertize
@@ -1352,7 +1352,7 @@ So it safe to call it many times like in a minor mode hook."
                    'display '(raise 0.0))
 
                   (propertize
-                   ">>> "
+                   " "
                    'display '((raise 0)
                               (space :width 0.5)))))
 
@@ -1438,7 +1438,6 @@ So it safe to call it many times like in a minor mode hook."
     (setq neo-window-width 34)
     (setq neo-window-fixed-size nil))
 
-
   (add-hook 'neotree-mode-hook 'hmz-neotree-mode)
 
   (defadvice neo-buffer--refresh (after hmz-keep-hl-line-after-buffer-refresh 1 () activate)
@@ -1472,8 +1471,6 @@ So it safe to call it many times like in a minor mode hook."
     "Overriden version of neotree refresh function that doesn't try to refresh buffers that are not visiting a file and generating error and jumping cursor as result."
     (interactive)
     (when (and neo-autorefresh (neo-global--window-exists-p) buffer-file-name (not (eq (current-buffer) "*NeoTree*"))
-               (neotree-refresh t))))
-  )
-
+               (neotree-refresh t)))))
 
 (provide 'hmz-modules)
