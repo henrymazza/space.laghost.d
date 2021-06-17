@@ -3,6 +3,12 @@
 
 (add-to-list 'load-path (expand-file-name "~/.spacemacs.develop.d/straight/repos/all-the-icons"))
 
+;; indent visual-line wrapped lines
+(use-package adaptive-wrap
+  :straight t
+  :config
+  (adaptive-wrap-prefix-mode 1))
+
 (use-package restclient
   :straight t)
 
@@ -15,6 +21,18 @@
   :straight t
   :ensure t
   :bind ("C-c d" . docker))
+
+(use-package org-reveal
+  :straight (org-reveal :type git :host github :repo "yjwen/org-reveal")
+  :init
+  (require 'ox-reveal)
+  ;; TODO: make that relative
+  (setq org-reveal-root "file:///Users/HMz/Development/reveal.js")
+  (setq org-reveal-title-slide nil))
+
+
+(use-package org-tree-slide
+  :straight t)
 
 (use-package ruby-tools
   :straight (ruby-tools :type git :host github :repo "rejeep/ruby-tools.el"))
@@ -831,8 +849,9 @@ So it safe to call it many times like in a minor mode hook."
 
 (use-package rubocopfmt
   :straight (rubocopfmt :type git :host github :repo "jimeh/rubocopfmt.el")
-  :init
-  (add-hook 'ruby-mode-hook #'rubocopfmt-mode))
+  ;; :init
+  ;; (add-hook 'ruby-mode-hook #'rubocopfmt-mode)
+  )
 
 (use-package fira-code-mode
   :straight t
@@ -1218,6 +1237,7 @@ So it safe to call it many times like in a minor mode hook."
     (setq switch-buffer-functions nil)
     (add-hook 'switch-buffer-functions
               (lambda (prev cur)
+                (tabbar-mode 1)
                 (unless (or (string= (buffer-name) "*Messages*")
                             (string= (buffer-name) neo-buffer-name))
                   (if (and (neo-global--window-exists-p) (buffer-file-name))

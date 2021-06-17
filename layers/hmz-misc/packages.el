@@ -20,7 +20,7 @@
     circe
     dired-sidebar
     doom-modeline
-    doom-todo-ivy
+    ;; doom-todo-ivy
     ;; ember-mode
     evil-ruby-text-objects
     evil-magit
@@ -182,6 +182,7 @@ So it safe to call it many times like in a minor mode hook."
 (defun hmz-misc/init-ivy-posframe ()
   (use-package ivy-posframe
     :straight t
+    :disabled
     :init
     ;; display at `ivy-posframe-style'
     (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display)))
@@ -452,6 +453,7 @@ So it safe to call it many times like in a minor mode hook."
 (defun hmz-misc/init-doom-todo-ivy ()
   (use-package doom-todo-ivy
     :after ivy
+    :disabled
     :hook (after-init . doom-todo-ivy)
     :load-path "~/.spacemacs.d/layers/hmz-misc/local/doom-todo-ivy/doom-todo-ivy.el"
     :init

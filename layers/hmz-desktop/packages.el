@@ -13,6 +13,7 @@
     (after-init . desktop-save-mode)
     :init
     (setq persp-auto-resume-time -1.0 persp-auto-save-opt 0)
-    (desktop-read)
+    ;; make it optional
+    ;; (desktop-read)
     )
   )

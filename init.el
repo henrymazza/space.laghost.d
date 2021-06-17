@@ -41,7 +41,9 @@ values."
    ;; load. If it is the symbol `all' instead
   ;; of a list then all discovered layers will be installed.
   dotspacemacs-configuration-layers
-  '(lua
+  '(nginx
+    bm
+    lua
     sql
     shell-scripts
     ;; elixir
@@ -73,7 +75,7 @@ values."
     ;; hmz-misc ;; use hmz-modules
     ;; hmz-misc2 ;; use hmz-modules
     ;; FIXME: pourpose window infinite recursion bug; delete desktop files?
-    ;; hmz-desktop
+    hmz-desktop
     hmz-color-identifiers
 
     ;; github
@@ -144,8 +146,8 @@ values."
     ns-auto-titlebar
     org-bullets
     ox-gfm ;; better markdown export
+    ox-reveal
     persistent-scratch
-    ;; persp-mode-projectile-bridge
     prodigy
     simpleclip
     sr-speedbar
@@ -161,6 +163,7 @@ values."
      git-gutter+
      fancy-battery
      smex
+     ;; ivy
      ;; treemacs
      ;; treemacs-icons-dired
      ;; powerline
@@ -183,6 +186,7 @@ This function is called at the very startup of Spacemacs initialization
 before layers configuration.
 You should not put any user code in there besides modifying the variable
 values."
+  (setq epa-pinentry-mode 'loopback)
   ;; This setq-default sexp is an exhaustive list of all the supported
   ;; spacemacs settings.
   (setq-default
@@ -415,9 +419,26 @@ executes.
  This function is mostly useful for variables that need to be set
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
+  ;; Load Ruby Executer for org-mode
+  (with-eval-after-load 'org
+    (org-babel-do-load-languages 'org-babel-load-languages '((ruby . t) (js . t)
+    (plantuml . t)
+    )))
+
+  ;; magit pre-commit config
+  (add-hook 'server-switch-hook 'magit-commit-diff)
+  (with-eval-after-load 'magit
+    (setq magit-git-environment
+          (append magit-git-environment
+                  (list "OVERCOMMIT_COLOR=0"))))
+
+  ;; magit open in full window
+  (setq magit-status-buffer-switch-function 'switch-to-buffer)
+  (setq magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
 
   ;; projectile will make slower indexing but use .projectile for ignore
   (setq projectile-use-native-indexing t)
+  (setq projectile-indexing-method 'native)
   (setq projectile-enable-caching t)
 
   (customize-set-variable 'tramp-verbose 10 "Enable remote command traces")
@@ -439,6 +460,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
     (push '("#+begin_src dockerfile" . ?🐋) prettify-symbols-alist)
     (push '("#+begin_src yaml" . ?Ӱ) prettify-symbols-alist)
     (push '("#+begin_src ruby" . ?ᚱ) prettify-symbols-alist)
+    (push '("#+begin_src js" . ?J) prettify-symbols-alist)
     (push '("#+begin_src sql" . ?☷) prettify-symbols-alist)
     (push '("#+begin_src elisp" . ?ε) prettify-symbols-alist)
     (push '("#+end_src" . ?❮) prettify-symbols-alist)
@@ -454,6 +476,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
     (push '("[ ]" . "☐") prettify-symbols-alist)
     (push '("[X]" . "☑" ) prettify-symbols-alist)
     (push '("[-]" . "❍" ) prettify-symbols-alist)
+    (push '("#+DOWNLOADED.*$" . "❍" ) prettify-symbols-alist)
     (prettify-symbols-mode 1))
 
   (add-hook 'org-mode-hook 'hmz-init/org-prettify)
@@ -720,7 +743,7 @@ you should place you code here."
   (add-hook 'dired-mode-hook (lambda () (setq tab-width 2)))
 
   ;; trying to stop newline at end of file madness
-  (setq mode-require-final-newline nil)
+  (setq mode-require-final-newline t)
 
   ;; org-mode grap-link shortcut
   (add-hook 'org-mode-hook
@@ -877,6 +900,11 @@ move to the next field. Call `open-line' if nothing else applies."
   (defun hmz-prog-mode-hook ()
     (interactive)
 
+    (setq require-final-newline t)
+
+    ;; recognize camelized words, underline, as word boundary
+    (subword-mode 1)
+
     (which-function-mode 0)
 
     (face-remap-add-relative 'default '(:height 140))
@@ -904,11 +932,11 @@ move to the next field. Call `open-line' if nothing else applies."
     (smartparens-global-mode t)
     (global-evil-matchit-mode 1)
 
+    (adaptive-wrap-prefix-mode 1)
     (visual-line-mode t))
 
   (add-hook 'prog-mode-hook 'hmz-prog-mode-hook)
   (add-hook 'text-mode-hook 'hmz-prog-mode-hook)
-
 
   ;; try to fix a new bug (infinite recursion?)
 
@@ -1245,7 +1273,6 @@ move to the next field. Call `open-line' if nothing else applies."
   ;; command-t
   (global-set-key (kbd "s-t") 'helm-projectile-find-file)
   (global-set-key (kbd "H-t") 'helm-projectile-find-file)
-  (setq projectile-enable-caching nil)
 
   ;; open files with command + o
   (global-set-key (kbd "s-o") 'find-file)
@@ -1381,11 +1408,11 @@ move to the next field. Call `open-line' if nothing else applies."
 
   (global-set-key (kbd "s-w") 'delete-window-or-frame)
 
-  (add-hook 'minibuffer-setup-hook
-            (lambda ()
-              ;; I don't know why minibuffer have this cursor color
-              (setq evil-emacs-state-cursor '("SkyBlue2" bar))
-              (text-scale-set 2)))
+  (add-hook 'minibuffer-setup-hook 'hmz-init/minibuffer-setup)
+  (defun hmz-init/minibuffer-setup ()
+    (setq evil-emacs-state-cursor '("SkyBlue2" bar))
+       (set (make-local-variable 'face-remapping-alist)
+          '((default :height 1.5))))
 
   ;; Always follow symlinks
   (setq vc-follow-symlinks t)
@@ -1488,7 +1515,7 @@ move to the next field. Call `open-line' if nothing else applies."
   ;;  (lambda ()
   ;;    (setq gc-cons-threshold 1000000)
   ;;    (message "Init took %s secs, GC ran %s times. gc-cons-threshold restored to %S."
-  ;;             (emacs-init-time)
+  ;;             (init-time)
   ;;             gcs-done
   ;;             gc-cons-threshold)))
 
@@ -1686,7 +1713,6 @@ This function is called at the very end of Spacemacs initialization."
  '(alert-default-style 'notifier)
  '(ansi-color-names-vector
    ["dim gray" "orange red" "medium spring green" "gold" "dodger blue" "purple" "turquoise1" "#eeeeec"])
- '(auth-sources '("~/.authinfo.gpg" "~/.authinfo" "~/.netrc"))
  '(auto-revert-buffer-list-filter 'magit-auto-revert-buffer-p)
  '(auto-revert-verbose t)
  '(before-save-hook
@@ -1723,6 +1749,7 @@ This function is called at the very end of Spacemacs initialization."
  '(ember-completion-system 'helm)
  '(ember-serve-command "ember serve  --output-path dist")
  '(ember-test-command "ember test --serve")
+ '(epg-pinentry-mode nil)
  '(evil-want-Y-yank-to-eol t)
  '(exec-path-from-shell-arguments '("-l" "-i"))
  '(exec-path-from-shell-check-startup-files t t)
@@ -1730,7 +1757,7 @@ This function is called at the very end of Spacemacs initialization."
  '(exec-path-from-shell-variables '("PATH" "MANPATH" "TMPDIR" "GOPATH" "KUBECONFIG"))
  '(fci-rule-color "#6272a4")
  '(fic-highlighted-words '("FIXME" "TODO" "BUG" "HACK" "XXX" "OPTIMIZE" "NOTE"))
- '(fill-column 80)
+ '(fill-column 100)
  '(gist-ask-for-filename nil)
  '(gist-view-gist nil)
  '(git-gutter-fr:side 'left-fringe)
@@ -1746,16 +1773,28 @@ This function is called at the very end of Spacemacs initialization."
  '(highlight-indent-guides-mode nil t)
  '(highlight-indentation-offset 4)
  '(ibuffer-default-sorting-mode 'recency)
+ '(ibuffer-formats
+   '((mark modified read-only locked " "
+           (name 30 30 :left :elide)
+           " "
+           (size 9 -1 :right)
+           " "
+           (mode 16 16 :left :elide)
+           " " filename-and-process)
+     (mark " "
+           (name 16 -1)
+           " " filename)))
  '(ibuffer-sidebar-width 22)
  '(inhibit-eol-conversion t)
  '(ispell-highlight-face 'flyspell-incorrect)
  '(ivy-height 20)
- '(ivy-mode t)
+ '(ivy-mode nil)
  '(jdee-db-active-breakpoint-face-colors (cons "#1E2029" "#bd93f9"))
  '(jdee-db-requested-breakpoint-face-colors (cons "#1E2029" "#50fa7b"))
  '(jdee-db-spec-breakpoint-face-colors (cons "#1E2029" "#565761"))
  '(line-spacing 3)
  '(magit-diff-highlight-trailing 'all)
+ '(magit-status-margin '(t age-abbreviated magit-log-margin-width t 11))
  '(markdown-hide-urls t)
  '(markdown-italic-underscore t)
  '(message-sent-hook '((lambda nil (message (buffer-name)))))
@@ -1782,9 +1821,12 @@ This function is called at the very end of Spacemacs initialization."
  '(neo-window-width 40)
  '(nil nil t)
  '(objed-cursor-color "#ff5555")
+ '(org-agenda-files
+   '("~/Documents/org/TODOs.org" "~/Development/GoDaddy/sellbrite/TODOs.org" "/Users/HMz/Development/GoDaddy/nemo/TODOs.org"))
  '(org-blank-before-new-entry '((heading) (plain-list-item)))
  '(org-bullets-bullet-list '("◉" "○" "●" "☞"))
  '(org-directory "~/Documents/org")
+ '(org-ellipsis " ▼")
  '(org-export-backends '(ascii html icalendar latex md odt))
  '(org-export-with-section-numbers 2)
  '(org-fontify-done-headline nil)
@@ -1847,10 +1889,11 @@ This function is called at the very end of Spacemacs initialization."
  '(projectile-indexing-method 'alien)
  '(rainbow-identifiers-cie-l*a*b*-lightness 50)
  '(rainbow-identifiers-cie-l*a*b*-saturation 20)
- '(require-final-newline nil)
+ '(require-final-newline t)
  '(rspec-autosave-buffer t)
  '(rspec-spec-command "rspec -f doc")
  '(rubocopfmt-include-unsafe-cops t)
+ '(rubocopfmt-use-bundler-when-possible nil)
  '(rustic-ansi-faces
    ["#282a36" "#ff5555" "#50fa7b" "#f1fa8c" "#61bfff" "#ff79c6" "#8be9fd" "#f8f8f2"])
  '(shell-pop-cleanup-buffer-at-process-exit t)
@@ -1868,7 +1911,7 @@ This function is called at the very end of Spacemacs initialization."
  '(tooltip-use-echo-area t)
  '(tramp-copy-size-limit 1000000)
  '(tramp-inline-compress-start-size 1000000)
- '(tramp-verbose 6)
+ '(tramp-verbose 10)
  '(use-dialog-box t)
  '(use-package-always-demand t)
  '(use-package-check-before-init t)
@@ -1957,6 +2000,7 @@ This function is called at the very end of Spacemacs initialization."
  '(all-the-icons-maroon ((t (:foreground "burlywood3"))))
  '(anzu-match-2 ((t (:foreground "deep sky blue"))))
  '(anzu-replace-highlight ((t (:box (:line-width 2 :color "sienna1")))))
+ '(bm-persistent-face ((t (:overline "DarkGoldenrod4"))))
  '(bold ((t (:weight bold))))
  '(custom-button ((t (:background "lightgrey" :foreground "black" :box 2))))
  '(custom-button-mouse ((t (:background "grey90" :foreground "black" :box 2))))
@@ -1996,14 +2040,15 @@ This function is called at the very end of Spacemacs initialization."
  '(neo-vc-edited-face ((t (:foreground "#ff79c6"))))
  '(org-block ((t (:extend t :background "dark slate gray" :foreground "#ffb86c"))))
  '(org-block-begin-line ((t (:inherit org-meta-line :extend t :height 1.2))))
- '(org-done ((t (:foreground "gold" :height 1.9))))
+ '(org-done ((t (:foreground "gold" :height 1.5))))
  '(org-headline-done ((t (:inherit org-headline-todo :weight bold :height 1.2))))
  '(org-level-1 ((t (:inherit link :extend nil :foreground "DarkOrange3" :underline nil :weight bold :height 1.3 :family "San Francisco"))))
- '(org-level-2 ((t (:inherit nil :extend nil :foreground "goldenrod" :weight bold :height 1.15))))
+ '(org-level-2 ((t (:inherit nil :extend nil :foreground "goldenrod" :weight bold :height 1.0))))
  '(org-level-3 ((t (:extend nil :foreground "#50fa7b" :weight bold :height 1.1))))
+ '(org-level-7 ((t (:extend nil :foreground "light salmon" :weight normal))))
  '(org-link ((t (:inherit link :foreground "SkyBlue2" :underline nil))))
  '(org-quote ((t (:inherit nil :background "gray20" :foreground "gray80" :slant italic))))
- '(org-todo ((t (:foreground "#ffb86c" :weight bold :height 1.9))))
+ '(org-todo ((t (:background "#373844" :foreground "#ffb86c" :weight bold :height 1.2))))
  '(org-verbatim ((t (:inherit font-lock-variable-name-face :family "Fira Code"))))
  '(origami-fold-replacement-face ((t (:inherit 'font-lock-builtin-face))))
  '(outshine-level-1 ((t (:inherit outline-1 :weight bold :height 1.1 :family "San Francisco"))))
