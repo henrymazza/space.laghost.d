@@ -848,8 +848,16 @@ So it safe to call it many times like in a minor mode hook."
 
 (use-package rubocopfmt
   :straight (rubocopfmt :type git :host github :repo "jimeh/rubocopfmt.el")
-  ;; :init
-  ;; (add-hook 'ruby-mode-hook #'rubocopfmt-mode)
+  :init
+  (add-hook 'ruby-mode-hook #'rubocopfmt-mode)
+
+  (defun rubocopfmt-before-save ()
+    (interactive)
+    (when (and (member major-mode rubocopfmt-major-modes))
+      (if (and rubocopfmt-on-save-use-lsp-format-buffer
+               (bound-and-true-p lsp-mode))
+          (lsp-format-buffer)
+        (rubocop-autocorrect-current-file))))
   )
 
 (use-package fira-code-mode
@@ -1434,6 +1442,8 @@ So it safe to call it many times like in a minor mode hook."
 
     ;; no scroll bars
     (scroll-bar-mode 0)
+    (yascroll-bar-mode 1)
+    (spacemacs/toggle-truncate-lines-on)
 
     ;; highlight current line
     (hl-line-mode t)

@@ -419,6 +419,23 @@ executes.
  This function is mostly useful for variables that need to be set
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
+
+  ;; allow remembering risky variables
+  (defun risky-local-variable-p (sym &optional _ignored) nil)
+
+
+  ;; Command to list ignored files:
+  ;; $ git ls-files --others --ignored --exclude-standard --directory
+  (defun magit-ignored-files ()
+    (magit-git-items "ls-files" "--others" "--ignored" "--exclude-standard" "-z" "--directory"))
+
+  (defun magit-insert-ignored-files ()
+    (-when-let (files (magit-ignored-files))
+      (magit-insert-section (ignored)
+        (magit-insert-heading "Ignored files:")
+        (magit-insert-un/tracked-files-1 files nil)
+        (insert ?\n))))
+
   ;; Load Ruby Executer for org-mode
   (with-eval-after-load 'org
     (org-babel-do-load-languages 'org-babel-load-languages '((ruby . t) (js . t)
@@ -492,7 +509,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
   (defun hmz-init/org-config ()
     (interactive)
     (setq org-log-done nil)
-    (spacemacs/toggle-visual-line-navigation-on)
+    ;;(spacemacs/toggle-visual-line-navigation-on)
     (org-indent-mode t)
     (org-bullets-mode 1)
     (drag-stuff-mode 0)
@@ -834,7 +851,7 @@ you should place you code here."
   (defun hmz-init/org-mode-prettify-symbols ()
     "Beautify Org Checkbox Symbol"
     (interactive)
-    (push '("[ ]" .  "☐") prettify-symbols-alist)
+    (push '("[ ]" . "☐") prettify-symbols-alist)
     (push '("[X]" . "☑" ) prettify-symbols-alist)
     (push '("[-]" . "❍" ) prettify-symbols-alist)
     (prettify-symbols-mode 1))
@@ -899,6 +916,11 @@ move to the next field. Call `open-line' if nothing else applies."
 
   (defun hmz-prog-mode-hook ()
     (interactive)
+
+    ;; projectile will make slower indexing but use .projectile for ignore
+    (setq projectile-use-native-indexing t)
+    (setq projectile-indexing-method 'native)
+    (setq projectile-enable-caching t)
 
     (setq require-final-newline t)
 
@@ -1527,7 +1549,11 @@ move to the next field. Call `open-line' if nothing else applies."
   ;; Stylize Echo Area (interestingly it ends up applying other faces styles)
   (with-current-buffer (get-buffer " *Echo Area 0*")   ; the leading space character is correct
     (setq-local face-remapping-alist
-                '((default (:height 0.9 :foreground "gray75") variable-pitch)))) ; etc.
+                '((default (:height 1.3 :foreground "#CCC") variable-pitch)))) ; etc.
+
+  (defun add-margin-to-mb ()
+   (setq minibuffer-temporary-goal-position (* 2 (frame-width))))
+  (add-hook 'minibuffer-setup-hook 'add-margin-to-mb)
 
   ;; define hook unless already defined
   (unless (boundp 'after-load-theme-hook)
@@ -1723,7 +1749,7 @@ This function is called at the very end of Spacemacs initialization."
  '(centaur-tabs-modified-marker "⦿")
  '(centaur-tabs-set-close-button t)
  '(coffee-tab-width 2)
- '(csv-separators '("," ";") t)
+ '(csv-separators '("," ";"))
  '(custom-safe-themes
    '("76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "2dff5f0b44a9e6c8644b2159414af72261e38686072e063aa66ee98a2faecf0e" "7451f243a18b4b37cabfec57facc01bd1fe28b00e101e488c61e1eed913d9db9" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "eb5c79b2e9a91b0a47b733a110d10774376a949d20b88c31700e9858f0f59da7" "a41b81af6336bd822137d4341f7e16495a49b06c180d6a6417bf9fd1001b6d2b" "57bd93e7dc5fbb5d8d27697185b753f8563fe0db5db245592bab55a8680fdd8c" "890a1a44aff08a726439b03c69ff210fe929f0eff846ccb85f78ee0e27c7b2ea" "819ab08867ef1adcf10b594c2870c0074caf6a96d0b0d40124b730ff436a7496" default))
  '(default-justification 'left)
@@ -1785,6 +1811,7 @@ This function is called at the very end of Spacemacs initialization."
            (name 16 -1)
            " " filename)))
  '(ibuffer-sidebar-width 22)
+ '(indicate-buffer-boundaries '((t) (top . left) (bottom . left)))
  '(inhibit-eol-conversion t)
  '(ispell-highlight-face 'flyspell-incorrect)
  '(ivy-height 20)
@@ -1795,6 +1822,8 @@ This function is called at the very end of Spacemacs initialization."
  '(line-spacing 3)
  '(magit-diff-highlight-trailing 'all)
  '(magit-status-margin '(t age-abbreviated magit-log-margin-width t 11))
+ '(magit-status-sections-hook
+   '(magit-insert-status-headers magit-insert-merge-log magit-insert-rebase-sequence magit-insert-am-sequence magit-insert-sequencer-sequence magit-insert-bisect-output magit-insert-bisect-rest magit-insert-bisect-log magit-insert-ignored-files magit-insert-untracked-files magit-insert-unstaged-changes magit-insert-staged-changes magit-insert-stashes magit-insert-unpushed-to-pushremote magit-insert-unpushed-to-upstream-or-recent magit-insert-unpulled-from-pushremote magit-insert-unpulled-from-upstream))
  '(markdown-hide-urls t)
  '(markdown-italic-underscore t)
  '(message-sent-hook '((lambda nil (message (buffer-name)))))
@@ -1892,10 +1921,23 @@ This function is called at the very end of Spacemacs initialization."
  '(require-final-newline t)
  '(rspec-autosave-buffer t)
  '(rspec-spec-command "rspec -f doc")
- '(rubocopfmt-include-unsafe-cops t)
+ '(rspec-use-docker-when-possible t)
+ '(rubocopfmt-rubocop-command "/Users/HMz/Development/GoDaddy/nemo/rubocop_wrapper.sh")
  '(rubocopfmt-use-bundler-when-possible nil)
  '(rustic-ansi-faces
    ["#282a36" "#ff5555" "#50fa7b" "#f1fa8c" "#61bfff" "#ff79c6" "#8be9fd" "#f8f8f2"])
+ '(safe-local-variable-values
+   '((rubocopfmt-rubocop-command . "/Users/HMz/Development/GoDaddy/nemo/rubocop_wrapperrr.sh")
+     (rubocopfmt-rubocop-command . "/Users/HMz/Development/GoDaddy/nemo/rubocop_wrapper.sh")
+     (rubocopfmt-rubocop-command . "/Users/HMz/Development/GoDaddy/nemo/rubocop-wrapper.sh")
+     (rubocopfmt-rubocop-command . "/Users/HMz/Development/GoDaddy/nemo/rubocop.sh")
+     (rubocopfmt-mode . 1)
+     (rubocopfmt-mode . -1)
+     (typescript-backend . tide)
+     (typescript-backend . lsp)
+     (javascript-backend . tide)
+     (javascript-backend . tern)
+     (javascript-backend . lsp)))
  '(shell-pop-cleanup-buffer-at-process-exit t)
  '(shell-pop-full-span nil t)
  '(shell-pop-restore-window-configuration t)
@@ -1905,6 +1947,7 @@ This function is called at the very end of Spacemacs initialization."
  '(sp-highlight-wrap-overlay nil)
  '(sp-highlight-wrap-tag-overlay nil)
  '(speedbar-use-images nil)
+ '(sublimity-attractive-centering-width 120)
  '(sublimity-mode t)
  '(sublimity-scroll-weight 2.0)
  '(tempbuf-kill-hook nil)
@@ -2008,7 +2051,7 @@ This function is called at the very end of Spacemacs initialization."
  '(evil-search-highlight-persist-highlight-face ((t (:inherit lazy-highlight))))
  '(fic-face ((t (:weight bold))))
  '(flyspell-duplicate ((t (:underline "DarkOrange"))))
- '(flyspell-incorrect ((t (:underline "Red1"))))
+ '(flyspell-incorrect ((t (:background "#220000" :overline nil :underline "#ff5555"))))
  '(font-lock-comment-face ((t (:foreground "LightSteelBlue3"))))
  '(font-lock-warning-face ((t (:background "#373844" :foreground "#ffb86c" :underline (:color "red" :style wave)))))
  '(fringe ((t (:foreground "DeepSkyBlue" :background unspecified))))
@@ -2026,7 +2069,8 @@ This function is called at the very end of Spacemacs initialization."
  '(magit-blame-highlight ((t (:inherit (font-lock-comment-face hl-line) :height 0.8 :family "San Francisco"))))
  '(magit-blame-name ((t (:inherit font-lock-variable-name-face))) t)
  '(magit-log-author ((t (:foreground "dark gray" :family "San Francisco"))))
- '(minibuffer-prompt ((t (:foreground "#ff79c6" :weight bold :height 1.0))))
+ '(magit-section-heading ((t (:extend t :foreground "#ff79c6" :weight bold))))
+ '(minibuffer-prompt ((t (:foreground "#ff79c6" :weight bold :height 1.2 :family "San Francisco"))))
  '(mode-line ((t (:foreground "White" :box (:line-width 1 :color "#44475a") :height 0.9 :family "San Francisco"))))
  '(mode-line-inactive ((t (:inherit mode-line :background "#373844" :foreground "#f8f8f2" :height 120))))
  '(neo-banner-face ((t (:inherit font-lock-constant-face :weight bold :family "San Francisco"))))
