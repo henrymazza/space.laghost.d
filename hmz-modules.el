@@ -319,7 +319,8 @@
   (setq doom-modeline-height 18)
   (display-battery-mode 0)
 
-  (doom-modeline-mode 1))
+  (doom-modeline-mode 1)
+  )
 
 (use-package yascroll
   :straight t

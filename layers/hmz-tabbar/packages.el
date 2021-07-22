@@ -332,7 +332,7 @@ element."
 
              (tabset-name (if (eq name 'scroll-left)
                               (propertize
-                               (format " %s " (or (file-remote-p default-directory 'host) " ∑ "))
+                               (format " %s " (or (file-remote-p default-directory 'host) (or (and (local-variable-p 'project-name) project-name)) " ∑ "))
                                ;;
                                ;; (format "(file-remote-p default-directory 'host)%s --" (tabbar-current-tabset))
                                ;; (format " !! ")
