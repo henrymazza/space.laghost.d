@@ -23,6 +23,7 @@
   :bind ("C-c d" . docker))
 
 (use-package org-reveal
+  :disabled
   :straight (org-reveal :type git :host github :repo "yjwen/org-reveal")
   :init
   (require 'ox-reveal)

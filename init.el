@@ -146,7 +146,7 @@ values."
     ns-auto-titlebar
     org-bullets
     ox-gfm ;; better markdown export
-    ox-reveal
+    ;; ox-reveal
     persistent-scratch
     prodigy
     simpleclip
