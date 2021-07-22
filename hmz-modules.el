@@ -187,9 +187,7 @@
     "Keyboard quit and force normal state."
     (interactive)
     (and evil-mode (evil-force-normal-state))
-    (keyboard-escape-quit)
-    (message "Me!")
-    )
+    (keyboard-escape-quit))
 
   (define-key evil-insert-state-map   (kbd "Esc") #'evil-keyboard-quit)
 
