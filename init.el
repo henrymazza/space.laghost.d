@@ -75,7 +75,7 @@ values."
     ;; hmz-misc ;; use hmz-modules
     ;; hmz-misc2 ;; use hmz-modules
     ;; FIXME: pourpose window infinite recursion bug; delete desktop files?
-    hmz-desktop
+    ;; hmz-desktop
     hmz-color-identifiers
 
     ;; github
@@ -512,7 +512,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
     ;;(spacemacs/toggle-visual-line-navigation-on)
     (org-indent-mode t)
     (org-bullets-mode 1)
-    (drag-stuff-mode 0)
+    ;; (drag-stuff-mode 0)
     (setq-local word-wrap nil))
 
   (add-hook 'org-mode-hook 'hmz-init/org-config)
@@ -1749,7 +1749,7 @@ This function is called at the very end of Spacemacs initialization."
  '(centaur-tabs-modified-marker "⦿")
  '(centaur-tabs-set-close-button t)
  '(coffee-tab-width 2)
- '(csv-separators '("," ";"))
+ '(csv-separators '("," ";") t)
  '(custom-safe-themes
    '("76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "2dff5f0b44a9e6c8644b2159414af72261e38686072e063aa66ee98a2faecf0e" "7451f243a18b4b37cabfec57facc01bd1fe28b00e101e488c61e1eed913d9db9" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "eb5c79b2e9a91b0a47b733a110d10774376a949d20b88c31700e9858f0f59da7" "a41b81af6336bd822137d4341f7e16495a49b06c180d6a6417bf9fd1001b6d2b" "57bd93e7dc5fbb5d8d27697185b753f8563fe0db5db245592bab55a8680fdd8c" "890a1a44aff08a726439b03c69ff210fe929f0eff846ccb85f78ee0e27c7b2ea" "819ab08867ef1adcf10b594c2870c0074caf6a96d0b0d40124b730ff436a7496" default))
  '(default-justification 'left)
