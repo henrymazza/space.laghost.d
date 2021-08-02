@@ -512,7 +512,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
     ;;(spacemacs/toggle-visual-line-navigation-on)
     (org-indent-mode t)
     (org-bullets-mode 1)
-    (drag-stuff-mode 0)
+    ;;(drag-stuff-mode 0)
     (setq-local word-wrap nil))
 
   (add-hook 'org-mode-hook 'hmz-init/org-config)
