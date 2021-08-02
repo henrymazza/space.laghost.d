@@ -75,7 +75,7 @@ values."
     ;; hmz-misc ;; use hmz-modules
     ;; hmz-misc2 ;; use hmz-modules
     ;; FIXME: pourpose window infinite recursion bug; delete desktop files?
-    hmz-desktop
+    ;; hmz-desktop
     hmz-color-identifiers
 
     ;; github
