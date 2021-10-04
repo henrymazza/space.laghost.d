@@ -3,11 +3,32 @@
 
 (add-to-list 'load-path (expand-file-name "~/.spacemacs.develop.d/straight/repos/all-the-icons"))
 
+(use-package string-inflection
+  :init
+  (global-set-key (kbd "C-c i") 'string-inflection-cycle)
+  (global-set-key (kbd "C-c C") 'string-inflection-camelcase)
+  (global-set-key (kbd "C-c L") 'string-inflection-lower-camelcase)
+  (global-set-key (kbd "C-c J") 'string-inflection-java-style-cycle))
+
+(use-package fic-mode
+  :straight (org-reveal :type git :host github :repo "lewang/fic-mode"))
+
 ;; indent visual-line wrapped lines
 (use-package adaptive-wrap
   :straight t
-  :config
-  (adaptive-wrap-prefix-mode 1))
+  :hook (prog-mlode . adaptive-wrap-prefix-mode))
+
+;; utilities for working with files
+(use-package f
+  :straight t)
+
+;; nice grep like searcher
+(use-package xah-find
+  :straight t)
+
+;; more powerful
+(use-package elgrep
+  :straight t)
 
 (use-package restclient
   :straight t)
@@ -226,7 +247,6 @@
   :catch t
   :demand t)
 
-;; * Here =hmz-misc= packages
 (use-package indicators
   :straight t
   :disabled
@@ -277,10 +297,6 @@
   :config
   (remove-hook 'magit-mode-hook 'turn-on-magit-gh-pulls))
 
-(use-package evil-magit
-  :straight t
-  :config (evil-magit-init))
-
 (use-package org-link-minor-mode
   :straight t)
 
@@ -319,8 +335,7 @@
   (setq doom-modeline-height 18)
   (display-battery-mode 0)
 
-  (doom-modeline-mode 1)
-  )
+  (doom-modeline-mode 1))
 
 (use-package yascroll
   :straight t
@@ -380,27 +395,6 @@ So it safe to call it many times like in a minor mode hook."
   :commands (ibuffer-sidebar-toggle-sidebar)
   :config
   (setq ibuffer-sidebar-use-custom-font t))
-
-(use-package which-key-posframe
-  :straight t
-  :load-path "path/to/which-key-posframe.el"
-  :init
-  (setq which-key-posframe-poshandler 'posframe-poshandler-window-top-center)
-  :config
-  (which-key-posframe-mode))
-
-(use-package ivy-posframe
-  :straight t
-  :init
-  ;; display at `ivy-posframe-style'
-  (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display)))
-  (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-top-center)))
-  (ivy-posframe-mode 1))
-
-(use-package company-posframe
-  :straight t
-  :config
-  (company-posframe-mode))
 
 (use-package undohist
   :straight (:host github :repo "halbtuerke/undohist-el"
@@ -549,6 +543,7 @@ So it safe to call it many times like in a minor mode hook."
   (add-to-list 'exec-path "~/Development/elixir-ls/"))
 
 (use-package persp-mode
+  :disabled
   :straight t
   :after projectile
   :custom
@@ -582,7 +577,6 @@ So it safe to call it many times like in a minor mode hook."
                                     (persp-frame-switch perspective))))
 
 (use-package persp-mode-projectile-bridge.el
-  ;; :straight t
   :straight (persp-mode-projectile-bridge.el :type git
                                              :host github :repo "Bad-ptr/persp-mode-projectile-bridge.el")
   :after (projectile persp-mode)
@@ -753,9 +747,9 @@ So it safe to call it many times like in a minor mode hook."
     ;; (ivy-mode 0)
     (amx-mode 1)
     (ido-mode 1)
-    (setq ivy-re-builders-alist
-          '((ivy-switch-buffer . ivy--regex-plus)
-            (t . ivy--regex-fuzzy)))
+    ;; (setq ivy-re-builders-alist
+    ;;       '((ivy-switch-buffer . ivy--regex-plus)
+    ;;         (t . ivy--regex-fuzzy)))
     ;; define the key binding at the very end in order to allow the user
     ;; to o
     (add-hook 'emacs-startup-hook
@@ -803,7 +797,7 @@ So it safe to call it many times like in a minor mode hook."
   (add-hook 'enh-ruby-mode-hook 'evil-ruby-text-objects-mode))
 
 (use-package doom-todo-ivy
-  ;; :disabled
+  :disabled
   :straight (doom-todo-ivy :type git :host github :repo "jsmestad/doom-todo-ivy")
   :catch t
   :after ivy

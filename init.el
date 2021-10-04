@@ -46,50 +46,60 @@ values."
     lua
     sql
     shell-scripts
-    ;; elixir
-    ;; lsp
-    ;; php
+    elixir
+    lsp
     html
     github
-    ;; rust
     python
-    ;; nginx
+    nginx
     (ibuffer :variables ibuffer-group-buffers-by 'projects)
-    ;; typescript
     yaml
     csv
     (version-control :variables
       version-control-diff-tool 'git-gutter)
 
     (auto-completion :variables
-        auto-completion-return-key-behavior 'complete
-        auto-completion-tab-key-behavior 'cycle
-        auto-completion-enable-snippets-in-popup t
-        auto-completion-use-company-box t
-        auto-completion-enable-sort-by-usage t
-        auto-completion-complete-with-key-sequence nil
-        auto-completion-complete-with-key-sequence-delay 0.01)
+                     spacemacs-default-company-backends '(company-files company-capf)
+                     auto-completion-complete-with-key-sequence "jk"
+                     auto-completion-return-key-behavior 'complete
+                     auto-completion-tab-key-behavior 'cycle
+                     auto-completion-enable-snippets-in-popup t
+                     auto-completion-use-company-box nil
+                     auto-completion-enable-sort-by-usage t
+                     auto-completion-complete-with-key-sequence nil
+                     auto-completion-complete-with-key-sequence-delay 0.01)
 
     ;; custom layers
     hmz-tabbar
-    ;; hmz-misc ;; use hmz-modules
-    ;; hmz-misc2 ;; use hmz-modules
-    ;; FIXME: pourpose window infinite recursion bug; delete desktop files?
-    ;; hmz-desktop
     hmz-color-identifiers
 
     ;; github
     better-defaults
     emacs-lisp
     neotree
-    ;; evil-cleverparens
+
+    evil-magit
+    evil-matchit
+    evil-cleverparens
     evil-commentary
+    evil-collection
+
     git
     dtrt-indent
+    web-beautify
+
+    react
+    typescript
     (javascript :variables
-                javascript-backend 'tide)
-    (spacemacs-layouts :variables spacemacs-layouts-restrict-spc-tab nil
-          dotspacemacs-auto-resume-layouts t)
+                javascript-import-tool 'import-js
+                javascript-lsp-linter nil
+                javascript-fmt-tool 'web-beautify
+                ;; javascript-fmt-on-save t
+                js2-mode-show-strict-warnings nil
+                javascript-backend 'lsp)
+    (spacemacs-layouts :variables
+                       spacemacs-layouts-restrict-spc-tab nil
+                       dotspacemacs-auto-resume-layouts t)
     markdown
     (org :variables
        org-enable-org-journal-support t)
@@ -101,7 +111,7 @@ values."
     syntax-checking
     (spell-checking :variables
         spell-checking-enable-by-default t)
-    ;; themes
+    themes
     tide
 
     (typescript :variables
@@ -133,8 +143,6 @@ values."
     doom-themes
     dracula-theme
     enh-ruby-mode
-    evil-magit
-    evil-matchit
     fic-mode
     fringe-helper
     graphql-mode
@@ -420,6 +428,14 @@ executes.
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
 
+  (add-to-list 'auto-mode-alist '("\\.jsx?$" . web-mode)) ;; auto-enable for .js/.jsx files
+  (setq web-mode-content-types-alist '(("jsx" . "\\.js[x]?\\'")))
+  (defun web-mode-init-hook ()
+    "Hooks for Web mode.  Adjust indent."
+    (setq web-mode-markup-indent-offset 4))
+
+  (add-hook 'web-mode-hook  'web-mode-init-hook)
+
   ;; allow remembering risky variables
   (defun risky-local-variable-p (sym &optional _ignored) nil)
 
@@ -455,7 +471,6 @@ before packages are loaded. If you are unsure, you should try in setting them in
 
   ;; projectile will make slower indexing but use .projectile for ignore
   (setq projectile-use-native-indexing t)
-  (setq projectile-indexing-method 'native)
   (setq projectile-enable-caching t)
 
   (customize-set-variable 'tramp-verbose 10 "Enable remote command traces")
@@ -467,6 +482,10 @@ before packages are loaded. If you are unsure, you should try in setting them in
   (defun hmz-init/org-prettify ()
     "Beautify Org Block Symbols"
     (interactive)
+
+    ;; no point on checking delimiters on org-mode
+    (rainbow-delimiters-mode-disable)
+
     (prettify-symbols-mode 0)
     (setq prettify-symbols-alist '())
     (push '("TODO:" . ?⚡) prettify-symbols-alist)
@@ -474,6 +493,8 @@ before packages are loaded. If you are unsure, you should try in setting them in
     (push '("CANCELED:" . ?✗) prettify-symbols-alist)
     (push '("#+begin_src sh" . ?❯) prettify-symbols-alist)
     (push '("#+begin_src shell" . ?❯) prettify-symbols-alist)
+    (push '("#+begin_src md" . ?𝐌) prettify-symbols-alist)
+    (push '("#+begin_src markdown" . ?𝐌) prettify-symbols-alist)
     (push '("#+begin_src dockerfile" . ?🐋) prettify-symbols-alist)
     (push '("#+begin_src yaml" . ?Ӱ) prettify-symbols-alist)
     (push '("#+begin_src ruby" . ?ᚱ) prettify-symbols-alist)
@@ -598,7 +619,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
 
   (remove-hook 'popwin-mode-hook 'hmz-init/popwin-config)
 
-  ;; fix doom-modeline and neotree not starting
+  ;; ;; fix doom-modeline and neotree not starting
   (defun colors//rainbow-identifiers-ignore-keywords ()
     "Do not colorize stuff with ‘font-lock-keyword-face’."
     (setq-local rainbow-identifiers-faces-to-override
@@ -615,8 +636,8 @@ before packages are loaded. If you are unsure, you should try in setting them in
   (setq comment-auto-fill-only-comments t)
 
   ;; ruby autocompletion through robe-mode
-  ;;(eval-after-load 'company
-  ;;'(push 'company-robe company-backends))
+  ;; (eval-after-load 'company
+  ;; '(push 'company-robe company-backends))
 
   ;; CSV hacks
   (add-hook 'csv-mode-hook
@@ -757,6 +778,10 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loa,
 you should place you code here."
+
+  ;; expect bugs with this as auto-completion layer has some incompatibilities
+  ;; NOTE: the mode itself should call it
+  ;; (global-company-mode)
 
   ;; fix tabs in dired
   (add-hook 'dired-mode-hook (lambda () (setq tab-width 2)))
@@ -911,7 +936,6 @@ move to the next field. Call `open-line' if nothing else applies."
 
   (setq mouse-wheel-scroll-amount '(1 ((shift) . 4) ((meta) . 8)))
 
-
   ;; (put 'text-mode 'flyspell-mode-predicate 'flyspell-ignore-http-and-https)
 
   (require 'window-purpose)
@@ -921,7 +945,6 @@ move to the next field. Call `open-line' if nothing else applies."
 
     ;; projectile will make slower indexing but use .projectile for ignore
     (setq projectile-use-native-indexing t)
-    (setq projectile-indexing-method 'native)
     (setq projectile-enable-caching t)
 
     (setq require-final-newline t)
@@ -950,13 +973,9 @@ move to the next field. Call `open-line' if nothing else applies."
 
     (flycheck-mode 1)
 
-    (rainbow-identifiers-mode t)
-    (rainbow-delimiters-mode-enable)
-
     (smartparens-global-mode t)
     (global-evil-matchit-mode 1)
 
-    (adaptive-wrap-prefix-mode 1)
     (visual-line-mode t))
 
   (add-hook 'prog-mode-hook 'hmz-prog-mode-hook)
@@ -1816,8 +1835,6 @@ This function is called at the very end of Spacemacs initialization."
  '(indicate-buffer-boundaries '((t) (top . left) (bottom . left)))
  '(inhibit-eol-conversion t)
  '(ispell-highlight-face 'flyspell-incorrect)
- '(ivy-height 20)
- '(ivy-mode nil)
  '(jdee-db-active-breakpoint-face-colors (cons "#1E2029" "#bd93f9"))
  '(jdee-db-requested-breakpoint-face-colors (cons "#1E2029" "#50fa7b"))
  '(jdee-db-spec-breakpoint-face-colors (cons "#1E2029" "#565761"))
@@ -1833,7 +1850,7 @@ This function is called at the very end of Spacemacs initialization."
  '(mode-line-in-non-selected-windows t)
  '(neo-hide-cursor t)
  '(neo-theme 'arrow)
- '(neo-vc-integration '(face char))
+ '(neo-vc-integration '(face char) t)
  '(neo-vc-state-char-alist
    '((up-to-date . 32)
      (edited . 10041)
@@ -1849,7 +1866,7 @@ This function is called at the very end of Spacemacs initialization."
      (unregistered . 32)
      (nil . 8942)))
  '(neo-window-position 'right)
- '(neo-window-width 40)
+ '(neo-window-width 40 t)
  '(nil nil t)
  '(objed-cursor-color "#ff5555")
  '(org-agenda-files
@@ -1891,7 +1908,6 @@ This function is called at the very end of Spacemacs initialization."
  '(persp-interactive-completion-system 'ido nil nil "Customized with use-package persp-mode")
  '(persp-keymap-prefix "" nil nil "Customized with use-package persp-mode")
  '(persp-kill-foreign-buffer-behaviour 'kill)
- '(persp-mode-projectile-bridge-mode t nil (persp-mode-projectile-bridge))
  '(persp-nil-name "nil" nil nil "Customized with use-package persp-mode")
  '(popwin-mode t)
  '(popwin:popup-window-height 8)
@@ -1917,9 +1933,10 @@ This function is called at the very end of Spacemacs initialization."
      ("*Help*" :height 0.4 :position bottom :noselect t :dedicated t :stick t)))
  '(popwin:universal-display-config '(t))
  '(prettify-symbols-unprettify-at-point 'right-edge)
- '(projectile-indexing-method 'alien)
+ '(projectile-indexing-method 'hybrid)
  '(rainbow-identifiers-cie-l*a*b*-lightness 50)
  '(rainbow-identifiers-cie-l*a*b*-saturation 20)
+ '(rainbow-identifiers-faces-to-override '(font-lock-variable-name-face))
  '(require-final-newline t)
  '(rspec-autosave-buffer t)
  '(rspec-spec-command "rspec -f doc")
@@ -1929,11 +1946,13 @@ This function is called at the very end of Spacemacs initialization."
  '(rustic-ansi-faces
    ["#282a36" "#ff5555" "#50fa7b" "#f1fa8c" "#61bfff" "#ff79c6" "#8be9fd" "#f8f8f2"])
  '(safe-local-variable-values
-   '((rubocopfmt-rubocop-command . "/Users/HMz/Development/GoDaddy/nemo/rubocop_wrapperrr.sh")
+   '((eval progn
+           (pp-buffer)
+           (indent-buffer))
+     (eval progn
+           (pp-buffer))
+     (column-enforce-column . 125)
      (rubocopfmt-rubocop-command . "/Users/HMz/Development/GoDaddy/nemo/rubocop_wrapper.sh")
-     (rubocopfmt-rubocop-command . "/Users/HMz/Development/GoDaddy/nemo/rubocop-wrapper.sh")
-     (rubocopfmt-rubocop-command . "/Users/HMz/Development/GoDaddy/nemo/rubocop.sh")
-     (rubocopfmt-mode . 1)
      (rubocopfmt-mode . -1)
      (typescript-backend . tide)
      (typescript-backend . lsp)
@@ -1956,7 +1975,7 @@ This function is called at the very end of Spacemacs initialization."
  '(tooltip-use-echo-area t)
  '(tramp-copy-size-limit 1000000)
  '(tramp-inline-compress-start-size 1000000)
- '(tramp-verbose 10)
+ '(tramp-verbose 10 t)
  '(use-dialog-box t)
  '(use-package-always-demand t)
  '(use-package-check-before-init t)
@@ -2063,7 +2082,6 @@ This function is called at the very end of Spacemacs initialization."
  '(hl-line ((t nil)))
  '(hydra-face-red ((t (:foreground "#FF0000" :weight bold))))
  '(indent-guide-face ((t (:inherit font-lock-constant-face :slant normal))))
- '(ivy-highlight-face ((t (:inherit highlight :underline t :weight bold))))
  '(line-number ((t (:background "#282a36" :foreground "#565761" :slant normal :height 0.8))))
  '(line-number-current-line ((t (:inherit (font-lock-keyword-face hl-line line-number)))))
  '(link ((t (:foreground "SkyBlue1" :underline nil :height 1.05 :family "San Francisco"))))

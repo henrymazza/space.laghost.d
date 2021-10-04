@@ -15,6 +15,7 @@ which require an initialization must be listed explicitly in the list.")
 
   "Tabbar customizations"
   (use-package tabbar
+    :after (all-the-icons)
     :straight t
     ;; :after (helm-lib all-the-icons)
     :init
@@ -205,11 +206,6 @@ which require an initialization must be listed explicitly in the list.")
                           :underline (face-attribute 'font-lock-variable-name-face :foreground)))
 
     (hmz-tabbar-refresh-faces)
-
-    ;; (use-package all-the-icons
-    ;;   :config
-    ;;   (add-to-list 'all-the-icons-icon-alist
-    ;;                '("\\.lua$" all-the-icons-wicon "moon-waning-crescent-3" :face all-the-icons-cyan)))
 
     (defun tabbar-buffer-help-on-tab (tab)
       "Return the help string shown when mouse is onto TAB. This function was overriden to show more useful information."
