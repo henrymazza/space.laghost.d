@@ -41,7 +41,8 @@ values."
    ;; load. If it is the symbol `all' instead
   ;; of a list then all discovered layers will be installed.
   dotspacemacs-configuration-layers
-  '(nginx
+  '(
+    nginx
     bm
     lua
     sql
@@ -51,7 +52,6 @@ values."
     html
     github
     python
-    nginx
     (ibuffer :variables ibuffer-group-buffers-by 'projects)
     yaml
     csv
@@ -70,26 +70,32 @@ values."
                      auto-completion-complete-with-key-sequence-delay 0.01)
 
     ;; custom layers
-    hmz-tabbar
+    ;; hmz-tabbar
     hmz-color-identifiers
 
     ;; github
+    ;; prodigy
+    ;; uninpaired
     better-defaults
+    dtrt-indent
     emacs-lisp
-    neotree
-
+    evil-cleverparens
+    evil-collection
+    evil-commentary
     evil-magit
     evil-matchit
-    evil-cleverparens
-    evil-commentary
-    evil-collection
-
     git
-    dtrt-indent
+    neotree
+    themes
+    tide
+    typography
+    version-control
+    vinegar
     web-beautify
 
-    react
-    typescript
+    ;; Javascript
+    ;; react
+    ;; typescript
     (javascript :variables
                 javascript-import-tool 'import-js
                 javascript-lsp-linter nil
@@ -97,13 +103,14 @@ values."
                 ;; javascript-fmt-on-save t
                 js2-mode-show-strict-warnings nil
                 javascript-backend 'lsp)
+
+
     (spacemacs-layouts :variables
                        spacemacs-layouts-restrict-spc-tab nil
                        dotspacemacs-auto-resume-layouts t)
     markdown
     (org :variables
        org-enable-org-journal-support t)
-    prodigy
     ruby-on-rails
     (ruby :variables
     ruby-version-manager 'rbenv
@@ -111,22 +118,18 @@ values."
     syntax-checking
     (spell-checking :variables
         spell-checking-enable-by-default t)
-    themes
-    tide
 
     (typescript :variables
                 typescript-backendd 'tide)
-    typography
-    ;; uninpaired
-    version-control
-    vinegar
+
     (shell :variables
-     shell-default-position 'bottom
-     shell-default-height 30
-     shell-enable-smart-eshell t
-     shell-default-shell 'eshell
-     shell-default-full-span nil)
-    (osx :variables osx-command-as 'super))
+           shell-default-position 'bottom
+           shell-default-height 30
+           shell-enable-smart-eshell t
+           shell-default-shell 'eshell
+           shell-default-full-span nil)
+    (osx :variables
+         osx-command-as 'super))
 
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
