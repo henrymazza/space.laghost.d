@@ -42,60 +42,61 @@ values."
   ;; of a list then all discovered layers will be installed.
   dotspacemacs-configuration-layers
   '(
-    nginx
-    bm
-    lua
-    sql
-    shell-scripts
-    elixir
-    lsp
-    html
-    github
+    ;; better-defaults
+    ;; bm
+    ;; csv
+    ;; dtrt-indent
+    ;; elixir
+    emacs-lisp
+    ;; evil-cleverparens
+    ;; evil-collection
+    evil-commentary
+    ;; evil-magit
+    ;; evil-matchit
+    git
+    ;; github
+    ;; hmz-color-identifiers
+    ;; hmz-tabbar
+    ;; html
+    ;; lsp
+    ;; lua
+    ;; markdown
+    ;; neotree
+    ;; nginx
+    prodigy
     python
+    ;; ruby-on-rails
+    ;; shell-scripts
+    ;; sql
+    ;; syntax-checking
+    ;; themes
+    ;; tide
+    ;; typography
+    ;; vinegar
+    ;; web-beautify
+    ;; yaml
+
     (ibuffer :variables ibuffer-group-buffers-by 'projects)
-    yaml
-    csv
+
     (version-control :variables
       version-control-diff-tool 'git-gutter)
 
     (auto-completion :variables
-                     spacemacs-default-company-backends '(company-files company-capf)
                      auto-completion-complete-with-key-sequence "jk"
+                     auto-completion-complete-with-key-sequence nil
+                     auto-completion-complete-with-key-sequence-delay 0.01
+                     auto-completion-enable-snippets-in-popup t
+                     auto-completion-enable-sort-by-usage t
                      auto-completion-return-key-behavior 'complete
                      auto-completion-tab-key-behavior 'cycle
-                     auto-completion-enable-snippets-in-popup t
                      auto-completion-use-company-box nil
-                     auto-completion-enable-sort-by-usage t
-                     auto-completion-complete-with-key-sequence nil
-                     auto-completion-complete-with-key-sequence-delay 0.01)
-
-    ;; custom layers
-    hmz-tabbar
-    hmz-color-identifiers
-
-    ;; github
-    ;; prodigy
-    ;; uninpaired
-    better-defaults
-    dtrt-indent
-    emacs-lisp
-    evil-cleverparens
-    evil-collection
-    evil-commentary
-    evil-magit
-    evil-matchit
-    git
-    neotree
-    themes
-    tide
-    typography
-    version-control
-    vinegar
-    web-beautify
+                     spacemacs-default-company-backends '(company-files company-capf))
 
     ;; Javascript
-    ;; react
-    ;; typescript
+    react
+    (typescript :variables
+                typescript-backendd 'tide)
+
     (javascript :variables
                 javascript-import-tool 'import-js
                 javascript-lsp-linter nil
@@ -105,24 +106,19 @@ values."
                 lsp-headerline-breadcrumb-enable nil
                 javascript-backend 'lsp)
 
-    javascript
-
     (spacemacs-layouts :variables
                        spacemacs-layouts-restrict-spc-tab nil
                        dotspacemacs-auto-resume-layouts t)
-    markdown
+
     (org :variables
-       org-enable-org-journal-support t)
-    ruby-on-rails
+         org-enable-org-journal-support t)
+
     (ruby :variables
-    ruby-version-manager 'rbenv
-    ruby-enable-enh-ruby-mode nil)
-    syntax-checking
+          ruby-version-manager 'rbenv
+          ruby-enable-enh-ruby-mode nil)
+
     (spell-checking :variables
         spell-checking-enable-by-default t)
-
-    (typescript :variables
-                typescript-backendd 'tide)
 
     (shell :variables
            shell-default-position 'bottom
@@ -130,6 +126,7 @@ values."
            shell-enable-smart-eshell t
            shell-default-shell 'eshell
            shell-default-full-span nil)
+
     (osx :variables
          osx-command-as 'super))
 
@@ -138,36 +135,35 @@ values."
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
   dotspacemacs-additional-packages
-  '(;; desktop-plus
-    ;; exec-path-from-shell
-    fira-code-mode
-    bug-hunter
-    discover-my-major
-    docker-tramp
-    dockerfile-mode
-    doom-themes
-    dracula-theme
-    enh-ruby-mode
-    fic-mode
-    fringe-helper
-    graphql-mode
-    handlebars-sgml-mode
-    ido-completing-read+
-    itail
-    jist
-    memory-usage
+  '(
+    ;; fira-code-mode
+    ;; bug-hunter
+    ;; discover-my-major
+    ;; docker-tramp
+    ;; dockerfile-mode
+    ;; doom-themes
+    ;; dracula-theme
+    ;; enh-ruby-mode
+    ;; fic-mode
+    ;; fringe-helper
+    ;; graphql-mode
+    ;; handlebars-sgml-mode
+    ;; ido-completing-read+
+    ;; itail
+    ;; jist
+    ;; memory-usage
     ns-auto-titlebar
-    org-bullets
-    ox-gfm ;; better markdown export
-    ;; ox-reveal
-    persistent-scratch
+    ;; org-bullets
+    ;; ox-gfm
+    ;; persistent-scratch
     prodigy
     simpleclip
-    sr-speedbar
-    sublimity
-    unobtrusive-magit-theme
+    ;; sr-speedbar
+    ;; sublimity
+    ;; unobtrusive-magit-theme
     use-package
-    zencoding-mode)
+    ;; zencoding-mode
+    )
 
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages
@@ -1369,13 +1365,6 @@ move to the next field. Call `open-line' if nothing else applies."
   (setq-default c-basic-offset 2)
   (setq indent-line-function 'insert-tab)
 
-  ;; force web-mode
-  (use-package web-mode
-    :custom
-    (web-mode-markup-indent-offset 2)
-    (web-mode-css-indent-offset 2)
-    (web-mode-code-indent-offset 2))
-
   (defun hmz-dotfile/setup-indent (&optional n)
     (interactive
      (unless n (setq n 2))
@@ -1745,7 +1734,7 @@ Example:
     (interactive)
     (dired-smart-shell-command "open -a iTerm $PWD" nil nil))
 
-  (require 'hmz-modules (concat (expand-file-name user-emacs-directory) "../.spacemacs.d/hmz-modules.el"))
+  ;; (require 'hmz-modules (concat (expand-file-name user-emacs-directory) "../.spacemacs.d/hmz-modules.el"))
 
   (ido-mode 1)
 ) ;; end user-config
@@ -1967,7 +1956,7 @@ This function is called at the very end of Spacemacs initialization."
  '(shell-pop-cleanup-buffer-at-process-exit t)
  '(shell-pop-full-span nil t)
  '(shell-pop-restore-window-configuration t)
- '(shell-pop-window-position "left" t)
+ '(shell-pop-window-position "bottom" t)
  '(shell-pop-window-size 30 t)
  '(sp-highlight-pair-overlay nil)
  '(sp-highlight-wrap-overlay nil)

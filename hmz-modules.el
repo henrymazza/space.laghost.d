@@ -3,6 +3,15 @@
 
 (add-to-list 'load-path (expand-file-name "~/.spacemacs.develop.d/straight/repos/all-the-icons"))
 
+;; force web-mode
+(use-package web-mode
+  :disabled
+  :straight t
+  :custom
+  (web-mode-markup-indent-offset 2)
+  (web-mode-css-indent-offset 2)
+  (web-mode-code-indent-offset 2))
+
 (use-package string-inflection
   :init
   (global-set-key (kbd "C-c i") 'string-inflection-cycle)
@@ -316,6 +325,7 @@
 (straight-use-package 'dash)
 
 (use-package outshine
+  :disabled
   :after dash
   :straight (outshine :type git :host github :repo "alphapapa/outshine")
   :config
