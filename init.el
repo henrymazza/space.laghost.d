@@ -42,39 +42,39 @@ values."
   ;; of a list then all discovered layers will be installed.
   dotspacemacs-configuration-layers
   '(
-    ;; better-defaults
-    ;; bm
-    ;; csv
-    ;; dtrt-indent
-    ;; elixir
+    better-defaults
+    bm
+    csv
+    dtrt-indent
+    elixir
     emacs-lisp
-    ;; evil-cleverparens
-    ;; evil-collection
+    evil-cleverparens
+    evil-collection
     evil-commentary
-    ;; evil-magit
-    ;; evil-matchit
+    evil-magit
+    evil-matchit
     git
-    ;; github
+    github
     hmz-color-identifiers
     hmz-tabbar
-    ;; html
-    ;; lsp
-    ;; lua
-    ;; markdown
-    ;; neotree
-    ;; nginx
-    prodigy ;; required (for process definitions)
+    html
+    lsp
+    lua
+    markdown
+    neotree
+    nginx
+    prodigy ;; required (for process definitions below)
     python ;; required
-    ;; ruby-on-rails
-    ;; shell-scripts
-    ;; sql
-    ;; syntax-checking
-    ;; themes
-    ;; tide
-    ;; typography
-    ;; vinegar
-    ;; web-beautify
-    ;; yaml
+    ruby-on-rails
+    shell-scripts
+    sql
+    syntax-checking
+    themes
+    tide
+    typography
+    vinegar
+    web-beautify
+    yaml
 
     (ibuffer :variables ibuffer-group-buffers-by 'projects)
 
@@ -136,34 +136,26 @@ values."
    ;; configuration in `dotspacemacs/user-config'.
   dotspacemacs-additional-packages
   '(
-    ;; fira-code-mode
-    ;; bug-hunter
-    ;; discover-my-major
-    ;; docker-tramp
-    ;; dockerfile-mode
-    ;; doom-themes
-    ;; dracula-theme
-    ;; enh-ruby-mode
-    ;; fic-mode
-    ;; fringe-helper
-    ;; graphql-mode
-    ;; handlebars-sgml-mode
-    ;; ido-completing-read+
-    ;; itail
-    ;; jist
-    ;; memory-usage
+    fira-code-mode
+    bug-hunter
+    discover-my-major
+    docker-tramp
+    dockerfile-mode
+    dracula-theme
+    fic-mode
+    fringe-helper
+    ido-completing-read+
+    jist
+    memory-usage
     ns-auto-titlebar ;; required
-    ;; org-bullets
-    ;; ox-gfm
-    ;; persistent-scratch
-    ;; prodigy
+    org-bullets
+    ox-gfm
+    persistent-scratch
+    prodigy
     simpleclip ;; required
-    ;; sr-speedbar
-    ;; sublimity
-    ;; unobtrusive-magit-theme
-    ;; use-package
-    ;; zencoding-mode
-    )
+    sr-speedbar
+    sublimity
+    unobtrusive-magit-theme)
 
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages
@@ -172,13 +164,8 @@ values."
      git-gutter+
      fancy-battery
      smex
-     ;; ivy
-     ;; treemacs
-     ;; treemacs-icons-dired
-     ;; powerline
-     ;; spaceline
-     ;; spaceline-all-the-icons
-     vi-tilde-fringe )
+     vi-tilde-fringe
+     ivy)
 
    ;; Defines the behaviour of Spacemacs when installing packages.
    ;; Possible values are `used-only', `used-but-keep-unused' and `all'.
