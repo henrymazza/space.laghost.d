@@ -70,7 +70,7 @@ values."
                      auto-completion-complete-with-key-sequence-delay 0.01)
 
     ;; custom layers
-    ;; hmz-tabbar
+    hmz-tabbar
     hmz-color-identifiers
 
     ;; github
@@ -102,8 +102,10 @@ values."
                 javascript-fmt-tool 'web-beautify
                 ;; javascript-fmt-on-save t
                 js2-mode-show-strict-warnings nil
+                lsp-headerline-breadcrumb-enable nil
                 javascript-backend 'lsp)
 
+    javascript
 
     (spacemacs-layouts :variables
                        spacemacs-layouts-restrict-spc-tab nil
