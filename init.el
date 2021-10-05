@@ -55,16 +55,16 @@ values."
     ;; evil-matchit
     git
     ;; github
-    ;; hmz-color-identifiers
-    ;; hmz-tabbar
+    hmz-color-identifiers
+    hmz-tabbar
     ;; html
     ;; lsp
     ;; lua
     ;; markdown
     ;; neotree
     ;; nginx
-    prodigy
-    python
+    prodigy ;; required (for process definitions)
+    python ;; required
     ;; ruby-on-rails
     ;; shell-scripts
     ;; sql
@@ -152,16 +152,16 @@ values."
     ;; itail
     ;; jist
     ;; memory-usage
-    ns-auto-titlebar
+    ns-auto-titlebar ;; required
     ;; org-bullets
     ;; ox-gfm
     ;; persistent-scratch
-    prodigy
-    simpleclip
+    ;; prodigy
+    simpleclip ;; required
     ;; sr-speedbar
     ;; sublimity
     ;; unobtrusive-magit-theme
-    use-package
+    ;; use-package
     ;; zencoding-mode
     )
 
