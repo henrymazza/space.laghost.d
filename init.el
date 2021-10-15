@@ -6,7 +6,9 @@
 
 ;; (require 'iso-transl)
 
-(setq debug-on-error t)
+;; troubleshoot
+(setq debug-on-error nil)
+(setq debug-on-quit nil)
 
 ;; it may cause problems with spacemacs own loader
 (setq straight-use-package-by-default nil)
@@ -43,10 +45,10 @@ values."
   dotspacemacs-configuration-layers
   '(
     better-defaults
-    bm
+    ;; bm
     csv
     dtrt-indent
-    elixir
+    ;; elixir
     emacs-lisp
     evil-cleverparens
     evil-collection
@@ -54,7 +56,7 @@ values."
     evil-magit
     evil-matchit
     git
-    github
+    github ;; keybinding warnings
     hmz-color-identifiers
     hmz-tabbar
     html
@@ -63,7 +65,6 @@ values."
     markdown
     neotree
     nginx
-    prodigy ;; required (for process definitions below)
     python ;; required
     ruby-on-rails
     shell-scripts
@@ -78,7 +79,7 @@ values."
 
     (ibuffer :variables ibuffer-group-buffers-by 'projects)
 
-    (version-control :variables
+    (version-control :variables ;; keybindings warnings too
       version-control-diff-tool 'git-gutter)
 
     (auto-completion :variables
@@ -128,7 +129,8 @@ values."
            shell-default-full-span nil)
 
     (osx :variables
-         osx-command-as 'super))
+         osx-command-as 'super)
+    )
 
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -151,11 +153,11 @@ values."
     org-bullets
     ox-gfm
     persistent-scratch
-    prodigy
     simpleclip ;; required
     sr-speedbar
     sublimity
-    unobtrusive-magit-theme)
+    unobtrusive-magit-theme
+    )
 
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages
@@ -1019,6 +1021,8 @@ move to the next field. Call `open-line' if nothing else applies."
   ;; Monkey Patch (or use functional magic) to show only first name of the
   ;; author in magit-log, as well abbrev. date.
   (use-package magit-log
+    :disabled
+    :straight t
     :init
     (progn
       ;; (setq magit-log-margin '(t age magit-log-margin-width t 18)) ;Default value
@@ -1064,6 +1068,8 @@ move to the next field. Call `open-line' if nothing else applies."
 
   ;; Initialize title bar appearence manager
   (use-package ns-auto-titlebar
+    :disabled
+    :straight t
     :if (memq window-system '(mac ns))
     :config
     (ns-auto-titlebar-mode))
@@ -1077,93 +1083,20 @@ move to the next field. Call `open-line' if nothing else applies."
   ;; avoid leaving stall branch information by VC
   (setq auto-revert-check-vc-info nil)
 
-  (defun prodigy-strip-ctrl-m (output)
-    "Strip  line endings from OUTPUT."
-    (s-replace "" "" output)
-    (s-replace "" "\n" output)
 
-    )
 
-  (prodigy-define-service
-    :name "Vavato's Spring Server"
-    :command "spring"
-    :args '("server" "start" "SKIP_COV=true")
-    :env '(("SKIP_COV" "true"))
-    :cwd "/Users/HMz/Development/Vavato/vavato-backend/"
-    :tags '(vavato work)
-    :stop-signal 'sigkill
-    :kill-process-buffer-on-stop t)
 
-  (prodigy-define-service
-    :name "Vavato's Guard Backend"
-    :command "guard"
-    :args '("-f" "doc" "SKIP_COV=true")
-    :cwd "/Users/HMz/Development/Vavato/vavato-backend/"
-    :tags '(vavato work)
-    :stop-signal 'sigkill
-    :kill-process-buffer-on-stop t)
 
-  (prodigy-define-service
-    :name "Vavato's Rails Backend"
-    :command "rails"
-    :args '("s")
-    :cwd "/Users/HMz/Development/Vavato/vavato-backend/"
-    :tags '(vavato work)
-    :stop-signal 'sigkill
-    :kill-process-buffer-on-stop t)
 
-  (prodigy-define-service
-    :name "Vavato's Angular Fronted"
-    :command "npm"
-    :args '("start")
-    :cwd "/Users/HMz/Development/Vavato/vavato-frontend/"
-    :tags '(vavato work)
-    :stop-signal 'sigkill
-    :kill-process-buffer-on-stop t)
 
-  (prodigy-define-service
-    :name "Uni Webserver"
-    :command "/Users/HMz/Development/uni/bin/rails"
-    :args '("s")
-    :cwd "/Users/HMz/Development/uni/"
-    :url "localhost"
-    :port 3000
-    :tags '(work)
-    :stop-signal 'sigkill
-    :kill-process-buffer-on-stop t)
 
-  (prodigy-define-service
-    :name "Uni Chef Recipe on Weberver"
-    :command "ssh"
-    :args '("sampa3.officina.me"
-            "-t"
-            "sudo"
-            "chef-client"
-            "-o"
-            "\"recipe[uni]\"")
-    :cwd "/Users/HMz/Development/uni/"
-    :tags '(work)
-    :kill-process-buffer-on-stop t)
 
-  ;; (prodigy-define-service
-  ;;   :name "Uni Frontend Build Server"
-  ;;   :command "ember"
-  ;;   :args '("serve")
-  ;;   :cwd "/Users/HMz/Development/uni-fe/"
-  ;;   :url "localhost"
-  ;;   :port 4200
-  ;;   :tags '(work)
-  ;;   :stop-signal 'sigkill
-  ;;   :kill-process-buffer-on-stop t)
 
-  ;; (prodigy-define-service
-  ;;   :name "Uni Test Server"
-  ;;   :command "ember"
-  ;;   :args '("test" "--serve" "--watcher" "node")
-  ;;   :cwd "/Users/HMz/Development/uni-fe/"
-  ;;   :tags '(work)
-  ;;   :stop-signal 'sigkill
-  ;;   :kill-process-buffer-on-stop t)
+
+
+
+
+
 
   ;; Thou shall not pass the eightiegh column of thy code
   (global-column-enforce-mode 1)
@@ -1314,7 +1247,7 @@ move to the next field. Call `open-line' if nothing else applies."
   (global-set-key (kbd "H-k") 'kill-this-buffer)
 
   ;; spacemacs as default git editor
-  (global-git-commit-mode t)
+  ;; (global-git-commit-mode t)
 
   ;; (global-git-gutter+-mode nil)
   ;; (git-gutter-mode -1)
@@ -1721,7 +1654,7 @@ Example:
     (interactive)
     (dired-smart-shell-command "open -a iTerm $PWD" nil nil))
 
-  ;; (require 'hmz-modules (concat (expand-file-name user-emacs-directory) "../.spacemacs.d/hmz-modules.el"))
+  (require 'hmz-modules (concat (expand-file-name user-emacs-directory) "../.spacemacs.d/hmz-modules.el"))
 
   (ido-mode 1)
 ) ;; end user-config
@@ -1930,9 +1863,8 @@ This function is called at the very end of Spacemacs initialization."
    '((eval progn
            (pp-buffer)
            (indent-buffer))
-     (eval progn
-           (pp-buffer))
      (column-enforce-column . 125)
+     (flycheck-eslintrc "/Users/HMz/Development/GoDaddy/nemo/nemo/app/ui/.eslintrc")
      (rubocopfmt-rubocop-command . "/Users/HMz/Development/GoDaddy/nemo/rubocop_wrapper.sh")
      (rubocopfmt-mode . -1)
      (typescript-backend . tide)
