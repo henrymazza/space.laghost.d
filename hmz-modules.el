@@ -3,6 +3,16 @@
 
 (add-to-list 'load-path (expand-file-name "~/.spacemacs.develop.d/straight/repos/all-the-icons"))
 
+(use-package good-scroll
+  :disabled
+  :straight (good-scroll :type git :host github :repo "io12/good-scroll.el")
+  :init
+  (good-scroll-mode 1)
+  :config
+  (global-set-key [next] #'good-scroll-up-full-screen)
+  (global-set-key [prior] #'good-scroll-down-full-screen)
+  )
+
 (use-package ob-elixir
   :disabled
   :straight t

@@ -753,9 +753,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
   (setq undo-tree-history-directory-alist '(("." . "~/.spacemacs.d/undo")))
 
   ;; disable smooth scroll on railwaycat's emacs fork
-  (setq mac-mouse-wheel-smooth-scroll nil)
-
-
+  ;; (setq mac-mouse-wheel-smooth-scroll t)
 )
 
 (defun dotspacemacs/user-config ()
@@ -905,23 +903,23 @@ move to the next field. Call `open-line' if nothing else applies."
   ;; Mouse Scrolling Config
   ;;   scrolling does not work properly. This is the closest approximation I could
   ;;   come up with.
-  (setq mouse-wheel-progressive-speed nil)
-  (setq redisplay-dont-pause t)
-  (defun up-single () (interactive) (scroll-up 1))
-  (defun down-single () (interactive) (scroll-down 1))
-  (defun up-double () (interactive) (scroll-up 2))
-  (defun down-double () (interactive) (scroll-down 2))
-  (defun up-triple () (interactive) (scroll-up 5))
-  (defun down-triple () (interactive) (scroll-down 5))
+  ;; (setq mouse-wheel-progressive-speed nil)
+  ;; (setq redisplay-dont-pause t)
+  ;; (defun up-single () (interactive) (scroll-up 1))
+  ;; (defun down-single () (interactive) (scroll-down 1))
+  ;; (defun up-double () (interactive) (scroll-up 2))
+  ;; (defun down-double () (interactive) (scroll-down 2))
+  ;; (defun up-triple () (interactive) (scroll-up 5))
+  ;; (defun down-triple () (interactive) (scroll-down 5))
 
-  (global-set-key [wheel-down] 'up-single)
-  (global-set-key [wheel-up] 'down-single)
-  (global-set-key [double-wheel-down] 'up-double)
-  (global-set-key [double-wheel-up] 'down-double)
-  (global-set-key [triple-wheel-down] 'up-triple)
-  (global-set-key [triple-wheel-up] 'down-triple)
+  ;; (global-set-key [wheel-down] 'up-single)
+  ;; (global-set-key [wheel-up] 'down-single)
+  ;; (global-set-key [double-wheel-down] 'up-double)
+  ;; (global-set-key [double-wheel-up] 'down-double)
+  ;; (global-set-key [triple-wheel-down] 'up-triple)
+  ;; (global-set-key [triple-wheel-up] 'down-triple)
 
-  (setq mouse-wheel-scroll-amount '(1 ((shift) . 4) ((meta) . 8)))
+  ;; (setq mouse-wheel-scroll-amount '(1 ((shift) . 4) ((meta) . 8)))
 
   ;; (put 'text-mode 'flyspell-mode-predicate 'flyspell-ignore-http-and-https)
 
@@ -1157,9 +1155,8 @@ move to the next field. Call `open-line' if nothing else applies."
   ;; Make insert cursor a vertical Bar. Keep default color.
   (setq evil-emacs-state-cursor '("SkyBlue2" bar))
 
-  ;; really! disabel it!
-  (if (window-system)
-      (scroll-bar-mode -1))
+  ;; 28.0 makes it much better; plus yascroll been broken lately
+  (scroll-bar-mode 1)
 
   ;; space in between lines
   (setq-default line-spacing 2)
@@ -1816,6 +1813,7 @@ This function is called at the very end of Spacemacs initialization."
  '(persp-keymap-prefix "" nil nil "Customized with use-package persp-mode")
  '(persp-kill-foreign-buffer-behaviour 'kill)
  '(persp-nil-name "nil" nil nil "Customized with use-package persp-mode")
+ '(pixel-scroll-mode nil)
  '(popwin-mode t)
  '(popwin:popup-window-height 8)
  '(popwin:popup-window-width 80)
