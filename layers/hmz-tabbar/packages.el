@@ -73,8 +73,10 @@ which require an initialization must be listed explicitly in the list.")
     ;; END SWITCH BUFFER
 
     ;; safari like back and forward tabs
-    (global-set-key [(control shift tab)] 'tabbar-backward-tab)
-    (global-set-key [(control tab)] 'tabbar-forward-tab)
+    ;; (global-set-key [(control shift tab)] 'tabbar-backward-tab)
+    ;; (global-set-key [(control tab)] 'tabbar-forward-tab)
+    (define-key evil-normal-state-map [(control tab)] 'tabbar-forward-tab)
+    (define-key evil-normal-state-map [(control shift tab)] 'tabbar-backward-tab)
 
     ;; make tab and shift tab move between MRU buffers
     (define-key evil-normal-state-map (kbd "<S-tab>") 'previous-buffer)

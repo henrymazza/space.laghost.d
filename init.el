@@ -9,6 +9,7 @@
 ;; troubleshoot
 (setq debug-on-error nil)
 (setq debug-on-quit nil)
+(setq warning-minimum-level :emergency)
 
 ;; it may cause problems with spacemacs own loader
 (setq straight-use-package-by-default nil)
@@ -48,19 +49,20 @@ values."
     ;; bm
     csv
     dtrt-indent
-    ;; elixir
+    elixir
     emacs-lisp
     evil-cleverparens
     evil-collection
     evil-commentary
     evil-magit
     evil-matchit
+    fine-file-rg
     git
     github ;; keybinding warnings
     hmz-color-identifiers
     hmz-tabbar
     html
-    lsp
+    ;; lsp
     lua
     markdown
     neotree
@@ -105,7 +107,7 @@ values."
                 ;; javascript-fmt-on-save t
                 js2-mode-show-strict-warnings nil
                 lsp-headerline-breadcrumb-enable nil
-                javascript-backend 'lsp)
+                javascript-backend 'tide)
 
     (spacemacs-layouts :variables
                        spacemacs-layouts-restrict-spc-tab nil
@@ -129,8 +131,7 @@ values."
            shell-default-full-span nil)
 
     (osx :variables
-         osx-command-as 'super)
-    )
+         osx-command-as 'super))
 
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -153,9 +154,8 @@ values."
     org-bullets
     ox-gfm
     persistent-scratch
+    rg
     simpleclip ;; required
-    sr-speedbar
-    sublimity
     unobtrusive-magit-theme
     )
 
@@ -243,16 +243,12 @@ values."
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font. `powerline-scale' allows to quickly tweak the mode-line
    ;; size to make separators look not too crappy.
-   dotspacemacs-default-font '(
-                               ;; "DejaVu Sans Mono"
-                               "Fira Code"
-             ;; "Inconsolata"
-             ;; "Anonymous Pro Minus"
-            :size 14
-            :height 120
-            :weight normal
-            :width normal
-            :powerline-scale 1.0)
+   dotspacemacs-default-font '("Fira Code"
+                               :size 14
+                               :height 120
+                               :weight normal
+                               :width normal
+                               :powerline-scale 1.0)
    ;; The leader key
    dotspacemacs-leader-key "SPC"
    ;; The key used for Emacs commands (M-x) (after pressing on the leader key).
@@ -484,6 +480,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
     (push '("#+begin_src sh" . ?❯) prettify-symbols-alist)
     (push '("#+begin_src shell" . ?❯) prettify-symbols-alist)
     (push '("#+begin_src md" . ?𝐌) prettify-symbols-alist)
+    (push '("#+begin_src elixir" . ?🪔) prettify-symbols-alist)
     (push '("#+begin_src markdown" . ?𝐌) prettify-symbols-alist)
     (push '("#+begin_src dockerfile" . ?🐋) prettify-symbols-alist)
     (push '("#+begin_src yaml" . ?Ӱ) prettify-symbols-alist)
@@ -658,8 +655,8 @@ before packages are loaded. If you are unsure, you should try in setting them in
   (global-auto-revert-mode nil)
 
   ;; projectile don't go well with tramp
-  (defadvice projectile-project-root (around ignore-remote first activate)
-    (unless (file-remote-p default-directory) ad-do-it))
+  ;; (defadvice projectile-project-root (around ignore-remote first activate)
+  ;;   (unless (file-remote-p default-directory) ad-do-it))
 
   ;; turn off magic comments for any ruby mode
   (setq enh-ruby-add-encoding-comment-on-save nil)
@@ -750,7 +747,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
   (setq undo-tree-enable-undo-in-region nil)
 
   ;; keep undo tree across restarts
-  (setq undo-tree-auto-save-history nil)
+  (setq undo-tree-auto-save-history t)
 
   ;; keep undo tree files in proper place
   (setq undo-tree-history-directory-alist '(("." . "~/.spacemacs.d/undo")))
@@ -939,9 +936,6 @@ move to the next field. Call `open-line' if nothing else applies."
 
     (setq require-final-newline t)
 
-    ;; recognize camelized words, underline, as word boundary
-    (subword-mode 1)
-
     (which-function-mode 0)
 
     (face-remap-add-relative 'default '(:height 140))
@@ -966,7 +960,8 @@ move to the next field. Call `open-line' if nothing else applies."
     (smartparens-global-mode t)
     (global-evil-matchit-mode 1)
 
-    (visual-line-mode t))
+    (visual-line-mode t)
+    (adaptive-wrap-prefix-mode 1))
 
   (add-hook 'prog-mode-hook 'hmz-prog-mode-hook)
   (add-hook 'text-mode-hook 'hmz-prog-mode-hook)
@@ -1243,7 +1238,7 @@ move to the next field. Call `open-line' if nothing else applies."
   (global-set-key (kbd "H-o") 'find-file)
 
   ;; kill buffers: c-k didn't work right
-  (global-set-key (kbd "s-k") 'kill-this-buffer)
+  (global-unset-key (kbd "s-k"))
   (global-set-key (kbd "H-k") 'kill-this-buffer)
 
   ;; spacemacs as default git editor
@@ -1672,8 +1667,6 @@ This function is called at the very end of Spacemacs initialization."
  '(ahs-default-range 'ahs-range-whole-buffer)
  '(ahs-idle-interval 1.0)
  '(alert-default-style 'notifier)
- '(ansi-color-names-vector
-   ["dim gray" "orange red" "medium spring green" "gold" "dodger blue" "purple" "turquoise1" "#eeeeec"])
  '(auto-revert-buffer-list-filter 'magit-auto-revert-buffer-p)
  '(auto-revert-verbose t)
  '(before-save-hook
@@ -1686,7 +1679,7 @@ This function is called at the very end of Spacemacs initialization."
  '(coffee-tab-width 2)
  '(csv-separators '("," ";") t)
  '(custom-safe-themes
-   '("76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "2dff5f0b44a9e6c8644b2159414af72261e38686072e063aa66ee98a2faecf0e" "7451f243a18b4b37cabfec57facc01bd1fe28b00e101e488c61e1eed913d9db9" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "eb5c79b2e9a91b0a47b733a110d10774376a949d20b88c31700e9858f0f59da7" "a41b81af6336bd822137d4341f7e16495a49b06c180d6a6417bf9fd1001b6d2b" "57bd93e7dc5fbb5d8d27697185b753f8563fe0db5db245592bab55a8680fdd8c" "890a1a44aff08a726439b03c69ff210fe929f0eff846ccb85f78ee0e27c7b2ea" "819ab08867ef1adcf10b594c2870c0074caf6a96d0b0d40124b730ff436a7496" default))
+   '("18bec4c258b4b4fb261671cf59197c1c3ba2a7a47cc776915c3e8db3334a0d25" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "0ab2aa38f12640ecde12e01c4221d24f034807929c1f859cbca444f7b0a98b3a" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "2dff5f0b44a9e6c8644b2159414af72261e38686072e063aa66ee98a2faecf0e" "7451f243a18b4b37cabfec57facc01bd1fe28b00e101e488c61e1eed913d9db9" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "eb5c79b2e9a91b0a47b733a110d10774376a949d20b88c31700e9858f0f59da7" "a41b81af6336bd822137d4341f7e16495a49b06c180d6a6417bf9fd1001b6d2b" "57bd93e7dc5fbb5d8d27697185b753f8563fe0db5db245592bab55a8680fdd8c" "890a1a44aff08a726439b03c69ff210fe929f0eff846ccb85f78ee0e27c7b2ea" "819ab08867ef1adcf10b594c2870c0074caf6a96d0b0d40124b730ff436a7496" default))
  '(default-justification 'left)
  '(desktop-minor-mode-table
    '((defining-kbd-macro nil)
@@ -1764,7 +1757,7 @@ This function is called at the very end of Spacemacs initialization."
  '(mode-line-in-non-selected-windows t)
  '(neo-hide-cursor t)
  '(neo-theme 'arrow)
- '(neo-vc-integration '(face char) t)
+ '(neo-vc-integration '(face char))
  '(neo-vc-state-char-alist
    '((up-to-date . 32)
      (edited . 10041)
@@ -1780,7 +1773,7 @@ This function is called at the very end of Spacemacs initialization."
      (unregistered . 32)
      (nil . 8942)))
  '(neo-window-position 'right)
- '(neo-window-width 40 t)
+ '(neo-window-width 40)
  '(nil nil t)
  '(objed-cursor-color "#ff5555")
  '(org-agenda-files
@@ -1815,7 +1808,7 @@ This function is called at the very end of Spacemacs initialization."
      (lisp-interaction-mode . origami-elisp-parser)
      (clojure-mode . origami-clj-parser)))
  '(package-selected-packages
-   '(google-this modern-fringes terraform-mode enh-ruby-mode psession telega dired-sidebar centaur-tabs writeroom-mode workgroups memory-usage drupal-mode phpunit phpcbf php-auto-yasnippets php-mode zones sr-speedbar evil-ruby-text-objects tempbuf wakatime-mode rspec-simple ido-completing-read+ shrink-path amx ri-mode ri smooth-scrolling ivy-youtube wgrep lv flyspell-correct-ivy counsel-projectile counsel swiper ivy doom-todo-ivy magit-todos todo-projectile hl-block hl-block-mode indent-guide-mode highlight-indent-guides-mode vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toml-mode toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocopfmt rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails prodigy popwin pip-requirements persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file ns-auto-titlebar nginx-mode mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-gutter-fringe gh-md gcmh fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme doom-themes doom-modeline discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby cargo bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))
+   '(google-this modern-fringes terraform-mode enh-ruby-mode psession telega dired-sidebar centaur-tabs writeroom-mode workgroups memory-usage drupal-mode phpunit phpcbf php-auto-yasnippets php-mode zones sr-speedbar evil-ruby-text-objects tempbuf wakatime-mode rspec-simple ido-completing-read+ shrink-path amx ri-mode ri smooth-scrolling ivy-youtube wgrep lv flyspell-correct-ivy counsel-projectile counsel swiper ivy doom-todo-ivy magit-todos todo-projectile hl-block hl-block-mode indent-guide-mode highlight-indent-guides-mode vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toml-mode toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocopfmt rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails prodigy popwin pip-requirements persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file ns-auto-titlebar nginx-mode mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-gutter-fringe gh-md gcmh fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme doom-themes doom-modeline discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby cargo bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))
  '(pdf-view-midnight-colors (cons "#f8f8f2" "#282a36"))
  '(persp-auto-save-num-of-backups 10 nil nil "Customized with use-package persp-mode")
  '(persp-autokill-buffer-on-remove 'kill-weak nil nil "Customized with use-package persp-mode")
@@ -1855,12 +1848,14 @@ This function is called at the very end of Spacemacs initialization."
  '(rspec-autosave-buffer t)
  '(rspec-spec-command "rspec -f doc")
  '(rspec-use-docker-when-possible t)
- '(rubocopfmt-rubocop-command "/Users/HMz/Development/GoDaddy/nemo/rubocop_wrapper.sh")
  '(rubocopfmt-use-bundler-when-possible nil)
  '(rustic-ansi-faces
    ["#282a36" "#ff5555" "#50fa7b" "#f1fa8c" "#61bfff" "#ff79c6" "#8be9fd" "#f8f8f2"])
  '(safe-local-variable-values
-   '((eval progn
+   '((rubocopfmt-rubocop-command . "rubocop")
+     (rubocopfmt-rubocop-command . "/Users/HMz/.gem/bin/rubocop --cache false")
+     (rubocopfmt-rubocop-command . "/Users/HMz/.gem/bin/rubocop")
+     (eval progn
            (pp-buffer)
            (indent-buffer))
      (column-enforce-column . 125)
@@ -1884,11 +1879,12 @@ This function is called at the very end of Spacemacs initialization."
  '(sublimity-attractive-centering-width 120)
  '(sublimity-mode t)
  '(sublimity-scroll-weight 2.0)
+ '(tabbar-mode t nil (tabbar))
  '(tempbuf-kill-hook nil)
  '(tooltip-use-echo-area t)
  '(tramp-copy-size-limit 1000000)
  '(tramp-inline-compress-start-size 1000000)
- '(tramp-verbose 10 t)
+ '(tramp-verbose 10)
  '(use-dialog-box t)
  '(use-package-always-demand t)
  '(use-package-check-before-init t)
@@ -1979,6 +1975,7 @@ This function is called at the very end of Spacemacs initialization."
  '(anzu-replace-highlight ((t (:box (:line-width 2 :color "sienna1")))))
  '(bm-persistent-face ((t (:overline "DarkGoldenrod4"))))
  '(bold ((t (:weight bold))))
+ '(column-enforce-face ((t (:underline "gold"))))
  '(custom-button ((t (:background "lightgrey" :foreground "black" :box 2))))
  '(custom-button-mouse ((t (:background "grey90" :foreground "black" :box 2))))
  '(custom-button-pressed ((t (:background "gray" :foreground "black" :box 2))))
@@ -2000,7 +1997,7 @@ This function is called at the very end of Spacemacs initialization."
  '(link ((t (:foreground "SkyBlue1" :underline nil :height 1.05 :family "San Francisco"))))
  '(linum ((t (:inherit hl-line :background "#282a36" :foreground "#565761" :slant italic))))
  '(magit-blame-highlight ((t (:inherit (font-lock-comment-face hl-line) :height 0.8 :family "San Francisco"))))
- '(magit-blame-name ((t (:inherit font-lock-variable-name-face))) t)
+ '(magit-blame-name ((t (:inherit font-lock-variable-name-face))))
  '(magit-log-author ((t (:foreground "dark gray" :family "San Francisco"))))
  '(magit-section-heading ((t (:extend t :foreground "#ff79c6" :weight bold))))
  '(minibuffer-prompt ((t (:foreground "#ff79c6" :weight bold :height 1.2 :family "San Francisco"))))

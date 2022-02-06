@@ -3,7 +3,20 @@
 
 (add-to-list 'load-path (expand-file-name "~/.spacemacs.develop.d/straight/repos/all-the-icons"))
 
-;; force web-mode
+(use-package ob-elixir
+  :disabled
+  :straight t
+  :after elixir)
+
+(use-package dired-subtree
+  :disabled
+  :straight t
+  :after dired
+  :config
+  (bind-key "<tab>" #'dired-subtree-toggle dired-mode-map)
+  (bind-key "<backtab>" #'dired-subtree-cycle dired-mode-map))
+
+;; force web-mode (#not)
 (use-package web-mode
   :disabled
   :straight t
@@ -20,7 +33,8 @@
   (global-set-key (kbd "C-c J") 'string-inflection-java-style-cycle))
 
 (use-package fic-mode
-  :straight (org-reveal :type git :host github :repo "lewang/fic-mode"))
+  :disabled
+  :straight (fic-mode :type git :host github :repo "lewang/fic-mode"))
 
 ;; indent visual-line wrapped lines
 (use-package adaptive-wrap
@@ -52,15 +66,16 @@
   :ensure t
   :bind ("C-c d" . docker))
 
+
 (use-package org-reveal
-  :disabled
   :straight (org-reveal :type git :host github :repo "yjwen/org-reveal")
   :init
-  (require 'ox-reveal)
+  (use-package ox-reveal
+    :straight t)
+
   ;; TODO: make that relative
   (setq org-reveal-root "file:///Users/HMz/Development/reveal.js")
   (setq org-reveal-title-slide nil))
-
 
 (use-package org-tree-slide
   :straight t)
@@ -348,6 +363,7 @@
   (doom-modeline-mode 1))
 
 (use-package yascroll
+  :disabled
   :straight t
   :config
   (global-yascroll-bar-mode 1))
@@ -409,7 +425,6 @@ So it safe to call it many times like in a minor mode hook."
 (use-package undohist
   :straight (:host github :repo "halbtuerke/undohist-el"
                    :branch "do-not-save-undo-file-for-ignored-files")
-  :defer t
   :init
   (autoload 'undohist-initialize "undohist")
   (undohist-initialize)
@@ -450,6 +465,7 @@ So it safe to call it many times like in a minor mode hook."
   (defun +dired-mode-faces ()
     (face-remap-add-relative 'hl-line
                              :background (face-background 'isearch))))
+
 (use-package dired-sidebar
   :straight t
   :hook
@@ -553,7 +569,6 @@ So it safe to call it many times like in a minor mode hook."
   (add-to-list 'exec-path "~/Development/elixir-ls/"))
 
 (use-package persp-mode
-  :disabled
   :straight t
   :after projectile
   :custom
@@ -573,6 +588,9 @@ So it safe to call it many times like in a minor mode hook."
 
   (persp-def-auto-persp "elisp"
                         :buffer-name "\\.el")
+
+  (persp-def-auto-persp "js"
+                        :buffer-name "\\.js")
 
   (persp-def-auto-persp "projectile"
                         :hooks 'projectile-mode-hook
@@ -729,6 +747,7 @@ So it safe to call it many times like in a minor mode hook."
 
 ;; FIXME: not loading at start time
 (use-package amx
+  :disabled
   :straight t
   :init
   (defun spacemacs/helm-M-x-fuzzy-matching ()
@@ -1251,7 +1270,8 @@ So it safe to call it many times like in a minor mode hook."
               (lambda (prev cur)
                 (tabbar-mode 1)
                 (unless (or (string= (buffer-name) "*Messages*")
-                            (string= (buffer-name) neo-buffer-name))
+                            (string= (buffer-name) neo-buffer-name)
+                            (file-remote-p (buffer-file-name)))
                   (if (and (neo-global--window-exists-p) (buffer-file-name))
                       (neotree-refresh t)
                     (neotree-hide))))))
@@ -1447,7 +1467,7 @@ So it safe to call it many times like in a minor mode hook."
 
     ;; no scroll bars
     (scroll-bar-mode 0)
-    (yascroll-bar-mode 1)
+    ;; (yascroll-bar-mode 1)
     (spacemacs/toggle-truncate-lines-on)
 
     ;; highlight current line
