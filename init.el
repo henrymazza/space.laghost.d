@@ -65,7 +65,10 @@ values."
     ;; lsp
     lua
     markdown
-    neotree
+    ;; neotree
+    (treemacs
+    :variables
+    treemacs-use-icons-dired nil)
     nginx
     python ;; required
     ruby-on-rails
@@ -586,7 +589,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
   ;; (set-clipboard-coding-system 'utf-8)
   (set-default-coding-systems 'utf-8)
   (set-keyboard-coding-system 'utf-8-unix)
-  (set-language-environment 'utf-8)
+  (set-laguage-environment 'utf-8)
   (set-selection-coding-system 'utf-8)
   (set-terminal-coding-system 'utf-8)
   (setq locale-coding-system 'utf-8)
@@ -1172,7 +1175,7 @@ move to the next field. Call `open-line' if nothing else applies."
 
   ;; Clear unused buffers
   (midnight-mode t)
-  (add-to-list 'clean-buffer-list-kill-never-regexps ".*NeoTree.*")
+  ;; (add-to-list 'clean-buffer-list-kill-never-regexps ".*NeoTree.*")
 
   ;; Eval and Print ERROR: not working so far
   (evil-define-key 'nomal emacs-lisp-mode-map (kbd "e p") 'eval-print-last-sexp)
@@ -1883,6 +1886,12 @@ This function is called at the very end of Spacemacs initialization."
  '(tramp-copy-size-limit 1000000)
  '(tramp-inline-compress-start-size 1000000)
  '(tramp-verbose 10)
+ '(treemacs-collapse-dirs 3)
+ '(treemacs-filewatch-mode t)
+ '(treemacs-follow-after-init t)
+ '(treemacs-follow-mode t)
+ '(treemacs-fringe-indicator-mode t)
+ '(treemacs-icons-dired-mode nil nil (treemacs-icons-dired))
  '(use-dialog-box t)
  '(use-package-always-demand t)
  '(use-package-check-before-init t)
@@ -1984,6 +1993,8 @@ This function is called at the very end of Spacemacs initialization."
  '(font-lock-comment-face ((t (:foreground "LightSteelBlue3"))))
  '(font-lock-warning-face ((t (:background "#373844" :foreground "#ffb86c" :underline (:color "red" :style wave)))))
  '(fringe ((t (:foreground "DeepSkyBlue" :background unspecified))))
+ '(git-gutter:added ((t (:foreground "medium spring green" :weight bold))))
+ '(git-gutter:modified ((t (:foreground "deep pink" :weight bold))))
  '(header-line ((t (:background "#44475a" :underline "gray20" :height 1.0 :family "San Francisco"))))
  '(hi-yellow ((t nil)))
  '(highlight-indent-guides-character-face ((t (:foreground "#3df1410a539f"))))
@@ -2039,3 +2050,9 @@ This function is called at the very end of Spacemacs initialization."
  '(window-divider ((t (:foreground "black"))))
  '(yascroll:thumb-fringe ((t (:inherit font-lock-comment-face :background "MediumPurple4" :foreground "MediumPurple4")))))
 )
+
+;; Troubleshoot
+;;
+;; * spacediminish: remove from layers/+spacemacs/spacemacs-visual/packages.el (it happens on
+;;develop usually)
+;;

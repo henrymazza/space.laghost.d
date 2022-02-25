@@ -757,7 +757,7 @@ So it safe to call it many times like in a minor mode hook."
 
 ;; FIXME: not loading at start time
 (use-package amx
-  :disabled
+  ;; :disabled
   :straight t
   :init
   (defun spacemacs/helm-M-x-fuzzy-matching ()
@@ -1243,6 +1243,7 @@ So it safe to call it many times like in a minor mode hook."
   (drag-stuff-define-keys))
 
 (use-package neotree
+  :disabled
   :straight t
   :after (all-the-icons rainbow-identifiers)
   :init
