@@ -2,11 +2,11 @@
   '(
     rainbow-mode
     rainbow-identifiers
-    rainbow-delimiters
+    ;; rainbow-delimiters
 
 
-    (rainbow-identifiers-mode t)
-    (rainbow-delimiters-mode-enable)
+    ;; (rainbow-identifiers-mode t)
+    ;; (rainbow-delimiters-mode-enable)
     ))
 
 (defun hmz-color-identifiers/post-rainbow-delimiters ()

@@ -78,6 +78,7 @@
 
 
 (use-package org-reveal
+  :disabled
   :straight (org-reveal :type git :host github :repo "yjwen/org-reveal")
   :init
   (use-package ox-reveal
@@ -531,38 +532,6 @@ So it safe to call it many times like in a minor mode hook."
   (setq awesome-tab-height 140)
   (awesome-tab-mode t))
 
-(use-package centaur-tabs
-  :straight t
-  :disabled
-  ;; :defer t
-  ;; only load if hmz-tabbar isn't config's part
-  :init
-  (setq centaur-tabs-set-icons t)
-  (setq centaur-tabs-plain-icons nil)
-  (setq centaur-tabs-gray-out-icons 'buffer)
-  (setq centaur-tabs-gray-out-icons nil)
-  (setq centaur-tabs-set-bar 'over)
-  (setq centaur-tabs-set-bar 'under)
-  (setq centaur-tabs-set-bar 'under)
-  (setq centaur-tabs-set-close-button nil)
-  (setq centaur-tabs-set-modified-marker t)
-  (setq centaur-tabs--buffer-show-groups nil)
-  (setq centaur-tabs-cycle-scope 'tabs)
-  (setq centaur-tabs-show-navigation-buttons nil)
-  (setq centaur-tabs-show-navigation-buttons t)
-  (setq centaur-tabs-adjust-buffer-order t)
-  (setq centaur-tabs-background-color "black")
-  (setq centaur-tabs-plain-icons nil)
-  (setq centaur-tabs-set-icons t)
-  (setq centaur-tabs-set-left-close-button nil)
-  (setq centaur-tabs-modified-marker "#")
-
-  :config
-  (centaur-tabs-mode 1)
-  ;; Safari like key-bindings
-  (global-set-key [(control shift tab)] 'centaur-tabs-backward)
-  (global-set-key [(control tab)] 'centaur-tabs-forward))
-
 (use-package direx
   :straight t
   :disabled
@@ -757,7 +726,7 @@ So it safe to call it many times like in a minor mode hook."
 
 ;; FIXME: not loading at start time
 (use-package amx
-  ;; :disabled
+  :disabled
   :straight t
   :init
   (defun spacemacs/helm-M-x-fuzzy-matching ()
@@ -1218,19 +1187,6 @@ So it safe to call it many times like in a minor mode hook."
 
   )
 
-(use-package ember-mode
-  :straight t
-  :disabled
-  :config
-  (defun ember--file-project-root (file)
-    "Overriden function so it come back to the old behavior and
-       search by app dir."
-    (locate-dominating-file file "app"))
-
-  (add-hook 'coffee-mode-hook (lambda () (ember-mode t)))
-  (add-hook 'js-mode-hook (lambda () (ember-mode t)))
-  (add-hook 'web-mode-hook (lambda () (ember-mode t))))
-
 (use-package command-log-mode
   :straight t
   :config
@@ -1243,7 +1199,7 @@ So it safe to call it many times like in a minor mode hook."
   (drag-stuff-define-keys))
 
 (use-package neotree
-  :disabled
+  ;; :disabled
   :straight t
   :after (all-the-icons rainbow-identifiers)
   :init
@@ -1279,7 +1235,7 @@ So it safe to call it many times like in a minor mode hook."
     (setq switch-buffer-functions nil)
     (add-hook 'switch-buffer-functions
               (lambda (prev cur)
-                (tabbar-mode 1)
+                ;; (tabbar-mode 1)
                 (unless (or (string= (buffer-name) "*Messages*")
                             (string= (buffer-name) neo-buffer-name)
                             (file-remote-p (buffer-file-name)))
