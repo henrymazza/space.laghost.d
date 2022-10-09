@@ -1,5 +1,6 @@
 ;; here are simple elisp customizations that may break and so cat get turned off easily
 
+
 (defun delete-window-or-frame (&optional window frame force)
   (interactive)
   (if (= 1 (length (window-list frame)))
@@ -15,7 +16,7 @@
 (global-set-key (kbd "M-?") 'mark-paragraph)
 (global-set-key (kbd "C-h") 'delete-backward-char)
 (global-set-key (kbd "M-h") 'backward-kill-word)
-(global-set-key (kbd "C-g") 'evil-force-normal-state)
+;; (global-set-key (kbd "C-g") 'evil-force-normal-state)
 ;; make tab and shift tab move between MRU buffers
 (define-key evil-normal-state-map (kbd "<S-tab>") 'previous-buffer)
 (define-key evil-normal-state-map (kbd "<tab>") 'next-buffer)
@@ -30,10 +31,10 @@
 (delete-selection-mode 1)
 
 
-  ;; ?Redefine transient state to include Next Conflicted File function
-  (spacemacs|define-transient-state smerge
-    :title "smerge transient state"
-    :doc "
+;; ?Redefine transient state to include Next Conflicted File function
+(spacemacs|define-transient-state smerge
+  :title "smerge transient state"
+  :doc "
  movement^^^^               merge action^^           other
  ---------------------^^^^  -------------------^^    -----------
  [_n_]^^    next hunk       [_b_] keep base          [_u_] undo
@@ -42,21 +43,21 @@
  [_N_]^^    next file       [_o_] keep other
  ^^^^                       [_c_] keep current
  ^^^^                       [_C_] combine with next"
-    :bindings
-    ("n" smerge-next)
-    ("p" smerge-prev)
-    ("N" smerge-vc-next-conflict)
-    ("j" evil-next-line)
-    ("k" evil-previous-line)
-    ("a" smerge-keep-all)
-    ("b" smerge-keep-base)
-    ("m" smerge-keep-mine)
-    ("o" smerge-keep-other)
-    ("c" smerge-keep-current)
-    ("C" smerge-combine-with-next)
-    ("r" smerge-refine)
-    ("u" undo-tree-undo)
-    ("q" nil :exit t))
+  :bindings
+  ("n" smerge-next)
+  ("p" smerge-prev)
+  ("N" smerge-vc-next-conflict)
+  ("j" evil-next-line)
+  ("k" evil-previous-line)
+  ("a" smerge-keep-all)
+  ("b" smerge-keep-base)
+  ("m" smerge-keep-mine)
+  ("o" smerge-keep-other)
+  ("c" smerge-keep-current)
+  ("C" smerge-combine-with-next)
+  ("r" smerge-refine)
+  ("u" undo-tree-undo)
+  ("q" nil :exit t))
 
 (defun hmz-init/org-prettify ()
   "Beautify Org Block Symbols"
@@ -89,6 +90,8 @@
   (push '("#+end_notes" . ?❞) prettify-symbols-alist)
   (push '("#+begin_quote" . ?❝) prettify-symbols-alist)
   (push '("#+end_quote" .  ?❞) prettify-symbols-alist)
+  (push '("#+author:" .  "—") prettify-symbols-alist)
+
   (push '("[ ]" . "☐") prettify-symbols-alist)
   (push '("[X]" . "☑" ) prettify-symbols-alist)
   (push '("[-]" . "❍" ) prettify-symbols-alist)
@@ -100,6 +103,10 @@
 ;; my org-mode settings
 (defun hmz-init/org-config ()
   (interactive)
+
+  ;; org-mode block syntax highlight (untested)
+  (setq org-src-fontify-natively t)
+
   (ignore-errors
     (drag-stuff-mode 1)
     (spacemacs/toggle-visual-line-navigation-on))
@@ -152,9 +159,7 @@
 (add-hook 'org-mode-hook
           (lambda () (define-key org-mode-map (kbd "C-c g") 'org-mac-grab-link)))
 
-
   (setq org-use-property-inheritance t)
-
 
 ;; C-o for add heading above in org-mode
 ;; TODO: move it to a layer/file about org-mode
@@ -169,6 +174,16 @@
 
 (defun hmz-prog-mode-hook ()
   (interactive)
+
+  (setq mouse-wheel-tilt-scroll t)
+  (setq mouse-wheel-flip-direction t)
+
+  ;; autofill is a little nuts lately
+  (auto-fill-mode -1)
+
+  (setq indent-guide-char "•")
+  (setq indent-guide-mode 1)
+
 
   ;; projectile will make slower indexing but use .projectile for ignore
   (setq projectile-use-native-indexing t)
@@ -253,17 +268,39 @@
    #b00000000
    #b00000000])
 
-  (defun my-esc (prompt)
-    "Functionality for escaping generally. Includes exiting Evil
-     insert state and C-g binding. "
-    (cond
-     ((or (evil-insert-state-p)
-          (evil-normal-state-p)
-          (evil-replace-state-p)
-          (evil-visual-state-p)) [escape])))
-  (define-key key-translation-map (kbd "C-g") 'my-esc)
+  ;; (defun my-esc (prompt)
+  ;;   "Functionality for escaping generally. Includes exiting Evil
+  ;;    insert state and C-g binding. "
+  ;;   (cond
+  ;;    ((or (evil-insert-state-p)
+  ;;         (evil-normal-state-p)
+  ;;         ;; (evil-replace-state-p)
+  ;;         (evil-visual-state-p)) [escape])
+  ;;    (t (keyboard-quit))
+  ;;    ))
 
-  (global-set-key (kbd "s-w") 'delete-window-or-frame)
+
+
+(defun hmz-init/evil-keyboard-quit (&optional prompt)
+  "Keyboard quit and force normal state."
+  (interactive)
+  ;; (cond (evil-mode (evil-force-normal-state))
+  ;;       (t (keyboard-escape-quit)))
+  (keyboard-escape-quit)
+  (evil-force-normal-state)
+  [escape]
+  )
+
+(global-set-key (kbd "C-g") 'hmz-init/evil-keyboard-quit)
+(define-key key-translation-map (kbd "C-g") #'hmz-init/evil-keyboard-quit)
+(global-set-key (kbd "s-w") 'delete-window-or-frame)
+
+(use-package evil-magit
+  :after (magit evil)
+  :config
+  (define-key transient-map (kbd "<escape>") 'transient-quit-one)
+  (define-key transient-map (kbd "C-g") 'transient-quit-one))
+
 
   (add-hook 'minibuffer-setup-hook 'hmz-init/minibuffer-setup)
   (defun hmz-init/minibuffer-setup ()
@@ -294,7 +331,9 @@
   (prettify-symbols-mode 0)
   (setq prettify-symbols-alist '())
   (push '("TODO:" . ?⚡) prettify-symbols-alist)
+  (push '("WAIT:" . ?⏳) prettify-symbols-alist)
   (push '("DONE:" . ?✓) prettify-symbols-alist)
+  (push '("Q:" . ??) prettify-symbols-alist)
   (push '("CANCELED:" . ?✗) prettify-symbols-alist)
   (push '("#+begin_src sh" . ?❯) prettify-symbols-alist)
   (push '("#+begin_src shell" . ?❯) prettify-symbols-alist)
@@ -336,7 +375,7 @@
 (global-auto-revert-mode t)
 
 ;; 28.0 makes it much better; plus yascroll been broken lately
-(scroll-bar-mode 1)
+(scroll-bar-mode 0)
 
 ;; Trackpads send a lot more scroll events than regular mouse wheels,
 ;; so the scroll amount and acceleration must be tuned to smooth it out.
@@ -353,5 +392,39 @@
  ;; a time (instead of 5 at default). Simply hold down shift to move twice as
  ;; fast, or hold down control to move 3x as fast. Perfect for trackpads.
  mouse-wheel-scroll-amount '(6 ((shift) . 1) ((meta) . 10)))
+
+(setq jiralib-url "https://sondermind-jira.atlassian.net")
+
+(add-to-list 'load-path "/Users/HMz/.emacs.d/straight/repos/rspec-simple/")
+(require 'rspec-simple)
+
+;; Salve all Projectile buffers
+(global-set-key (kbd "s-S") 'projectile-save-project-buffers)
+(spacemacs/set-leader-keys "p s" 'projectile-save-project-buffers)
+
+(defun hmz-init/before-save (save-fun &rest args)
+  (set-buffer-modified-p t)
+  (message "Saving... %s" buffer-file-name)
+  (if (file-exists-p (buffer-file-name))
+      (progn
+        (set-buffer-modified-p t)
+        (apply save-fun args))
+    (if (y-or-n-p (concat "Buffer " (buffer-name) " has no file on disk! Create it?"))
+        (apply save-fun args))))
+
+(advice-add 'save-buffer :around #'hmz-init/before-save)
+
+(spacemacs/toggle-vi-tilde-fringe-off)
+
+;; Breadcrumb in modeline: https://www.reddit.com/r/emacs/comments/qxzadv/moving_lspmode_breadcrumbs_to_modeline/
+(add-hook 'lsp-configure-hook (lambda ()
+                                (lsp-headerline-breadcrumb-mode -1)))
+
+(spaceline-define-segment ol/lsp-breadcrumb-spaceline
+  (when (bound-and-true-p lsp-mode)
+    (when (functionp 'lsp-headerline--build-string)
+      (replace-regexp-in-string "^>  " "" (concat
+                                           (lsp-headerline--build-string)
+                                           "")))))
 
 (provide 'hmz-custom)

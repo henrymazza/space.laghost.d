@@ -17,8 +17,15 @@ which require an initialization must be listed explicitly in the list.")
   (use-package tabbar
     :after (all-the-icons)
     :straight t
-    ;; :after (helm-lib all-the-icons)
+    :after (helm-lib all-the-icons)
     :init
+
+    ;; force project-name to be refreshed
+    (defun unset-project-name ()
+      (setq-local project-name nil))
+
+    (run-with-timer 0 2 'unset-project-name)
+
     (defun ido-switch-tab-group ()
       "Switch tab groups using ido."
       (interactive)
@@ -369,8 +376,7 @@ element."
                            'pointer 'hand
                            'local-map (tabbar-make-button-keymap name)
                            'help-echo 'tabbar-help-on-button)
-               (unless (string-equal tabset-name "tabbar-tabsets-tabset") tabset-name)
-               )))))
+               (unless (string-equal tabset-name "tabbar-tabsets-tabset") tabset-name))))))
 
     (defadvice tabbar-line-format (after tabbar-button-cache-clearer 1 (tabset) activate)
       "Clear cached button values each time `tabbar-line-format' is called
@@ -407,14 +413,6 @@ element."
                            (length (tabbar-view
                                     (tabbar-current-tabset)))))))))
 
-    (defun advice-unadvice (sym)
-      "Remove all advices from symbol SYM."
-      (interactive "Function symbol: ")
-      (advice-mapc (lambda (advice _props) (advice-remove sym advice)) sym))
-
-
-    (advice-unadvice 'tabbar-buffer-update-groups)
-
     (defun tabbar-buffer-update-groups ()
       "Update tab sets from groups of existing buffers.
 Return the the first group where the current buffer is."
@@ -425,8 +423,8 @@ Return the the first group where the current buffer is."
                   #'(lambda (b)
                       (with-current-buffer b
                         (list (current-buffer)
-                              (format "%s" (visited-file-modtime))
-                              ;; (format "%10d" (buffer-modified-tick b))
+                              ;; (format "%s" (visited-file-modtime))
+                              (format "%10d" (buffer-modified-tick b))
                               ;; (format "%s" (float-time (nth 5 (file-attributes (buffer-file-name)))))
                               ;; (number-to-string (string-width (buffer-name)))
                               (if tabbar-buffer-groups-function
@@ -434,8 +432,9 @@ Return the the first group where the current buffer is."
                                 '("Common")))))
                   (and tabbar-buffer-list-function
                        (funcall tabbar-buffer-list-function)))
-                 #'(lambda (e2 e1)
+                 #'(lambda (e1 e2)
                      (string-lessp (nth 1 e1) (nth 1 e2))))))
+
         ;; If the cache has changed, update the tab sets.
         (unless (equal bl tabbar--buffers)
           ;; Add new buffers, or update changed ones.
@@ -469,6 +468,7 @@ Return the the first group where the current buffer is."
                        tabset)))) ;; return list of tabsets, replacing non-empties with nil
           ;; The new cache becomes the current one.
           (setq tabbar--buffers bl)))
+
       ;; Return the first group the current buffer belongs to.
       (car (nth 2 (assq (current-buffer) tabbar--buffers))))
 
@@ -508,10 +508,14 @@ Return a list of one element based on major mode."
                  gnus-article-mode score-mode gnus-browse-killed-mode))
          "Mail")
 
-        ((local-variable-p 'project-name) (format "%s" (buffer-local-value 'project-name (current-buffer))))
+        ((and (local-variable-p 'project-name) (buffer-local-value 'project-name (current-buffer)))
+          (format "%s" (buffer-local-value 'project-name (current-buffer))))
+
         (t
-         "unset"
-         (if (local-variable-p 'project-name)
+         ;; (setq-local project-name "unset")
+         (if (and (local-variable-p 'project-name)
+                  (buffer-local-value 'project-name (current-buffer)))
+             ;; (setq-local project-name (projectile-project-name))
              (buffer-local-value 'project-name (current-buffer))
            ;; "unset"
            (progn
@@ -521,9 +525,7 @@ Return a list of one element based on major mode."
                (setq-local project-name major-mode))
 
              (defvar-local project-name (projectile-project-name))
-             (buffer-local-value 'project-name (current-buffer))
-             )
-           )
+             (buffer-local-value 'project-name (current-buffer))))
 
          ;; Return `mode-name' if not blank, `major-mode' otherwise.
          ;; (unless (stringp (buffer-local-value 'project-name (current-buffer)))
@@ -535,60 +537,20 @@ Return a list of one element based on major mode."
          )
         )))
 
-    ;; Tabbar Groups Definition
-    (defun x-tabbar-buffer-groups ()
-      "Returns the name of the tab group names the current buffer belongs to.
-      There are two groups: Emacs buffers (those whose name starts with '*', plus
-      dired buffers), and the rest."
-      (list (if (member (buffer-name)
-                        (helm-skip-entries
-                         (mapcar #'buffer-name (buffer-list))
-                         (append '("\\`[:\\*]\\(Back\\|Help\\)")
-                                 helm-boring-buffer-regexp-list)
-                         helm-white-buffer-regexp-list))
-                (cond
-                 ((file-remote-p default-directory)
-                  (string-join
-                   `( ,(file-remote-p default-directory 'user)
-                      ,(file-remote-p default-directory 'host))
-                   "@")
-                  )
-
-                 ((string-match-p "*" (buffer-name))
-                  (if (or (get-buffer-process (current-buffer))
-                          (eq major-mode 'eshell-mode))
-                      "proc"
-                    "limbo"))
-                 ;; ((projectile-project-p) (projectile-project-name))
-                 ((local-variable-p 'project-name) project-name)
-                 ((eq major-mode 'dired-mode) "dired")
-                 ;; ((string-match-p "magit" (symbol-name major-mode))
-                 "magit")
-              ;; ((buffer-file-name) "other")
-              (t "limbo"))
-            "limbo"))
-
     (defun hmz-tabbar-refresh-tabs ()
       (if tabbar-mode
           (progn
-            (tabbar-mode 0)
-            (setq tabbar-scroll-left-button-value nil)
-            (setq tabbar-scroll-right-button-value nil)
-            (setq tabbar-home-button-value nil)
+            ;; (tabbar-mode 0)
+            ;; (setq tabbar-scroll-left-button-value nil)
+            ;; (setq tabbar-scroll-right-button-value nil)
+            ;; (setq tabbar-home-button-value nil)
 
-            (hmz-tabbar-refresh-faces)
+            ;; (hmz-tabbar-refresh-faces)
 
-            (tabbar-mode 1)
+            ;; (tabbar-mode 1)
             )))
 
-    (unless (boundp 'after-load-theme-hook)
-      (defvar after-load-theme-hook nil
-        "Hook run after a color theme is loaded using `load-theme'.")
-      (defadvice load-theme (after run-after-load-theme-hook activate)
-        "Run `after-load-theme-hook'."
-        (run-hooks 'after-load-theme-hook)))
 
-    (add-hook 'after-load-theme-hook 'hmz-tabbar-refresh-tabs)
     (add-hook 'after-save-hook 'hmz-tabbar-refresh-tabs)
     (add-hook 'first-change-hook 'hmz-tabbar-refresh-tabs)
 
@@ -596,36 +558,4 @@ Return a list of one element based on major mode."
     (tabbar-mode 1)
     ;; redefine tabbar-add-tab so that it alphabetizes / sorts the tabs
     ;; TODO: better treat non-file buffers in sort
-    (defun x-tabbar-add-tab (tabset object &optional append)
-      "Add to TABSET a tab with value OBJECT if there isn't one there yet.
-  If the tab is added, it is added at the beginning of the tab list,
-  unless the optional argument APPEND is non-nil, in which case it is
-  added at the end."
-      (let ((tabs (tabbar-tabs tabset)))
-        (if (tabbar-get-tab object tabset)
-            tabs
-          (let* (
-                 (tab (tabbar-make-tab object tabset))
-                 (tentative-new-tabset
-                  (if append
-                      (append tabs (list tab))
-                    (cons tab tabs)))
-                 (new-tabset
-                  (sort
-                   tentative-new-tabset
-                   #'(lambda (e1 e2)
-                       (setq file1 (buffer-local-value 'buffer-file-name (get-buffer (car e1)))
-                             file2 (buffer-local-value 'buffer-file-name (get-buffer (car e2))))
-                       (if (and file1 file2)
-                           (not (time-less-p
-                                 (file-attribute-modification-time
-                                  (file-attributes (expand-file-name file1)))
-                                 (file-attribute-modification-time
-
-                                  (file-attributes (expand-file-name file2)))
-                                 ))
-                         t)
-
-                       ))))
-            (tabbar-set-template tabset nil)
-            (set tabset new-tabset)))))))
+    ))

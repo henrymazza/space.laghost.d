@@ -3,7 +3,7 @@
 ;; It must be stored in your home directory.
 
 ;; troubleshoot
-(setq debug-on-error t)
+(setq debug-on-error nil)
 (setq debug-on-quit nil)
 (setq warning-minimum-level :emergency)
 
@@ -39,7 +39,8 @@ This function should only modify configuration layer settings."
    dotspacemacs-configuration-layer-path '()
    ;; List of configuration layers to loader.
    dotspacemacs-configuration-layers
-   '(
+   '(go
+     csv
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
      ;; Uncomment some layer names and press `SPC f e R' (Vim style) or
@@ -59,7 +60,8 @@ This function should only modify configuration layer settings."
                       auto-completion-enable-sort-by-usage t
                       auto-completion-return-key-behavior 'complete
                       auto-completion-tab-key-behavior 'cycle
-                      auto-completion-use-company-box nil
+                      auto-completion-use-company-box t
+                      auto-completion-use-company-posframe t
                       spacemacs-default-company-backends '(company-files company-capf))
 
      react
@@ -97,7 +99,7 @@ This function should only modify configuration layer settings."
      lua
      helm
      python ;; required?
-     ;; lsp
+     lsp
      markdown
      neotree
      org
@@ -146,13 +148,14 @@ This function should only modify configuration layer settings."
    ;; consider creating a layer. You can also put the configuration in
    ;; `dotspacemacs/user-config'. To use a local version of a package, use the
    ;; `:location' property: '(your-package :location "~/path/to/your-package/")
-   ;; Also include the dependencies as they will not be resolved automatically.
+   ;; Also
    dotspacemacs-additional-packages
    '(
      bug-hunter
      docker-tramp
      dockerfile-mode
      dracula-theme
+     epresent
      fic-mode
      fira-code-mode
      fringe-helper
@@ -315,11 +318,11 @@ It should only modify the values of Spacemacs settings."
 
    ;; If non-nil, *scratch* buffer will be persistent. Things you write down in
    ;; *scratch* buffer will be saved and restored automatically.
-   dotspacemacs-scratch-buffer-persistent nil
+   dotspacemacs-scratch-buffer-persistent t
 
    ;; If non-nil, `kill-buffer' on *scratch* buffer
    ;; will bury it instead of killing.
-   dotspacemacs-scratch-buffer-unkillable nil
+   dotspacemacs-scratch-buffer-unkillable t
 
    ;; Initial message in the scratch buffer, such as "Welcome to Spacemacs!"
    ;; (default nil)
@@ -699,7 +702,7 @@ This function is called at the very end of Spacemacs initialization."
  '(before-save-hook
    '(time-stamp whitespace-cleanup spacemacs//python-sort-imports))
  '(coffee-tab-width 2)
- '(csv-separators '("," ";") t)
+ '(csv-separators '("," ";"))
  '(custom-safe-themes
    '("18bec4c258b4b4fb261671cf59197c1c3ba2a7a47cc776915c3e8db3334a0d25" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "0ab2aa38f12640ecde12e01c4221d24f034807929c1f859cbca444f7b0a98b3a" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "2dff5f0b44a9e6c8644b2159414af72261e38686072e063aa66ee98a2faecf0e" "7451f243a18b4b37cabfec57facc01bd1fe28b00e101e488c61e1eed913d9db9" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "eb5c79b2e9a91b0a47b733a110d10774376a949d20b88c31700e9858f0f59da7" "a41b81af6336bd822137d4341f7e16495a49b06c180d6a6417bf9fd1001b6d2b" "57bd93e7dc5fbb5d8d27697185b753f8563fe0db5db245592bab55a8680fdd8c" "890a1a44aff08a726439b03c69ff210fe929f0eff846ccb85f78ee0e27c7b2ea" "819ab08867ef1adcf10b594c2870c0074caf6a96d0b0d40124b730ff436a7496"))
  '(default-justification 'left)
@@ -768,7 +771,15 @@ This function is called at the very end of Spacemacs initialization."
  '(jdee-db-requested-breakpoint-face-colors (cons "#1E2029" "#50fa7b"))
  '(jdee-db-spec-breakpoint-face-colors (cons "#1E2029" "#565761"))
  '(line-spacing 3)
+ '(lsp-ui-doc-use-webkit t)
+ '(lsp-ui-sideline-ignore-duplicate t)
+ '(lsp-ui-sideline-show-symbol nil)
+ '(magit-diff-adjust-tab-width t)
  '(magit-diff-highlight-trailing 'all)
+ '(magit-diff-paint-whitespace 'all)
+ '(magit-diff-refine-hunk 'all)
+ '(magit-diff-refine-ignore-whitespace nil)
+ '(magit-list-refs-sortby '("-creatordate"))
  '(magit-status-margin '(t age-abbreviated magit-log-margin-width t 11))
  '(magit-status-sections-hook
    '(magit-insert-status-headers magit-insert-merge-log magit-insert-rebase-sequence magit-insert-am-sequence magit-insert-sequencer-sequence magit-insert-bisect-output magit-insert-bisect-rest magit-insert-bisect-log magit-insert-ignored-files magit-insert-untracked-files magit-insert-unstaged-changes magit-insert-staged-changes magit-insert-stashes magit-insert-unpushed-to-pushremote magit-insert-unpushed-to-upstream-or-recent magit-insert-unpulled-from-pushremote magit-insert-unpulled-from-upstream))
@@ -778,9 +789,10 @@ This function is called at the very end of Spacemacs initialization."
  '(midnight-mode t)
  '(mode-line-in-non-selected-windows t)
  '(mode-require-final-newline t)
+ '(nano-modeline-position 'bottom)
  '(neo-hide-cursor t)
  '(neo-theme 'arrow)
- '(neo-vc-integration '(face char))
+ '(neo-vc-integration '(face char) t)
  '(neo-vc-state-char-alist
    '((up-to-date . 32)
      (edited . 10041)
@@ -796,12 +808,11 @@ This function is called at the very end of Spacemacs initialization."
      (unregistered . 32)
      (nil . 8942)))
  '(neo-window-position 'right)
- '(neo-window-width 40)
+ '(neo-window-width 40 t)
  '(nil nil t)
  '(objed-cursor-color "#ff5555")
  '(org-blank-before-new-entry '((heading) (plain-list-item)))
  '(org-bullets-bullet-list '("◉" "○" "●" "☞"))
- '(org-directory "~/Documents/org")
  '(org-ellipsis " ▼")
  '(org-export-backends '(ascii html icalendar latex md odt))
  '(org-export-with-section-numbers 2)
@@ -811,7 +822,7 @@ This function is called at the very end of Spacemacs initialization."
  '(org-modules
    '(ol-bbdb ol-bibtex ol-docview ol-eww ol-gnus org-habit ol-info ol-irc ol-mhe ol-rmail ol-w3m org-mac-link))
  '(org-todo-keywords
-   '((sequence "TODO:(t)" "WAIT:(w)" "|" "DONE:(d)" "CANCELED:(c)")))
+   '((sequence "TODO:(t)" "WAIT:(w)" "|" "Q:(n)" "DONE:(d)" "CANCELED:(c)")))
  '(origami-parser-alist
    '((ruby-mode origami-markers-parser "do" "end")
      (java-mode . origami-java-parser)
@@ -1012,16 +1023,20 @@ This function is called at the very end of Spacemacs initialization."
  '(highlight-indent-guides-character-face ((t (:foreground "#3df1410a539f"))))
  '(hl-line ((t nil)))
  '(hydra-face-red ((t (:foreground "#FF0000" :weight bold))))
- '(indent-guide-face ((t (:inherit font-lock-constant-face :slant normal))))
+ '(indent-guide-face ((t (:inherit font-lock-comment-face :foreground "#669" :slant normal))))
  '(line-number ((t (:background "#282a36" :foreground "#565761" :slant normal :height 0.8))))
  '(line-number-current-line ((t (:inherit (font-lock-keyword-face hl-line line-number)))))
  '(link ((t (:foreground "SkyBlue1" :underline nil :height 1.05 :family "San Francisco"))))
  '(linum ((t (:inherit hl-line :background "#282a36" :foreground "#565761" :slant italic))))
+ '(magit-blame-heading ((t (:inherit magit-blame-highlight :extend t :background "black" :slant normal :weight normal))))
  '(magit-blame-highlight ((t (:inherit (font-lock-comment-face hl-line) :height 0.8 :family "San Francisco"))))
  '(magit-blame-name ((t (:inherit font-lock-variable-name-face))))
+ '(magit-diff-our ((t (:background "cornflower blue"))))
+ '(magit-diff-our-highlight ((t (:background "dodger blue"))))
  '(magit-log-author ((t (:foreground "dark gray" :family "San Francisco"))))
  '(magit-section-heading ((t (:extend t :foreground "#ff79c6" :weight bold))))
- '(minibuffer-prompt ((t (:foreground "#ff79c6" :weight bold :height 1.2 :family "San Francisco"))))
+ '(magit-section-highlight ((t (:extend t :background "#464752"))))
+ '(minibuffer-prompt ((t (:foreground "#ff79c6" :weight bold :height 0.9 :family "San Francisco"))))
  '(mode-line ((t (:foreground "White" :box (:line-width 1 :color "#44475a") :height 0.9 :family "San Francisco"))))
  '(mode-line-inactive ((t (:inherit mode-line :background "#373844" :foreground "#f8f8f2" :height 120))))
  '(neo-banner-face ((t (:inherit font-lock-constant-face :weight bold :family "San Francisco"))))
@@ -1033,16 +1048,18 @@ This function is called at the very end of Spacemacs initialization."
  '(neo-vc-added-face ((t (:foreground "#50fa7b"))))
  '(neo-vc-conflict-face ((t (:foreground "dark red"))))
  '(neo-vc-edited-face ((t (:foreground "#ff79c6"))))
- '(org-block ((t (:extend t :background "#1f1f3f" :foreground "#ffb86c"))))
- '(org-block-begin-line ((t (:inherit org-meta-line :extend t :height 1.2))))
- '(org-done ((t (:foreground "gold" :height 1.5))))
+ '(org-block ((t (:extend t :background "#1f1f3a" :foreground "powder blue"))))
+ '(org-block-begin-line ((t (:inherit (org-meta-line org-block) :extend t :overline "#666" :height 1.0))))
+ '(org-block-end-line ((t (:inherit (org-block-begin-line org-block) :extend t :overline nil))))
+ '(org-done ((t (:foreground "cyan" :height 1.2))))
  '(org-headline-done ((t (:inherit org-headline-todo :weight bold :height 1.2))))
  '(org-level-1 ((t (:inherit link :extend nil :foreground "tomato3" :underline nil :weight bold :height 1.3 :family "San Francisco"))))
  '(org-level-2 ((t (:inherit nil :extend nil :foreground "goldenrod" :weight bold :height 1.1))))
  '(org-level-3 ((t (:extend nil :foreground "#50fa7b" :weight bold :height 1.1))))
  '(org-level-7 ((t (:extend nil :foreground "light salmon" :weight normal))))
  '(org-link ((t (:inherit link :foreground "SkyBlue2" :underline nil))))
- '(org-quote ((t (:inherit nil :background "gray20" :foreground "gray80" :slant italic))))
+ '(org-meta-line ((t (:inherit (fixed-pitch font-lock-comment-face) :foreground "#666"))))
+ '(org-quote ((t (:inherit org-block :foreground "gray80" :slant italic))))
  '(org-todo ((t (:background "#373844" :foreground "#ffb86c" :weight bold :height 1.2))))
  '(org-verbatim ((t (:inherit font-lock-variable-name-face :family "Fira Code"))))
  '(origami-fold-replacement-face ((t (:inherit 'font-lock-builtin-face))))

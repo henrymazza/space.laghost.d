@@ -3,6 +3,49 @@
 
 (add-to-list 'load-path (expand-file-name "~/.spacemacs.develop.d/straight/repos/all-the-icons"))
 
+;; (use-package jist :straight t)
+
+(use-package blamer
+  :disabled
+  :straight t
+  ;; :bind (("s-i" . blamer-show-commit-info)
+  ;;        ("C-c i" . ("s-i" . blamer-show-posframe-commit-info)))
+  :defer 20
+  :custom
+  (blamer-idle-time 0.3)
+  (blamer-min-offset 70)
+  :custom-face
+  (blamer-face ((t :foreground "#7a88cf"
+                   :background nil
+                   :height 140
+                   :italic t)))
+  :config
+  (blamer-show-commit-info)
+  (global-blamer-mode 1))
+
+(use-package poporg
+  :init
+  (remove-hook 'poporg-edit-hook 'org-mode)
+  (add-hook 'poporg-edit-hook 'markdown-mode))
+
+(use-package selectrum
+  :straight t
+  :init
+  (use-package selectrum-prescient
+    :straight t
+    :init
+    (selectrum-prescient-mode +1)
+    (prescient-persist-mode +1))
+  (selectrum-mode +1))
+
+(use-package helm-posframe :straight t)
+
+(use-package company-posframe
+  :straight t
+  :init
+  (company-posframe-mode 1)
+  (setq company-tooltip-minimum-width 40))
+
 (use-package good-scroll
   :disabled
   :straight (good-scroll :type git :host github :repo "io12/good-scroll.el")
@@ -179,6 +222,10 @@
 ;;     (vterm-send-string command)
 ;;     (vterm-send-return)))
 
+(use-package vterm
+  :disabled
+  :straight t)
+
 ;; Typescript
 (use-package tide
   :straight t
@@ -331,6 +378,38 @@
 
   :config
   (remove-hook 'magit-mode-hook 'turn-on-magit-gh-pulls))
+
+;; author name customize
+(use-package magit
+    :straight t
+    :init
+    (progn
+      ;; (setq magit-log-margin '(t age magit-log-margin-width t 18)) ;Default value
+      (setq magit-log-margin '(t age-abbreviated magit-log-margin-width :author 11)))
+    :config
+    (progn
+      ;; Abbreviate author name. I added this so that I can view Magit log without
+      ;; too much commit message truncation even on narrow screens (like on phone).
+      (defun modi/magit-log--abbreviate-author (&rest args)
+        "The first arg is AUTHOR, abbreviate it.
+      First Last  -> F Last
+      First.Last  -> F Last
+      Last, First -> F Last
+      First       -> First (no change).
+
+      It is assumed that the author has only one or two names."
+        ;; ARGS               -> '((REV AUTHOR DATE))
+        ;; (car ARGS)         -> '(REV AUTHOR DATE)
+        ;; (nth 1 (car ARGS)) -> AUTHOR
+        (let* ((author (nth 1 (car args)))
+               (author-abbr (if (string-match-p "," author)
+                                ;; Last, First -> F Last
+                                (replace-regexp-in-string "\\(.*?\\), *\\(.*\\)" "\\1" author)
+                              ;; First Last -> F Last
+                              (replace-regexp-in-string "\\(.*\\)[. ]+\\(.*\\)" "\\1" author))))
+          (setf (nth 1 (car args)) author-abbr))
+        (car args))                       ;'(REV AUTHOR-ABBR DATE)
+      (advice-add 'magit-log-format-margin :filter-args #'modi/magit-log--abbreviate-author)))
 
 (use-package org-link-minor-mode
   :straight t)
@@ -612,7 +691,7 @@ So it safe to call it many times like in a minor mode hook."
 
 (use-package sublimity
   :straight t
-  ;; :disabled
+  :disabled
   :init
   (require 'sublimity)
   (require 'sublimity-scroll)
@@ -674,6 +753,9 @@ So it safe to call it many times like in a minor mode hook."
               (if (rspec-rake-p)
                   (concat rspec-rake-command " spec")
                 rspec-spec-command)))))
+
+;; (use-package rspec-simple
+;;   :straight (rspec-simple :type git :host github :repo "code-mancers/rspec-simple"))
 
 (use-package yard-mode
   :straight t
@@ -774,6 +856,7 @@ So it safe to call it many times like in a minor mode hook."
   ;; (spacemacs/set-leader-keys "SPC" 'spacemacs/amx)
   )
 
+
 (use-package unicode-fonts
   :straight t
   :config
@@ -852,6 +935,7 @@ So it safe to call it many times like in a minor mode hook."
 (use-package rubocopfmt
   :straight (rubocopfmt :type git :host github :repo "jimeh/rubocopfmt.el")
   :init
+  (lsp-ui-mode -1)
   (add-hook 'ruby-mode-hook #'rubocopfmt-mode)
 
   (defun rubocopfmt-before-save ()
@@ -1199,7 +1283,7 @@ So it safe to call it many times like in a minor mode hook."
   (drag-stuff-define-keys))
 
 (use-package neotree
-  ;; :disabled
+  :disabled
   :straight t
   :after (all-the-icons rainbow-identifiers)
   :init
@@ -1230,6 +1314,7 @@ So it safe to call it many times like in a minor mode hook."
 
   :config
   (use-package switch-buffer-functions
+    :disabled
     :straight t
     :config
     (setq switch-buffer-functions nil)
