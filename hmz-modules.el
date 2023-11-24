@@ -1,29 +1,235 @@
+(setq debug-on-error t)
+
 (require 'use-package)
 (setq use-package-verbose 'debug)
 
+(use-package sort-words
+  :straight (sort-words :type git :host github :repo "dotemacs/sort-words.el"))
+
+(use-package marshal :straight t)
+(use-package logito :straight t)
+(use-package pcache :straight t)
+(use-package gh
+  :straight (gh.el :type git :host github :repo "sigma/gh.el"))
+(use-package gist
+  :straight (gist.el :type git :host github :repo "defunkt/gist.el"))
+
+;; (use-package jist
+;;   :straight (jist.el :type git :host github :repo "emacs-pe/jist.el"))
+
+
+;; (use-package tree-sitter-langs :straight t)
+
+;; (use-package tree-sitter
+;;   :straight t
+;;   :after tree-sitter-langs
+;;   :init
+;;   (global-tree-sitter-mode)
+;;   (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
+;;   )
+
+(use-package doom-themes
+  :straight t
+  :config
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  ;; (load-theme 'doom-one t)
+
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
+  ;; Enable custom neotree theme (all-the-icons must be installed!)
+  (doom-themes-neotree-config)
+  ;; or for treemacs users
+  (setq doom-themes-treemacs-theme "doom-colors") ; use "doom-colors" for less minimal icon theme
+  (doom-themes-treemacs-config)
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
+
+(use-package grugru
+  :straight t
+  :init
+  (define-key evil-normal-state-map (kbd "C-a") #'grugru)
+  (grugru-define-multiple
+    (ruby-mode
+     (word "true" "false")
+     (word "xit" "it")
+     (word "xcontext" "context")
+     (word "xdescribe" "describe")
+
+     )))
+
+;; (use-package all-the-icons-dired
+;;   :straight t
+;;   :init
+;;   (defun hmz-modules/set-dired-icons (&optional backward)
+;;     (interactive)
+;;     ;; (all-the-icons-dired-mode -1)
+;;     ;; (treemacs-icons-dired-mode -1)
+;;     )
+
+;;   (add-hook 'dired-mode-hook 'hmz-modules/set-dired-icons))
+
+(use-package org-mac-link
+ :straight t
+ :after org
+ :init
+ (add-hook 'org-mode-hook
+           (lambda ()
+             (define-key org-mode-map (kbd "C-c g") 'org-mac-link-get-link))))
+
 (add-to-list 'load-path (expand-file-name "~/.spacemacs.develop.d/straight/repos/all-the-icons"))
 
-;; (use-package jist :straight t)
+(use-package org-roam
+  ;; :disabled
+  :after org
+  ;; :hook (org-mode . org-roam-mode)
+  :init
+  (setq org-roam-directory (file-truename "~/Documents/org/org-roam"))
+  (setq find-file-visit-truename t)
+  ;; (org-roam-db-autosync-mode)
+  (setq org-roam-dailies-directory (file-truename "~/Documents/org/org-roam/journal/"))
 
-(use-package blamer
-  :disabled
-  :straight t
-  ;; :bind (("s-i" . blamer-show-commit-info)
-  ;;        ("C-c i" . ("s-i" . blamer-show-posframe-commit-info)))
-  :defer 20
-  :custom
-  (blamer-idle-time 0.3)
-  (blamer-min-offset 70)
-  :custom-face
-  (blamer-face ((t :foreground "#7a88cf"
-                   :background nil
-                   :height 140
-                   :italic t)))
-  :config
-  (blamer-show-commit-info)
-  (global-blamer-mode 1))
+  ;; (use-package org-roam-ui
+  ;;   :straight
+  ;;   (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
+  ;;   :after org-roam
+  ;;   ;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
+  ;;   ;;         a hookable mode anymore, you're advised to pick something yourself
+  ;;   ;;         if you don't care about startup time, use
+  ;;   ;;  :hook (after-init . org-roam-ui-mode)
+  ;;   :config
+  ;;   (setq org-roam-ui-sync-theme t
+  ;;         org-roam-ui-follow t
+  ;;         org-roam-ui-update-on-save t
+  ;;         org-roam-ui-open-on-start t))
+
+  )
+
+;; (use-package org-present
+;;   :disabled
+;;   :straight t
+;;   :init
+;;   ;; Install visual-fill-column
+;;   (unless (package-installed-p 'visual-fill-column)
+;;     (package-install 'visual-fill-column))
+
+;;   ;; Configure fill width
+;;   (setq visual-fill-column-width 110
+;;         visual-fill-column-center-text t)
+
+;;   (defun hmz-init/org-present-start ()
+;;     ;; Center the presentation and wrap lines
+;;     (visual-fill-column-mode 1)
+;;     (flyspell-mode-off)
+;;     (flycheck-mode -1)
+;;     (visual-line-mode 1)
+;;     (tabbar-mode -1)
+;;     (setq header-line-format " ")
+;;     ;; Tweak font sizes
+;;     (setq-local face-remapping-alist '((default (:height 1.2) variable-pitch)
+;;                                        (header-line (:height 4.0) variable-pitch)
+;;                                        (org-document-title (:height 1.75) org-document-title)
+;;                                        (org-code (:height 1.55) org-code)
+;;                                        (org-verbatim (:height 1.55) org-verbatim)
+;;                                        (org-block (:height 1.25) org-block)
+;;                                        (org-block-begin-line (:height 0.7) org-block))))
+
+;;   (defun hmz-init/org-present-end ()
+;;     ;; Stop centering the document
+;;     (visual-fill-column-mode 0)
+;;     (flyspell-mode-on)
+;;     (hmz-init/org-config)
+;;     (visual-line-mode 0)
+;;     (tabbar-mode 1)
+;;     ;; Reset font customizations
+;;     (setq-local face-remapping-alist '((default variable-pitch default)))
+;;     )
+
+;;   ;; Register hooks with org-present
+;;   (add-hook 'org-present-mode-hook 'hmz-init/org-present-start)
+;;   (add-hook 'org-present-mode-quit-hook 'hmz-init/org-present-end))
+
+;; (use-package org-noter
+;;   :disabled
+;;   :straight t)
+
+;; (use-package indium
+;;   :disabled
+;;   :straight t
+;;   :hook ((js2-mode . indium-interaction-mode)
+;;          (js-mode . indium-interaction-mode)))
+
+;; (use-package vue-mode :disabled :straight t)
+
+;; (use-package mmm-mode
+;;   :disabled
+;;   :straight t
+;;   :init
+;;   (setq mmm-global-mode t)
+;;   (setq mmm-submode-decoration-level 0) ;; Turn off background highlight
+
+;;   (mmm-add-mode-ext-class 'typescript-mode nil 'mmm-styled-mode)
+
+;;   ;; Add submodule for graphql blocks
+;;   (mmm-add-classes
+;;    '((mmm-graphql-mode
+;;       :submode graphql-mode
+;;       :front "gr?a?p?h?ql`"
+;;       :back "`;")))
+
+;;   (mmm-add-mode-ext-class 'typescript-mode nil 'mmm-graphql-mode)
+
+;;   ;; Add JSX submodule, because typescript-mode is not that great at it
+;;   (mmm-add-classes
+;;    '((mmm-jsx-mode
+;;       :front "\\(return\s\\|n\s\\|(\n\s*\\)<"
+;;       :front-offset -1
+;;       :back ">\n?\s*)"
+;;       :back-offset 1
+;;       :submode web-mode)))
+
+;;   (mmm-add-mode-ext-class 'typescript-mode nil 'mmm-jsx-mode)
+
+;;   (defun mmm-reapply ()
+;;     (mmm-mode)
+;;     (mmm-mode))
+
+;;   (add-hook 'after-save-hook
+;;             (lambda ()
+;;               (when (string-match-p "\\.tsx?" buffer-file-name)
+;;                 (mmm-reapply))))
+
+;;   )
+
+;; (use-package expand-region
+;;   :straight t
+;;   :bind ("C-=" . er/expand-region))
+
+;; (use-package color-theme-buffer-local
+;;   :straight (color-theme-buffer-local :type git :host github :repo "vic/color-theme-buffer-local")
+;;   )
+
+;; (use-package blamer
+;;   :disabled
+;;   :straight t
+;;   ;; :bind (("s-i" . blamer-show-commit-info)
+;;   ;;        ("C-c i" . ("s-i" . blamer-show-posframe-commit-info)))
+;;   :defer 20
+;;   :custom
+;;   (blamer-idle-time 0.3)
+;;   (blamer-min-offset 70)
+;;   :custom-face
+;;   (blamer-face ((t :foreground "#7a88cf"
+;;                    :background nil
+;;                    :height 140
+;;                    :italic t)))
+;;   :config
+;;   (blamer-show-commit-info)
+;;   (global-blamer-mode 1))
 
 (use-package poporg
+  :disabled
   :init
   (remove-hook 'poporg-edit-hook 'org-mode)
   (add-hook 'poporg-edit-hook 'markdown-mode))
@@ -110,6 +316,7 @@
   :straight t)
 
 (use-package diredful
+  :disabled
   :straight t
   :init
   (diredful-mode 1))
@@ -128,10 +335,12 @@
     :straight t)
 
   ;; TODO: make that relative
-  (setq org-reveal-root "file:///Users/HMz/Development/reveal.js")
-  (setq org-reveal-title-slide nil))
+  ;; (setq org-reveal-root "file:///Users/HMz/Development/reveal.js")
+  ;; (setq org-reveal-title-slide nil)
+  )
 
 (use-package org-tree-slide
+  :disabled
   :straight t)
 
 (use-package ruby-tools
@@ -321,13 +530,8 @@
   :straight t)
 
 (use-package org-download
-  :straight t)
-
-(use-package all-the-icons
-  :straight t
   :disabled
-  :catch t
-  :demand t)
+  :straight t)
 
 (use-package indicators
   :straight t
@@ -342,74 +546,73 @@
 (use-package browse-at-remote
   :straight t)
 
-(use-package magithub
-  :straight t
-  :disabled
-  :after magit
-  :catch t
-  :config
-  (magithub-feature-autoinject t)
-  (setq magithub-clone-default-directory "~/github"))
-
-;; (use-package magit-popup
+;; (use-package magithub
 ;;   :straight t
-;;   :demand t)
+;;   :disabled
+;;   :after magit
+;;   :catch t
+;;   :config
+;;   (magithub-feature-autoinject t)
+;;   (setq magithub-clone-default-directory "~/github"))
+
+;; (use-package magit-popup :straight t)
 
 ;; (use-package git-link
 ;;   :straight t
 ;;   :after magit)
 
-;; (use-package forge
-;;   :disable
-;;   :straight t
-;;   :after magit)
-
-(use-package magit-gh-pulls
-  :straight t
+(use-package forge
   :disabled
-  :demand t
-  :catch t
-  :after magit-popup
-  :init
-  ;; NOTE: Broken! asks for magit-gh-pulls-pop which depends on:
-  (require 'magit-popup)
+  :straight t
+  :after magit)
 
-  (require 'gh-url) ;; this is giving recursive load, try twice at least:
+;; (use-package magit-gh-pulls
+;;   :straight t
+;;   :disabled
+;;   :demand t
+;;   :catch t
+;;   :after magit-popup
+;;   :init
+;;   ;; NOTE: Broken! asks for magit-gh-pulls-pop which depends on:
+;;   (require 'magit-popup)
 
-  :config
-  (remove-hook 'magit-mode-hook 'turn-on-magit-gh-pulls))
+;;   (require 'gh-url) ;; this is giving recursive load, try twice at least:
+
+;;   :config
+;;   (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls))
 
 ;; author name customize
-(use-package magit
-    :straight t
-    :init
-    (progn
-      ;; (setq magit-log-margin '(t age magit-log-margin-width t 18)) ;Default value
-      (setq magit-log-margin '(t age-abbreviated magit-log-margin-width :author 11)))
-    :config
-    (progn
-      ;; Abbreviate author name. I added this so that I can view Magit log without
-      ;; too much commit message truncation even on narrow screens (like on phone).
-      (defun modi/magit-log--abbreviate-author (&rest args)
-        "The first arg is AUTHOR, abbreviate it.
-      First Last  -> F Last
-      First.Last  -> F Last
-      Last, First -> F Last
-      First       -> First (no change).
+;; (use-package magit
+;;     :straight t
+;;     :init
+;;     (progn
+;;       ;; (setq magit-log-margin '(t age magit-log-margin-width t 18)) ;Default value
+;;       (setq magit-log-margin '(t age-abbreviated magit-log-margin-width :author 11)))
+;;     :config
+;;     (progn
+;;       ;; Abbreviate author name. I added this so that I can view Magit log without
+;;       ;; too much commit message truncation even on narrow screens (like on phone).
+;;       (defun modi/magit-log--abbreviate-author (&rest args)
+;;         "The first arg is AUTHOR, abbreviate it.
+;;       First Last  -> F Last
+;;       First.Last  -> F Last
+;;       Last, First -> F Last
+;;       First       -> First (no change).
 
-      It is assumed that the author has only one or two names."
-        ;; ARGS               -> '((REV AUTHOR DATE))
-        ;; (car ARGS)         -> '(REV AUTHOR DATE)
-        ;; (nth 1 (car ARGS)) -> AUTHOR
-        (let* ((author (nth 1 (car args)))
-               (author-abbr (if (string-match-p "," author)
-                                ;; Last, First -> F Last
-                                (replace-regexp-in-string "\\(.*?\\), *\\(.*\\)" "\\1" author)
-                              ;; First Last -> F Last
-                              (replace-regexp-in-string "\\(.*\\)[. ]+\\(.*\\)" "\\1" author))))
-          (setf (nth 1 (car args)) author-abbr))
-        (car args))                       ;'(REV AUTHOR-ABBR DATE)
-      (advice-add 'magit-log-format-margin :filter-args #'modi/magit-log--abbreviate-author)))
+;;       It is assumed that the author has only one or two names."
+;;         ;; ARGS               -> '((REV AUTHOR DATE))
+;;         ;; (car ARGS)         -> '(REV AUTHOR DATE)
+;;         ;; (nth 1 (car ARGS)) -> AUTHOR
+;;         (let* ((author (nth 1 (car args)))
+;;                (author-abbr (if (string-match-p "," author)
+;;                                 ;; Last, First -> F Last
+;;                                 (replace-regexp-in-string "\\(.*?\\), *\\(.*\\)" "\\1" author)
+;;                               ;; First Last -> F Last
+;;                               (replace-regexp-in-string "\\(.*\\)[. ]+\\(.*\\)" "\\1" author))))
+;;           (setf (nth 1 (car args)) author-abbr))
+;;         (car args))                       ;'(REV AUTHOR-ABBR DATE)
+
+;;       (advice-add 'magit-log-format-margin :filter-args #'modi/magit-log--abbreviate-author)))
 
 (use-package org-link-minor-mode
   :straight t)
@@ -453,7 +656,7 @@
   (doom-modeline-mode 1))
 
 (use-package yascroll
-  :disabled
+  ;; :disabled
   :straight t
   :config
   (global-yascroll-bar-mode 1))
@@ -594,6 +797,7 @@ So it safe to call it many times like in a minor mode hook."
   (dired-mode . stripe-buffer-mode))
 
 (use-package all-the-icons-dired
+  :disabled
   :straight t
   :diminish all-the-icons-dired-mode
   :hook
@@ -691,42 +895,17 @@ So it safe to call it many times like in a minor mode hook."
 
 (use-package sublimity
   :straight t
-  :disabled
+  :disabled ;; i'm suspecting it may interfere with tabbar
   :init
-  (require 'sublimity)
+  ;; (require 'sublimity)
   (require 'sublimity-scroll)
-  (require 'sublimity-attractive)
-  (setq sublimity-attractive-centering-width 110)
+  ;; (require 'sublimity-attractive)
+  (setq sublimity-attractive-centering-width 130)
+
+  (setq sublimity-scroll-weight 3
+        sublimity-scroll-drift-length 2)
+
   (sublimity-mode t))
-
-(use-package tempbuf
-  :straight t
-  ;; :disabled
-  ;; :load-path  "~/spacemacs.d/layers/hmz-misc/local/tempbuf/tempbuf.el"
-  :config
-  ;; modified from jmjeong / jmjeong-emacs
-  (add-hook 'help-mode-hook 'turn-on-tempbuf-mode)
-  (add-hook 'dired-mode-hook 'turn-on-tempbuf-mode)
-  (add-hook 'custom-mode-hook 'turn-on-tempbuf-mode)
-  (add-hook 'w3-mode-hook 'turn-on-tempbuf-mode)
-  (add-hook 'Man-mode-hook 'turn-on-tempbuf-mode)
-  (add-hook 'view-mode-hook 'turn-on-tempbuf-mode)
-  (add-hook 'helm-major-mode-hook 'turn-on-tempbuf-mode)
-  (add-hook 'inferior-python-mode-hook 'turn-on-tempbuf-mode)
-  (add-hook 'magit-mode-hook 'turn-on-tempbuf-mode)
-
-  (defun hmz-misc/tempbuf-kill-func ()
-    (message "%s" (buffer-name))
-    (shell-command
-     (combine-and-quote-strings
-      (list "terminal-notifier"
-            "-message" (buffer-name)
-            "-title" "Tempbuf"
-            ) " ")))
-
-  (add-hook 'tempbuf-kill-hook 'hmz-misc/tempbuf-kill-func)
-
-  (and (fboundp 'temp-buffer-resize-mode) (temp-buffer-resize-mode t)))
 
 (use-package rspec-mode
   :straight t
@@ -935,7 +1114,6 @@ So it safe to call it many times like in a minor mode hook."
 (use-package rubocopfmt
   :straight (rubocopfmt :type git :host github :repo "jimeh/rubocopfmt.el")
   :init
-  (lsp-ui-mode -1)
   (add-hook 'ruby-mode-hook #'rubocopfmt-mode)
 
   (defun rubocopfmt-before-save ()
@@ -1314,7 +1492,7 @@ So it safe to call it many times like in a minor mode hook."
 
   :config
   (use-package switch-buffer-functions
-    :disabled
+    ;; :disabled
     :straight t
     :config
     (setq switch-buffer-functions nil)
@@ -1505,7 +1683,7 @@ So it safe to call it many times like in a minor mode hook."
     (interactive)
 
     ;; hide line numbers
-    (linum-mode 0)
+    ;; (linum-mode 0)
     (display-line-numbers-mode 0)
 
     ;; go away with modeline
@@ -1519,7 +1697,7 @@ So it safe to call it many times like in a minor mode hook."
 
     ;; no scroll bars
     (scroll-bar-mode 0)
-    ;; (yascroll-bar-mode 1)
+    (yascroll-bar-mode -1)
     (spacemacs/toggle-truncate-lines-on)
 
     ;; highlight current line
@@ -1579,4 +1757,5 @@ So it safe to call it many times like in a minor mode hook."
     (when (and neo-autorefresh (neo-global--window-exists-p) buffer-file-name (not (eq (current-buffer) "*NeoTree*"))
                (neotree-refresh t)))))
 
+(setq debug-on-error nil)
 (provide 'hmz-modules)

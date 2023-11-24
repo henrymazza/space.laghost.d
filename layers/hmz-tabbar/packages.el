@@ -20,9 +20,11 @@ which require an initialization must be listed explicitly in the list.")
     :after (helm-lib all-the-icons)
     :init
 
-    ;; force project-name to be refreshed
+    ;; force project-name to be refreshed; others
     (defun unset-project-name ()
-      (setq-local project-name nil))
+      (setq-local project-name nil)
+      (hmz-tabbar-refresh-faces)
+      )
 
     (run-with-timer 0 2 'unset-project-name)
 
@@ -154,7 +156,7 @@ which require an initialization must be listed explicitly in the list.")
                           :background 'unspecified
                           :underline nil
                           :weight 'light
-                          :height 1.0
+                          :height 1.2
                           :box nil)
 
       (set-face-attribute 'tabbar-selected-modified nil
@@ -424,16 +426,24 @@ Return the the first group where the current buffer is."
                       (with-current-buffer b
                         (list (current-buffer)
                               ;; (format "%s" (visited-file-modtime))
-                              (format "%10d" (buffer-modified-tick b))
+                              (format "%14d" (buffer-modified-tick b))
+                              ;; (buffer-modified-tick b)
                               ;; (format "%s" (float-time (nth 5 (file-attributes (buffer-file-name)))))
+                              ;; (* 10000000 (float-time (nth 5 (file-attributes (buffer-file-name)))))
                               ;; (number-to-string (string-width (buffer-name)))
+                              ;; (buffer-name)
                               (if tabbar-buffer-groups-function
                                   (funcall tabbar-buffer-groups-function)
                                 '("Common")))))
                   (and tabbar-buffer-list-function
                        (funcall tabbar-buffer-list-function)))
                  #'(lambda (e1 e2)
-                     (string-lessp (nth 1 e1) (nth 1 e2))))))
+                     ;; (message "%s" (nth 1 e2) )
+                     ;; (message "%s -- %s" (nth 1 e2) (nth 1 e1))
+                     (string-lessp (nth 1 e1) (nth 1 e2))
+                     ;; (>  (nth 1 e1)  (nth 1 e2))
+
+                     ))))
 
         ;; If the cache has changed, update the tab sets.
         (unless (equal bl tabbar--buffers)
@@ -540,6 +550,7 @@ Return a list of one element based on major mode."
     (defun hmz-tabbar-refresh-tabs ()
       (if tabbar-mode
           (progn
+            ;; (setq-local project-name nil)
             ;; (tabbar-mode 0)
             ;; (setq tabbar-scroll-left-button-value nil)
             ;; (setq tabbar-scroll-right-button-value nil)

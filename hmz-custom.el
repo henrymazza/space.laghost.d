@@ -91,6 +91,7 @@
   (push '("#+begin_quote" . ?❝) prettify-symbols-alist)
   (push '("#+end_quote" .  ?❞) prettify-symbols-alist)
   (push '("#+author:" .  "—") prettify-symbols-alist)
+  (push '("#+title:" .  " ❯ ") prettify-symbols-alist)
 
   (push '("[ ]" . "☐") prettify-symbols-alist)
   (push '("[X]" . "☑" ) prettify-symbols-alist)
@@ -156,8 +157,8 @@
 (setq undo-tree-history-directory-alist '(("." . "~/.spacemacs.d/undo")))
 
 ;; org-mode grap-link shortcut
-(add-hook 'org-mode-hook
-          (lambda () (define-key org-mode-map (kbd "C-c g") 'org-mac-grab-link)))
+;; (add-hook 'org-mode-hook
+;;           (lambda () (define-key org-mode-map (kbd "C-c g") 'org-mac-grab-link)))
 
   (setq org-use-property-inheritance t)
 
@@ -168,12 +169,33 @@
   (move-beginning-of-line nil)
   (org-insert-heading))
 
+(defun hmz-custom/ibuffer-mode-hook ()
+  (spacemacs/toggle-truncate-lines-off))
+
+(add-hook 'ibuffer-mode-hook 'hmz-custom/ibuffer-mode-hook)
+
 (add-hook 'org-mode-hook
           (lambda ()
             (define-key org-mode-map (kbd "C-o") 'org-insert-heading-above)))
 
 (defun hmz-prog-mode-hook ()
   (interactive)
+
+  (treemacs-follow-mode 1)
+
+  (setq-default fill-column 80)
+
+  (ignore-errors
+    (lsp-mode -1)
+    (lsp-ui-mode -1)
+    (lsp-disconnect)
+    (lsp-ui-mode -1))
+
+  (when (and buffer-read-only
+         (fboundp 'color-theme-buffer-local))
+    (color-theme-buffer-local 'color-theme-classic (current-buffer)))
+
+  (setq lsp-ui-doc-enable nil)
 
   (setq mouse-wheel-tilt-scroll t)
   (setq mouse-wheel-flip-direction t)
@@ -196,7 +218,6 @@
   (face-remap-add-relative 'default '(:height 140))
 
   (linum-mode -1)
-  (auto-fill-mode 1)
 
   (flyspell-mode t)
   (flyspell-prog-mode)
@@ -209,6 +230,7 @@
       (fic-mode t))
 
   (flycheck-mode 1)
+
 
   (display-line-numbers-mode 1)
 
@@ -286,9 +308,10 @@
   (interactive)
   ;; (cond (evil-mode (evil-force-normal-state))
   ;;       (t (keyboard-escape-quit)))
-  (keyboard-escape-quit)
+  ;; (keyboard-escape-quit)
   (evil-force-normal-state)
   [escape]
+  ()
   )
 
 (global-set-key (kbd "C-g") 'hmz-init/evil-keyboard-quit)
@@ -302,18 +325,19 @@
   (define-key transient-map (kbd "C-g") 'transient-quit-one))
 
 
-  (add-hook 'minibuffer-setup-hook 'hmz-init/minibuffer-setup)
-  (defun hmz-init/minibuffer-setup ()
-    (setq evil-emacs-state-cursor '("SkyBlue2" bar))
-       (set (make-local-variable 'face-remapping-alist)
-          '((default :height 1.5))))
 
-  ;; Always follow symlinks
-  (setq vc-follow-symlinks t)
-  ;; Stylize Echo Area (interestingly it ends up applying other faces styles)
-  (with-current-buffer (get-buffer " *Echo Area 0*")   ; the leading space character is correct
-    (setq-local face-remapping-alist
-                '((default (:height 1.3 :foreground "#CCC") variable-pitch)))) ; etc.
+(add-hook 'minibuffer-setup-hook 'hmz-init/minibuffer-setup)
+(defun hmz-init/minibuffer-setup ()
+  (setq evil-emacs-state-cursor '("SkyBlue2" bar))
+  (set (make-local-variable 'face-remapping-alist)
+       '((default :height 1.5))))
+
+;; Always follow symlinks
+(setq vc-follow-symlinks t)
+;; Stylize Echo Area (interestingly it ends up applying other faces styles)
+(with-current-buffer (get-buffer " *Echo Area 0*")   ; the leading space character is correct
+  (setq-local face-remapping-alist
+              '((default (:height 1.3 :foreground "#CCC") variable-pitch)))) ; etc.
 
 
 (linum-mode 0)
@@ -391,7 +415,7 @@
  ;; The most important setting of all! Make each scroll-event move 2 lines at
  ;; a time (instead of 5 at default). Simply hold down shift to move twice as
  ;; fast, or hold down control to move 3x as fast. Perfect for trackpads.
- mouse-wheel-scroll-amount '(6 ((shift) . 1) ((meta) . 10)))
+ mouse-wheel-scroll-amount '(3 ((shift) . 1) ((meta) . 10)))
 
 (setq jiralib-url "https://sondermind-jira.atlassian.net")
 
@@ -405,7 +429,10 @@
 (defun hmz-init/before-save (save-fun &rest args)
   (set-buffer-modified-p t)
   (message "Saving... %s" buffer-file-name)
-  (if (file-exists-p (buffer-file-name))
+  (when (derived-mode-p 'vue-mode 'js-mode 'js2-mode 'typescript-mode)
+    ;; (ignore-errors (prettier-js))
+    )
+  (if (and buffer-file-name (file-exists-p (buffer-file-name)))
       (progn
         (set-buffer-modified-p t)
         (apply save-fun args))
@@ -416,15 +443,114 @@
 
 (spacemacs/toggle-vi-tilde-fringe-off)
 
-;; Breadcrumb in modeline: https://www.reddit.com/r/emacs/comments/qxzadv/moving_lspmode_breadcrumbs_to_modeline/
-(add-hook 'lsp-configure-hook (lambda ()
-                                (lsp-headerline-breadcrumb-mode -1)))
+;; ;; Breadcrumb in modeline: https://www.reddit.com/r/emacs/comments/qxzadv/moving_lspmode_breadcrumbs_to_modeline/
+;; (add-hook 'lsp-configure-hook (lambda ()
+;;                                 (lsp-headerline-breadcrumb-mode 1)))
 
-(spaceline-define-segment ol/lsp-breadcrumb-spaceline
-  (when (bound-and-true-p lsp-mode)
-    (when (functionp 'lsp-headerline--build-string)
-      (replace-regexp-in-string "^>  " "" (concat
-                                           (lsp-headerline--build-string)
-                                           "")))))
+;; (spaceline-define-segment ol/lsp-breadcrumb-spaceline
+;;   (when (bound-and-true-p lsp-mode)
+;;     (when (functionp 'lsp-headerline--build-string)
+;;       (replace-regexp-in-string "^>  " "" (concat
+;;                                            (lsp-headerline--build-string)
+;;                                            "")))))
+
+;; bm layer customs
+(define-key evil-normal-state-map (kbd "<left-fringe> <mouse-5>") 'bm-next-mouse)
+(define-key evil-normal-state-map (kbd "<left-fringe> <mouse-4>") 'bm-previous-mouse)
+(define-key evil-normal-state-map (kbd "<left-fringe> <mouse-1>") 'bm-toggle-mouse)
+(define-key evil-normal-state-map (kbd "M-t") 'bm-toggle)
+(define-key evil-normal-state-map (kbd "M-n") 'bm-next)
+(define-key evil-normal-state-map (kbd "M-p") 'bm-previous)
+
+;; this is overwritten by some autocomplete mode, redefining
+(define-key evil-normal-state-map (kbd "C-i") 'evil-jump-forward)
+
+
+
+(setq bm-marker 'bm-marker-right)
+
+;; adapted from https://superuser.com/questions/1017094/emacs-jump-to-the-next-line-with-same-indentation
+(defun jump-to-upper-indent (direction)
+  (interactive)
+  (let ((start-indent (current-indentation)))
+    (while
+        (and
+         ;; not end-of-buffer
+         (not (bobp))
+         ;; the line is forwarded
+         (zerop (forward-line (or direction 1)))
+         ;; indentation at point is = or > than start
+         (or (zerop (current-indentation))
+             (>= (current-indentation)  start-indent)))))
+  (back-to-indentation))
+
+
+(global-set-key [?\M-{] #'(lambda () (interactive) (jump-to-upper-indent -1)))
+(global-set-key [?\M-}] 'jump-to-upper-indent)
+
+(evil-leader/set-key "/" 'spacemacs/helm-project-do-ag)
+(setq helm-ag-base-command "ag --nocolor --nogroup")
+
+(defun find-next-file (&optional backward)
+  "Find the next file (by name) in the current directory. With prefix arg, find the previous file."
+  (interactive "P")
+  (when buffer-file-name
+    (let* ((file (expand-file-name buffer-file-name))
+           (files (cl-remove-if (lambda (file) (or (cl-first (file-attributes file))
+                                              (string= (substring (file-name-nondirectory file) 0 1) ".")
+                                              ))
+                                (sort (directory-files (file-name-directory file) t nil t) 'string<)))
+
+           (pos (mod (+ (cl-position file files :test 'equal) (if backward -1 1))
+                     (length files))))
+      (find-file (nth pos files))))
+
+  )
+
+(spacemacs/set-leader-keys "fN" (lambda () "Goto Notes" (interactive) (find-file "~/Documents/org/notes.org")))
+(spacemacs/set-leader-keys "fp" #'(lambda () "Previous File"
+                                    (interactive)
+                                    (setq current-prefix-arg '(4)) ;; emulate prefix
+                                    (call-interactively 'find-next-file)
+
+                                    ))
+(spacemacs/set-leader-keys "fn" #'(lambda () "Next File" (interactive) (call-interactively 'find-next-file)))
+
+;; (require 'ob-js)
+
+(add-to-list org-babel-load-languages '((js . t) (emacs-lisp . t) (shell . t)))
+
+;; (add-to-list 'org-babel-tangle-lang-exts '("js" . "js"))
+
+(org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages)
+
+(add-to-list 'auto-mode-alist '("\\.js\\'" . js-mode))
+(add-to-list 'auto-mode-alist '("\\.vue\\'" . js-mode))
+(add-to-list 'auto-mode-alist '("\\.tsx\\'" . js-mode))
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . js-mode))
+
+(setq split-width-threshold nil)
+
+(defun org-to-clipboard-as-markdown ()
+  (interactive)
+  (let ((org-export-with-toc nil))
+    (with-current-buffer (org-md-export-as-markdown)
+      (clipboard-kill-region (point-min) (point-max))
+      (kill-buffer))))
+
+;; Convert org to markdown and save it to the Clipboard
+(defun hmz/org-md-to-clipboard ()
+  (interactive)
+  (save-window-excursion
+    (let ((org-export-with-toc nil))
+      (let ((buf (org-export-to-buffer 'md "*tmp*" nil nil t t)))
+        (save-excursion
+          (set-buffer buf)
+          (simpleclip-set-contents (buffer-string))
+          (kill-buffer-and-window)
+          )))))
+
+(server-start)
+
 
 (provide 'hmz-custom)
