@@ -1,7 +1,21 @@
-(setq debug-on-error t)
+(setq debug-on-error nil)
 
 (require 'use-package)
 (setq use-package-verbose 'debug)
+
+(use-package hl7-mode
+  :straight (hl7-mode :type git :host github :repo "bkruczyk/hl7-mode")
+  :mode (("\\.hl7" . hl7-mode))
+  :init
+  ;; speed up bit lines; unsuported! (t = off)
+  (setq-default bidi-display-reordering nil)
+  ;; speed up bit lines (t = on)
+  (setq-default bidi-inhibit-bpa t)
+
+  (toggle-truncate-lines 1)
+  )
+
+(use-package libsqlite3)
 
 (use-package sort-words
   :straight (sort-words :type git :host github :repo "dotemacs/sort-words.el"))
@@ -16,7 +30,6 @@
 
 ;; (use-package jist
 ;;   :straight (jist.el :type git :host github :repo "emacs-pe/jist.el"))
-
 
 ;; (use-package tree-sitter-langs :straight t)
 

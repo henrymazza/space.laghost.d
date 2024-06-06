@@ -724,7 +724,7 @@ This function is called at the very end of Spacemacs initialization."
    '(company-capf company-files
                   (company-dabbrev-code company-gtags company-etags company-keywords)
                   company-dabbrev))
- '(csv-separators '("," ";"))
+ '(csv-separators '("," ";" "|"))
  '(custom-safe-themes
    '("dc8285f7f4d86c0aebf1ea4b448842a6868553eded6f71d1de52f3dcbc960039" "944d52450c57b7cbba08f9b3d08095eb7a5541b0ecfb3a0a9ecd4a18f3c28948" "1436985fac77baf06193993d88fa7d6b358ad7d600c1e52d12e64a2f07f07176" "18bec4c258b4b4fb261671cf59197c1c3ba2a7a47cc776915c3e8db3334a0d25" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "0ab2aa38f12640ecde12e01c4221d24f034807929c1f859cbca444f7b0a98b3a" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "2dff5f0b44a9e6c8644b2159414af72261e38686072e063aa66ee98a2faecf0e" "7451f243a18b4b37cabfec57facc01bd1fe28b00e101e488c61e1eed913d9db9" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "eb5c79b2e9a91b0a47b733a110d10774376a949d20b88c31700e9858f0f59da7" "a41b81af6336bd822137d4341f7e16495a49b06c180d6a6417bf9fd1001b6d2b" "57bd93e7dc5fbb5d8d27697185b753f8563fe0db5db245592bab55a8680fdd8c" "890a1a44aff08a726439b03c69ff210fe929f0eff846ccb85f78ee0e27c7b2ea" "819ab08867ef1adcf10b594c2870c0074caf6a96d0b0d40124b730ff436a7496"))
  '(default-justification 'left)
@@ -941,6 +941,7 @@ This function is called at the very end of Spacemacs initialization."
  '(tramp-verbose 10)
  '(treemacs-position 'right)
  '(treemacs-tag-follow-mode t)
+ '(truncate-lines nil)
  '(use-dialog-box t)
  '(use-package-check-before-init t)
  '(use-package-compute-statistics t)

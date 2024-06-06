@@ -1,7 +1,5 @@
 ;; here are simple elisp customizations that may break and so cat get turned off easily
 
-
-(defun delete-window-or-frame (&optional window frame force)
   (interactive)
   (if (= 1 (length (window-list frame)))
       (condition-case nil
