@@ -80,7 +80,7 @@ This function should only modify configuration layer settings."
      ;;             javascript-backend 'tide)
      (spell-checking :variables
                      spell-checking-enable-by-default t)
-     (vue :variables vue-backend 'dump)
+     (vue :variables vue-backend 'dumb)
      (node :variables node-add-modules-path t)
      ;; custom layers
      hmz-color-identifiers
@@ -89,7 +89,7 @@ This function should only modify configuration layer settings."
      (treemacs :variables treemacs-use-all-the-icons-theme -1)
 
      better-defaults
-     bm
+     ;; bm
      coffeescript
      emacs-lisp
 
@@ -98,7 +98,7 @@ This function should only modify configuration layer settings."
      evil-commentary
      ;; evil-magit
      ;; evil-matchit
-     github ;; keybinding warnings
+     ;; github ;; NOTE: unknown
 
      git
      dtrt-indent
@@ -122,14 +122,13 @@ This function should only modify configuration layer settings."
           org-enable-transclusion-support t
           org-enable-valign t
           org-enable-verb-support t)
-     semantic
      shell-scripts
      spell-checking
      sql
      syntax-checking
      tide
      typography
-     version-control
+     (version-control :variables version-control-diff-tool nil)
      vinegar
      web-beautify
      yaml
@@ -645,7 +644,7 @@ default it calls `spacemacs/load-spacemacs-env' which loads the environment
 variables declared in `~/.spacemacs.env' or `~/.spacemacs.d/.spacemacs.env'.
 See the header of this file for more information."
   (spacemacs/load-spacemacs-env)
-)
+  )
 
 (defun dotspacemacs/user-init ()
   "Initialization for user code:
@@ -670,33 +669,25 @@ If you are unsure, try setting them in `dotspacemacs/user-config' first."
   (straight-use-package 'use-package)
 
   ;; straight.el init ends here
-)
+  )
 
 (defun dotspacemacs/user-load ()
   "Library to load while dumping.
 This function is called only while dumping Spacemacs configuration. You can
 `require' or `load' the libraries of your choice that will be included in the
 dump."
-)
+  )
 
-  ;; Find String in Project
-  (global-set-key (kbd "s-F") 'helm-projectile-ag)
+;; Find String in Project
+(global-set-key (kbd "s-F") 'helm-projectile-ag)
 (defun dotspacemacs/user-config ()
   "Configuration for user code:
 This function is called at the very end of Spacemacs startup, after layer
 configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
-  ;; ;; fix doom-modeline and neotree not starting
-  (defun colors//rainbow-identifiers-ignore-keywords ()
-    "Do not colorize stuff with ‘font-lock-keyword-face’."
-    (setq-local rainbow-identifiers-faces-to-override
-                (delq 'font-lock-keyword-face
-                      rainbow-identifiers-faces-to-override)))
-
   (load "~/.spacemacs.d/hmz-modules")
-  (load "~/.spacemacs.d/hmz-custom")
-)
+  (load "~/.spacemacs.d/hmz-custom"))
 
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -706,401 +697,400 @@ before packages are loaded."
 This is an auto-generated function, do not modify its content directly, use
 Emacs customize menu instead.
 This function is called at the very end of Spacemacs initialization."
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ahs-default-range 'ahs-range-whole-buffer)
- '(ahs-idle-interval 1.0)
- '(alert-default-style 'notifier)
- '(all-the-icons-dired-monochrome nil)
- '(auto-revert-buffer-list-filter 'magit-auto-revert-buffer-p)
- '(auto-revert-verbose t)
- '(before-save-hook
-   '(time-stamp whitespace-cleanup spacemacs//python-sort-imports))
- '(coffee-tab-width 2)
- '(company-backends
-   '(company-capf company-files
-                  (company-dabbrev-code company-gtags company-etags company-keywords)
-                  company-dabbrev))
- '(csv-separators '("," ";" "|"))
- '(custom-safe-themes
-   '("dc8285f7f4d86c0aebf1ea4b448842a6868553eded6f71d1de52f3dcbc960039" "944d52450c57b7cbba08f9b3d08095eb7a5541b0ecfb3a0a9ecd4a18f3c28948" "1436985fac77baf06193993d88fa7d6b358ad7d600c1e52d12e64a2f07f07176" "18bec4c258b4b4fb261671cf59197c1c3ba2a7a47cc776915c3e8db3334a0d25" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "0ab2aa38f12640ecde12e01c4221d24f034807929c1f859cbca444f7b0a98b3a" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "2dff5f0b44a9e6c8644b2159414af72261e38686072e063aa66ee98a2faecf0e" "7451f243a18b4b37cabfec57facc01bd1fe28b00e101e488c61e1eed913d9db9" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "eb5c79b2e9a91b0a47b733a110d10774376a949d20b88c31700e9858f0f59da7" "a41b81af6336bd822137d4341f7e16495a49b06c180d6a6417bf9fd1001b6d2b" "57bd93e7dc5fbb5d8d27697185b753f8563fe0db5db245592bab55a8680fdd8c" "890a1a44aff08a726439b03c69ff210fe929f0eff846ccb85f78ee0e27c7b2ea" "819ab08867ef1adcf10b594c2870c0074caf6a96d0b0d40124b730ff436a7496"))
- '(default-justification 'left)
- '(desktop-minor-mode-table
-   '((defining-kbd-macro nil)
-     (isearch-mode nil)
-     (vc-mode nil)
-     (vc-dired-mode nil)
-     (erc-track-minor-mode nil)
-     (company-posframe-mode nil)))
- '(diff-font-lock-prettify t)
- '(dired-hide-details-hide-information-lines nil)
- '(dired-k-human-readable t)
- '(dired-k-padding 1)
- '(dired-mode-hook
-   '(hl-line-mode doom-modeline-set-project-modeline vinegar/dired-setup))
- '(display-buffer-alist '(("." nil (reusable-frames . t))))
- '(doom-modeline-buffer-encoding nil)
- '(doom-modeline-height 15)
- '(doom-modeline-indent-info nil)
- '(doom-modeline-mode t)
- '(doom-themes-treemacs-theme "doom-colors")
- '(ember-completion-system 'helm)
- '(ember-serve-command "ember serve  --output-path dist")
- '(ember-test-command "ember test --serve")
- '(epg-pinentry-mode nil)
- '(evil-want-Y-yank-to-eol t)
- '(fic-highlighted-words '("FIXME" "TODO" "BUG" "HACK" "XXX" "OPTIMIZE" "NOTE"))
- '(fill-column 100)
- '(gist-ask-for-filename nil)
- '(gist-view-gist nil)
- '(git-gutter-fr:side 'left-fringe)
- '(global-auto-highlight-symbol-mode t)
- '(global-prettify-symbols-mode t)
- '(global-visual-line-mode t)
- '(helm-boring-buffer-regexp-list
-   '("\\` " "\\`\\*helm" "\\`\\*Echo Area" "\\`\\*Minibuf" "magit-.*: .*" "\\*" "magit: .*"))
- '(helm-completion-style 'emacs)
- '(helm-mode-fuzzy-match t)
- '(highlight-indent-guides-character 183)
- '(highlight-indent-guides-method 'character)
- '(highlight-indent-guides-mode nil t)
- '(highlight-indentation-offset 4)
- '(ibuffer-default-sorting-mode 'recency)
- '(ibuffer-formats
-   '((mark modified read-only locked " "
-           (name 30 30 :left :elide)
-           " "
-           (size 9 -1 :right)
-           " "
-           (mode 16 16 :left :elide)
-           " " filename-and-process)
-     (mark " "
-           (name 16 -1)
-           " " filename)))
- '(ibuffer-sidebar-width 22)
- '(indicate-buffer-boundaries '((t) (top . left) (bottom . left)))
- '(inhibit-eol-conversion t)
- '(ispell-highlight-face 'flyspell-incorrect)
- '(line-spacing 3)
- '(lsp-headerline-breadcrumb-enable nil)
- '(lsp-headerline-breadcrumb-enable-diagnostics nil)
- '(lsp-ui-doc-use-webkit t)
- '(lsp-ui-sideline-ignore-duplicate t)
- '(lsp-ui-sideline-show-symbol nil)
- '(magit-diff-adjust-tab-width t)
- '(magit-diff-highlight-trailing 'all)
- '(magit-diff-paint-whitespace 'all)
- '(magit-diff-refine-hunk 'all)
- '(magit-diff-refine-ignore-whitespace nil)
- '(magit-list-refs-sortby '("-creatordate"))
- '(magit-status-margin '(t age-abbreviated magit-log-margin-width t 11))
- '(magit-status-sections-hook
-   '(magit-insert-status-headers magit-insert-merge-log magit-insert-rebase-sequence magit-insert-am-sequence magit-insert-sequencer-sequence magit-insert-bisect-output magit-insert-bisect-rest magit-insert-bisect-log magit-insert-untracked-files magit-insert-unstaged-changes magit-insert-staged-changes magit-insert-stashes magit-insert-unpushed-to-pushremote magit-insert-unpushed-to-upstream-or-recent magit-insert-unpulled-from-pushremote magit-insert-unpulled-from-upstream forge-insert-issues))
- '(markdown-hide-urls t)
- '(markdown-italic-underscore t)
- '(message-sent-hook '((lambda nil (message (buffer-name)))))
- '(midnight-mode t)
- '(mode-line-in-non-selected-windows t)
- '(mode-require-final-newline t)
- '(nano-modeline-position 'bottom)
- '(neo-hide-cursor t)
- '(neo-theme 'arrow)
- '(neo-vc-integration '(face char))
- '(neo-vc-state-char-alist
-   '((up-to-date . 32)
-     (edited . 10041)
-     (added . 10029)
-     (removed . 10006)
-     (missing . 33)
-     (needs-merge . 77)
-     (conflict . 9552)
-     (unlocked-changes . 33)
-     (needs-update . 85)
-     (ignored . 32)
-     (user . 85)
-     (unregistered . 32)
-     (nil . 8942)))
- '(neo-window-position 'right)
- '(neo-window-width 40)
- '(nil nil t)
- '(objed-cursor-color "#ff5555")
- '(org-blank-before-new-entry '((heading) (plain-list-item)))
- '(org-bullets-bullet-list '("◉" "○" "●" "☞"))
- '(org-download-image-org-width 800)
- '(org-ellipsis " ▼")
- '(org-export-backends '(ascii html icalendar latex md odt))
- '(org-export-with-section-numbers 2)
- '(org-export-with-sub-superscripts nil)
- '(org-fontify-done-headline nil)
- '(org-fontify-quote-and-verse-blocks t)
- '(org-hide-block-startup t)
- '(org-log-done nil)
- '(org-modules
-   '(ol-bbdb ol-bibtex ol-docview ol-eww ol-gnus org-habit ol-info ol-irc ol-mhe ol-rmail ol-w3m org-mac-link))
- '(org-roam-dailies-capture-templates
-   '(("d" "default" entry "* %?" :target
-      (file+head "%<%Y-%m-%d>.org" "#+title: %<%a, %Y-%m-%d>
-"))))
- '(org-todo-keywords
-   '((sequence "TODO:(t)" "WAIT:(w)" "|" "Q:(n)" "DONE:(d)" "CANCELED:(c)")))
- '(origami-parser-alist
-   '((ruby-mode origami-markers-parser "do" "end")
-     (java-mode . origami-java-parser)
-     (c-mode . origami-c-parser)
-     (c++-mode . origami-c-style-parser)
-     (perl-mode . origami-c-style-parser)
-     (cperl-mode . origami-c-style-parser)
-     (js-mode . origami-c-style-parser)
-     (js2-mode . origami-c-style-parser)
-     (js3-mode . origami-c-style-parser)
-     (go-mode . origami-c-style-parser)
-     (php-mode . origami-c-style-parser)
-     (python-mode . origami-python-parser)
-     (emacs-lisp-mode . origami-elisp-parser)
-     (lisp-interaction-mode . origami-elisp-parser)
-     (clojure-mode . origami-clj-parser)))
- '(package-selected-packages
-   '(google-this modern-fringes terraform-mode enh-ruby-mode psession telega dired-sidebar centaur-tabs writeroom-mode workgroups memory-usage drupal-mode phpunit phpcbf php-auto-yasnippets php-mode zones sr-speedbar evil-ruby-text-objects wakatime-mode rspec-simple ido-completing-read+ shrink-path amx ri-mode ri smooth-scrolling ivy-youtube wgrep lv flyspell-correct-ivy counsel-projectile counsel swiper ivy doom-todo-ivy magit-todos todo-projectile hl-block hl-block-mode indent-guide-mode highlight-indent-guides-mode vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toml-mode toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocopfmt rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails prodigy popwin pip-requirements persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file ns-auto-titlebar nginx-mode mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-gutter-fringe gh-md gcmh fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme doom-themes doom-modeline discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby cargo bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))
- '(pdf-view-midnight-colors (cons "#f8f8f2" "#282a36"))
- '(persp-interactive-completion-system 'ido nil nil "Customized with use-package persp-mode")
- '(persp-kill-foreign-buffer-behaviour 'kill)
- '(pixel-scroll-mode nil)
- '(popwin-mode t)
- '(popwin:popup-window-height 8)
- '(popwin:popup-window-width 80)
- '(popwin:special-display-config
-   '(("^\\*RuboCop.+\\*$" :regexp t :height 0.4 :position bottom :noselect t :dedicated t :stick t :tail t)
-     ("*rspec-compilation*" :width 0.33 :position bottom :noselect t :dedicated t :stick t :tail t)
-     ("*rake-compilation*" :height 0.4 :position bottom :noselect t :dedicated t :stick t)
-     ("*projectile-rails-generate*" :height 0.4 :position bottom :noselect t :dedicated t :stick t)
-     ("*projectile-rails-compilation*" :height 0.4 :position bottom :noselect t :dedicated t :stick t)
-     ("*Bundler*" :height 0.4 :position bottom :noselect t :dedicated t :stick t)
-     ("*Google Translate*" :height 0.4 :position bottom :noselect t :dedicated t :stick t)
-     ("^*WoMan.+*$" :regexp t :position bottom)
-     ("*nosetests*" :position bottom :noselect nil :dedicated t :stick t)
-     ("*grep*" :position bottom :noselect nil :dedicated t :stick t)
-     ("*ert*" :position bottom :noselect nil :dedicated t :stick t)
-     ("*undo-tree Diff*" :height 0.3 :position bottom :noselect nil :dedicated t :stick t)
-     ("*undo-tree*" :width 60 :position right :noselect nil :dedicated t :stick t)
-     ("*Async Shell Command*" :position bottom :noselect nil :dedicated t :stick t)
-     ("*Shell Command Output*" :position bottom :noselect nil :dedicated t :stick t)
-     ("*compilation*" :height 0.4 :position bottom :noselect t :dedicated t :stick t)
-     ("*Process List*" :height 0.4 :position bottom :noselect nil :dedicated t :stick t)
-     ("*Help*" :height 0.4 :position bottom :noselect t :dedicated t :stick t)))
- '(popwin:universal-display-config '(t))
- '(prettify-symbols-unprettify-at-point 'right-edge)
- '(projectile-globally-ignored-directories
-   '("^\\.idea$" "^\\.vscode$" "^\\.ensime_cache$" "^\\.eunit$" "^\\.git$" "^\\.hg$" "^\\.fslckout$" "^_FOSSIL_$" "^\\.bzr$" "^_darcs$" "^\\.pijul$" "^\\.tox$" "^\\.svn$" "^\\.stack-work$" "^\\.ccls-cache$" "^\\.cache$" "^\\.clangd$" "^\\.bp-gems$"))
- '(projectile-indexing-method 'hybrid)
- '(purpose-x-popwin-height 0.15)
- '(rainbow-identifiers-cie-l*a*b*-lightness 50)
- '(rainbow-identifiers-cie-l*a*b*-saturation 20)
- '(rainbow-identifiers-faces-to-override '(font-lock-variable-name-face))
- '(require-final-newline t)
- '(rspec-autosave-buffer t)
- '(rspec-spec-command "rspec -f doc")
- '(rspec-use-docker-when-possible t)
- '(rubocopfmt-disabled-cops nil)
- '(rubocopfmt-include-unsafe-cops t)
- '(rubocopfmt-show-errors 'buffer)
- '(rubocopfmt-use-bundler-when-possible nil)
- '(rustic-ansi-faces
-   ["#282a36" "#ff5555" "#50fa7b" "#f1fa8c" "#61bfff" "#ff79c6" "#8be9fd" "#f8f8f2"])
- '(safe-local-variable-values
-   '((rubocopfmt-rubocop-command . "rubocop")
-     (rubocopfmt-rubocop-command . "/Users/HMz/.gem/bin/rubocop --cache false")
-     (rubocopfmt-rubocop-command . "/Users/HMz/.gem/bin/rubocop")
-     (eval progn
-           (pp-buffer)
-           (indent-buffer))
-     (column-enforce-column . 125)
-     (rubocopfmt-mode . -1)
-     (typescript-backend . tide)
-     (javascript-backend . tide)
-     (javascript-backend . tern)))
- '(shell-pop-cleanup-buffer-at-process-exit t)
- '(shell-pop-full-span nil t)
- '(shell-pop-restore-window-configuration t)
- '(shell-pop-window-position "bottom" t)
- '(shell-pop-window-size 30 t)
- '(sp-highlight-pair-overlay nil)
- '(sp-highlight-wrap-overlay nil)
- '(sp-highlight-wrap-tag-overlay nil)
- '(speedbar-use-images nil)
- '(sublimity-attractive-centering-width 120)
- '(sublimity-mode t)
- '(sublimity-scroll-weight 2.0)
- '(tab-width 2)
- '(tabbar-mode t nil (tabbar))
- '(tooltip-use-echo-area t)
- '(tramp-copy-size-limit 1000000)
- '(tramp-inline-compress-start-size 1000000)
- '(tramp-verbose 10)
- '(treemacs-position 'right)
- '(treemacs-tag-follow-mode t)
- '(truncate-lines nil)
- '(use-dialog-box t)
- '(use-package-check-before-init t)
- '(use-package-compute-statistics t)
- '(use-package-defaults
-   '((:straight
-      '(t)
-      straight-use-package-by-default)
-     (:config
-      '(t)
-      t)
-     (:init nil t)
-     (:catch t
-             (lambda
-               (name args)
-               (not use-package-expand-minimally)))
-     (:defer use-package-always-defer
-             (lambda
-               (name args)
-               (and use-package-always-defer
-                    (not
-                     (plist-member args :defer))
-                    (not
-                     (plist-member args :demand)))))
-     (:demand use-package-always-demand
-              (lambda
-                (name args)
-                (and use-package-always-demand
-                     (not
-                      (plist-member args :defer))
-                     (not
-                      (plist-member args :demand)))))
-     (:ensure
-      (list use-package-always-ensure)
-      (lambda
-        (name args)
-        (and use-package-always-ensure
-             (not
-              (plist-member args :load-path)))))
-     (:pin use-package-always-pin use-package-always-pin)))
- '(use-package-expand-minimally nil)
- '(use-package-minimum-reported-time 0)
- '(use-package-verbose 'debug)
- '(vc-annotate-background "#282a36")
- '(vc-annotate-color-map
-   (list
-    (cons 20 "#50fa7b")
-    (cons 40 "#85fa80")
-    (cons 60 "#bbf986")
-    (cons 80 "#f1fa8c")
-    (cons 100 "#f5e381")
-    (cons 120 "#face76")
-    (cons 140 "#ffb86c")
-    (cons 160 "#ffa38a")
-    (cons 180 "#ff8ea8")
-    (cons 200 "#ff79c6")
-    (cons 220 "#ff6da0")
-    (cons 240 "#ff617a")
-    (cons 260 "#ff5555")
-    (cons 280 "#d45558")
-    (cons 300 "#aa565a")
-    (cons 320 "#80565d")
-    (cons 340 "#6272a4")
-    (cons 360 "#6272a4")))
- '(vc-annotate-very-old-color nil)
- '(volatile-highlights-mode t)
- '(wdired-allow-to-change-permissions t)
- '(web-mode-markup-indent-offset 2)
- '(workgroups-mode t)
- '(yascroll:delay-to-hide 1.5)
- '(yascroll:scroll-bar '(right-fringe left-fringe text-area)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ahs-definition-face ((t (:weight bold))))
- '(ahs-edit-mode-face ((t (:weight bold))))
- '(ahs-face ((t (:weight bold))))
- '(ahs-plugin-whole-buffer-face ((t nil)))
- '(all-the-icons-dorange ((t (:foreground "tan3"))))
- '(all-the-icons-lmaroon ((t (:foreground "burlywood3"))))
- '(all-the-icons-maroon ((t (:foreground "burlywood3"))))
- '(anzu-match-2 ((t (:foreground "deep sky blue"))))
- '(anzu-replace-highlight ((t (:box (:line-width 2 :color "sienna1")))))
- '(bm-persistent-face ((t (:background "gray24" :box (:line-width (3 . 3) :color "salmon" :style flat-button) :overline "firebrick"))))
- '(bold ((t (:weight bold))))
- '(column-enforce-face ((t (:background "#323a40" :underline (:color "burlywood4" :style wave)))))
- '(custom-button ((t (:background "lightgrey" :foreground "black" :box 2))))
- '(custom-button-mouse ((t (:background "grey90" :foreground "black" :box 2))))
- '(custom-button-pressed ((t (:background "gray" :foreground "black" :box 2))))
- '(evil-search-highlight-persist-highlight-face ((t (:inherit lazy-highlight))))
- '(fic-face ((t (:weight bold))))
- '(flycheck-fringe-info ((t (:family "San Francisco" :foreground "cornflower blue" :inherit success))))
- '(flyspell-duplicate ((t (:underline "DarkOrange"))))
- '(flyspell-incorrect ((t (:background "#220000" :overline nil :underline "#ff5555"))))
- '(font-lock-comment-face ((t (:foreground "LightSteelBlue3"))))
- '(font-lock-warning-face ((t (:background "#373844" :foreground "#ffb86c" :underline (:color "red" :style wave)))))
- '(fringe ((t (:foreground "DeepSkyBlue" :background unspecified))))
- '(git-gutter:added ((t (:foreground "medium spring green" :weight bold))))
- '(git-gutter:modified ((t (:foreground "deep pink" :weight bold))))
- '(header-line ((t (:background "#44475a" :underline "gray20" :height 1.0 :family "San Francisco"))))
- '(hi-yellow ((t nil)))
- '(highlight-indent-guides-character-face ((t (:foreground "#3df1410a539f"))))
- '(highlight-parentheses-highlight ((nil (:weight ultra-bold))) t)
- '(hl-line ((t nil)))
- '(hydra-face-red ((t (:foreground "#FF0000" :weight bold))))
- '(indent-guide-face ((t (:inherit font-lock-comment-face :foreground "#669" :slant normal))))
- '(line-number ((t (:background "#282a36" :foreground "#565761" :slant normal :height 0.8))))
- '(line-number-current-line ((t (:inherit (font-lock-keyword-face hl-line line-number)))))
- '(link ((t (:foreground "SkyBlue1" :underline nil :height 1.05 :family "San Francisco"))))
- '(linum ((t (:inherit hl-line :background "#282a36" :foreground "#565761" :slant italic))))
- '(lsp-lens-face ((t (:inherit lsp-details-face :foreground "steel blue" :family "San Francisco"))))
- '(magit-blame-heading ((t (:inherit magit-blame-highlight :extend t :overline "dim gray"))))
- '(magit-blame-highlight ((t (:inherit (font-lock-comment-face hl-line) :height 0.8 :family "San Francisco"))))
- '(magit-blame-name ((t (:inherit font-lock-variable-name-face))))
- '(magit-diff-added-highlight ((t (:extend t :background "#225522" :foreground "#cceecc"))))
- '(magit-diff-our ((t (:background "cornflower blue"))))
- '(magit-diff-our-highlight ((t (:background "#334477"))))
- '(magit-log-author ((t (:foreground "dark gray" :family "San Francisco"))))
- '(magit-section-heading ((t (:extend t :foreground "#ff79c6" :weight bold))))
- '(magit-section-highlight ((t (:extend t :background "#464752"))))
- '(minibuffer-prompt ((t (:foreground "#ff79c6" :weight bold :height 0.9 :family "San Francisco"))))
- '(mode-line ((t (:foreground "White" :box (:line-width 1 :color "#44475a") :height 0.9 :family "San Francisco"))))
- '(mode-line-inactive ((t (:inherit mode-line :background "#373844" :foreground "#f8f8f2" :height 120))))
- '(neo-banner-face ((t (:inherit font-lock-constant-face :weight bold :family "San Francisco"))))
- '(neo-button-face ((t (:underline nil :family "San Francisco"))))
- '(neo-dir-link-face ((t (:foreground "DeepSkyBlue" :family "San Francisco"))))
- '(neo-expand-btn-face ((t (:foreground "SkyBlue" :family "San Francisco"))))
- '(neo-file-link-face ((t (:foreground "White" :family "San Francisco"))))
- '(neo-root-dir-face ((t (:foreground "gray40" :weight bold))))
- '(neo-vc-added-face ((t (:foreground "#50fa7b"))))
- '(neo-vc-conflict-face ((t (:foreground "dark red"))))
- '(neo-vc-edited-face ((t (:foreground "#ff79c6"))))
- '(org-block ((t (:extend t :background "#1f1f3a" :foreground "powder blue"))))
- '(org-block-begin-line ((t (:inherit (org-meta-line org-block) :extend t :overline "#666" :height 1.0))))
- '(org-block-end-line ((t (:inherit (org-block-begin-line org-block) :extend t :overline nil))))
- '(org-done ((t (:foreground "cyan" :height 1.2))))
- '(org-headline-done ((t (:inherit org-headline-todo :weight bold :height 1.2))))
- '(org-level-1 ((t (:inherit link :extend nil :foreground "tomato3" :underline nil :weight bold :height 1.3 :family "San Francisco"))))
- '(org-level-2 ((t (:inherit nil :extend nil :foreground "goldenrod" :weight bold :height 1.1))))
- '(org-level-3 ((t (:extend nil :foreground "light sky blue" :height 1.1))))
- '(org-level-7 ((t (:extend nil :foreground "light salmon" :weight normal))))
- '(org-link ((t (:inherit link :foreground "SkyBlue2" :underline nil))))
- '(org-meta-line ((t (:inherit (fixed-pitch font-lock-comment-face) :foreground "#666"))))
- '(org-quote ((t (:inherit org-block :foreground "gray80" :slant italic))))
- '(org-todo ((t (:background "#373844" :foreground "#ffb86c" :weight bold :height 1.2))))
- '(org-verbatim ((t (:inherit font-lock-variable-name-face :family "Fira Code"))))
- '(origami-fold-replacement-face ((t (:inherit 'font-lock-builtin-face))))
- '(outshine-level-1 ((t (:inherit outline-1 :weight bold :height 1.1 :family "San Francisco"))))
- '(spacemacs-transient-state-title-face ((t (:inherit mode-line :height 0.8))))
- '(tab-line ((t (:inherit variable-pitch :background "#44475a" :foreground "#bd93f9" :underline t :height 1.0))))
- '(tabbar-default ((t (:inherit (hl-line header-line) :box nil :underline nil :weight light :height 0.8))))
- '(tabbar-icon-unselected ((t (:box nil :inherit 'tabbar-default :underline t))))
- '(tabbar-selected ((t (:inherit tabbar-default :background "#282a36" :box nil :overline nil :weight bold))))
- '(treemacs-all-the-icons-root-face ((t (:height 1.0 :inherit font-lock-string-face))))
- '(treemacs-directory-face ((t (:family "San Francisco" :inherit font-lock-type-face))))
- '(treemacs-file-face ((t (:family "Monaco" :inherit default))))
- '(treemacs-root-face ((t (:inherit font-lock-comment-face :weight bold :height 1.0))))
- '(which-key-posframe-border ((t (:inherit default :background "gray50" :underline t))))
- '(window-divider ((t (:foreground "black"))))
- '(yascroll:thumb-fringe ((t (:inherit font-lock-comment-face :background "MediumPurple4" :foreground "MediumPurple4")))))
-)
+  (custom-set-variables
+   ;; custom-set-variables was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   '(ahs-default-range 'ahs-range-whole-buffer)
+   '(ahs-idle-interval 1.0)
+   '(alert-default-style 'notifier)
+   '(auto-revert-buffer-list-filter 'magit-auto-revert-buffer-p)
+   '(auto-revert-verbose t)
+   '(before-save-hook
+     '(time-stamp whitespace-cleanup spacemacs//python-sort-imports))
+   '(coffee-tab-width 2)
+   '(company-backends
+     '(company-capf company-files
+                    (company-dabbrev-code company-gtags company-etags company-keywords)
+                    company-dabbrev))
+   '(csv-align-max-width 80)
+   '(csv-separators '("," ";" "|"))
+   '(custom-safe-themes
+     '("dc8285f7f4d86c0aebf1ea4b448842a6868553eded6f71d1de52f3dcbc960039" "944d52450c57b7cbba08f9b3d08095eb7a5541b0ecfb3a0a9ecd4a18f3c28948" "1436985fac77baf06193993d88fa7d6b358ad7d600c1e52d12e64a2f07f07176" "18bec4c258b4b4fb261671cf59197c1c3ba2a7a47cc776915c3e8db3334a0d25" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "0ab2aa38f12640ecde12e01c4221d24f034807929c1f859cbca444f7b0a98b3a" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "76bfa9318742342233d8b0b42e824130b3a50dcc732866ff8e47366aed69de11" "2dff5f0b44a9e6c8644b2159414af72261e38686072e063aa66ee98a2faecf0e" "7451f243a18b4b37cabfec57facc01bd1fe28b00e101e488c61e1eed913d9db9" "e6ff132edb1bfa0645e2ba032c44ce94a3bd3c15e3929cdf6c049802cf059a2a" "eb5c79b2e9a91b0a47b733a110d10774376a949d20b88c31700e9858f0f59da7" "a41b81af6336bd822137d4341f7e16495a49b06c180d6a6417bf9fd1001b6d2b" "57bd93e7dc5fbb5d8d27697185b753f8563fe0db5db245592bab55a8680fdd8c" "890a1a44aff08a726439b03c69ff210fe929f0eff846ccb85f78ee0e27c7b2ea" "819ab08867ef1adcf10b594c2870c0074caf6a96d0b0d40124b730ff436a7496"))
+   '(default-justification 'left)
+   '(desktop-minor-mode-table
+     '((defining-kbd-macro nil)
+       (isearch-mode nil)
+       (vc-mode nil)
+       (vc-dired-mode nil)
+       (erc-track-minor-mode nil)
+       (company-posframe-mode nil)))
+   '(diff-font-lock-prettify t)
+   '(dired-hide-details-hide-information-lines nil)
+   '(dired-k-human-readable t)
+   '(dired-k-padding 1)
+   '(dired-mode-hook '(hl-line-mode vinegar/dired-setup))
+   '(display-buffer-alist '(("." nil (reusable-frames . t))))
+   '(doom-modeline-buffer-encoding nil)
+   '(doom-modeline-height 15)
+   '(doom-modeline-indent-info nil)
+   '(doom-modeline-mode t)
+   '(doom-themes-treemacs-theme "doom-colors")
+   '(ember-completion-system 'helm)
+   '(ember-serve-command "ember serve  --output-path dist")
+   '(ember-test-command "ember test --serve")
+   '(epg-pinentry-mode nil)
+   '(evil-want-Y-yank-to-eol t)
+   '(fic-highlighted-words '("FIXME" "TODO" "BUG" "HACK" "XXX" "OPTIMIZE" "NOTE"))
+   '(fill-column 100)
+   '(gist-ask-for-filename nil)
+   '(gist-view-gist nil)
+   '(git-gutter-fr:side 'left-fringe)
+   '(global-auto-highlight-symbol-mode t)
+   '(global-prettify-symbols-mode t)
+   '(global-visual-line-mode t)
+   '(helm-boring-buffer-regexp-list
+     '("\\` " "\\`\\*helm" "\\`\\*Echo Area" "\\`\\*Minibuf" "magit-.*: .*" "\\*" "magit: .*"))
+   '(helm-completion-style 'emacs)
+   '(helm-mode-fuzzy-match t)
+   '(highlight-indent-guides-character 183)
+   '(highlight-indent-guides-method 'character)
+   '(highlight-indent-guides-mode nil t)
+   '(highlight-indentation-offset 4)
+   '(ibuffer-default-sorting-mode 'recency)
+   '(ibuffer-formats
+     '((mark modified read-only locked " "
+             (name 30 30 :left :elide)
+             " "
+             (size 9 -1 :right)
+             " "
+             (mode 16 16 :left :elide)
+             " " filename-and-process)
+       (mark " "
+             (name 16 -1)
+             " " filename)))
+   '(ibuffer-sidebar-width 22)
+   '(indicate-buffer-boundaries '((t) (top . left) (bottom . left)))
+   '(inhibit-eol-conversion t)
+   '(ispell-highlight-face 'flyspell-incorrect)
+   '(line-spacing 3)
+   '(lsp-headerline-breadcrumb-enable nil)
+   '(lsp-headerline-breadcrumb-enable-diagnostics nil)
+   '(lsp-ui-doc-use-webkit t)
+   '(lsp-ui-sideline-ignore-duplicate t)
+   '(lsp-ui-sideline-show-symbol nil)
+   '(magit-diff-adjust-tab-width t)
+   '(magit-diff-highlight-trailing 'all)
+   '(magit-diff-paint-whitespace 'all)
+   '(magit-diff-refine-hunk 'all)
+   '(magit-diff-refine-ignore-whitespace nil)
+   '(magit-list-refs-sortby '("-creatordate"))
+   '(magit-status-margin '(t age-abbreviated magit-log-margin-width t 11))
+   '(magit-status-sections-hook
+     '(magit-insert-status-headers magit-insert-merge-log magit-insert-rebase-sequence magit-insert-am-sequence magit-insert-sequencer-sequence magit-insert-bisect-output magit-insert-bisect-rest magit-insert-bisect-log magit-insert-untracked-files magit-insert-unstaged-changes magit-insert-staged-changes magit-insert-stashes magit-insert-unpushed-to-pushremote magit-insert-unpushed-to-upstream-or-recent magit-insert-unpulled-from-pushremote magit-insert-unpulled-from-upstream forge-insert-issues))
+   '(markdown-hide-urls t)
+   '(markdown-italic-underscore t)
+   '(message-sent-hook '((lambda nil (message (buffer-name)))))
+   '(midnight-mode t)
+   '(mode-line-in-non-selected-windows t)
+   '(mode-require-final-newline t)
+   '(nano-modeline-position 'bottom)
+   '(neo-hide-cursor t)
+   '(neo-theme 'arrow)
+   '(neo-vc-integration '(face char))
+   '(neo-vc-state-char-alist
+     '((up-to-date . 32)
+       (edited . 10041)
+       (added . 10029)
+       (removed . 10006)
+       (missing . 33)
+       (needs-merge . 77)
+       (conflict . 9552)
+       (unlocked-changes . 33)
+       (needs-update . 85)
+       (ignored . 32)
+       (user . 85)
+       (unregistered . 32)
+       (nil . 8942)))
+   '(neo-window-position 'right)
+   '(neo-window-width 40)
+   '(nil nil t)
+   '(objed-cursor-color "#ff5555")
+   '(org-blank-before-new-entry '((heading) (plain-list-item)))
+   '(org-bullets-bullet-list '("◉" "○" "●" "☞"))
+   '(org-cycle-hide-block-startup t)
+   '(org-download-image-org-width 800)
+   '(org-ellipsis " ▼")
+   '(org-export-backends '(ascii html icalendar latex md odt))
+   '(org-export-with-section-numbers 2)
+   '(org-export-with-sub-superscripts nil)
+   '(org-fontify-done-headline nil)
+   '(org-fontify-quote-and-verse-blocks t)
+   '(org-log-done nil)
+   '(org-modules
+     '(ol-bbdb ol-bibtex ol-docview ol-eww ol-gnus org-habit ol-info ol-irc ol-mhe ol-rmail ol-w3m org-mac-link))
+   '(org-roam-dailies-capture-templates
+     '(("d" "default" entry "* %?" :target
+        (file+head "%<%Y-%m-%d>.org" "#+title: %<%a, %Y-%m-%d>\12"))))
+   '(org-todo-keywords
+     '((sequence "TODO:(t)" "WAIT:(w)" "|" "Q:(n)" "DONE:(d)" "CANCELED:(c)")))
+   '(origami-parser-alist
+     '((ruby-mode origami-markers-parser "do" "end")
+       (java-mode . origami-java-parser)
+       (c-mode . origami-c-parser)
+       (c++-mode . origami-c-style-parser)
+       (perl-mode . origami-c-style-parser)
+       (cperl-mode . origami-c-style-parser)
+       (js-mode . origami-c-style-parser)
+       (js2-mode . origami-c-style-parser)
+       (js3-mode . origami-c-style-parser)
+       (go-mode . origami-c-style-parser)
+       (php-mode . origami-c-style-parser)
+       (python-mode . origami-python-parser)
+       (emacs-lisp-mode . origami-elisp-parser)
+       (lisp-interaction-mode . origami-elisp-parser)
+       (clojure-mode . origami-clj-parser)))
+   '(package-selected-packages
+     '(google-this modern-fringes terraform-mode enh-ruby-mode psession telega dired-sidebar centaur-tabs writeroom-mode workgroups memory-usage drupal-mode phpunit phpcbf php-auto-yasnippets php-mode zones sr-speedbar evil-ruby-text-objects wakatime-mode rspec-simple ido-completing-read+ shrink-path amx ri-mode ri smooth-scrolling ivy-youtube wgrep lv flyspell-correct-ivy counsel-projectile counsel swiper ivy magit-todos todo-projectile hl-block hl-block-mode indent-guide-mode highlight-indent-guides-mode vi-tilde-fringe spaceline powerline evil-nerd-commenter define-word zencoding-mode yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights uuidgen use-package unfill typo toml-mode toc-org tide tagedit tabbar sublimity smeargle slim-mode simpleclip shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocopfmt rubocop rspec-mode robe reveal-in-osx-finder restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode projectile-rails prodigy popwin pip-requirements persistent-scratch pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file ns-auto-titlebar nginx-mode mwim multi-term move-text mmm-mode minitest markdown-toc magit-gitflow macrostep lua-mode lorem-ipsum livid-mode live-py-mode linum-relative link-hint launchctl json-mode js2-refactor js-doc itail indent-guide hy-mode hungry-delete htmlize highlight-parentheses highlight-numbers highlight-indentation highlight-indent-guides helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag handlebars-sgml-mode google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-gutter-fringe gh-md gcmh fuzzy flyspell-correct-helm flx-ido fill-column-indicator fic-mode feature-mode fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-commentary evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help emmet-mode ember-mode elisp-slime-nav dumb-jump dracula-theme doom-themes discover-my-major diminish diff-hl cython-mode csv-mode company-web company-tern company-statistics company-anaconda column-enforce-mode coffee-mode clean-aindent-mode chruby cargo bundler bpr auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))
+   '(package-vc-selected-packages
+     '((ultra-scroll-mac :vc-backend Git :url "https://github.com/jdtsmith/ultra-scroll-mac")))
+   '(pdf-view-midnight-colors (cons "#f8f8f2" "#282a36"))
+   '(persp-interactive-completion-system 'ido nil nil "Customized with use-package persp-mode")
+   '(persp-kill-foreign-buffer-behaviour 'kill)
+   '(pixel-scroll-mode nil)
+   '(popwin-mode t)
+   '(popwin:popup-window-height 8)
+   '(popwin:popup-window-width 80)
+   '(popwin:special-display-config
+     '(("^\\*RuboCop.+\\*$" :regexp t :height 0.4 :position bottom :noselect t :dedicated t :stick t :tail t)
+       ("*rspec-compilation*" :width 0.33 :position bottom :noselect t :dedicated t :stick t :tail t)
+       ("*rake-compilation*" :height 0.4 :position bottom :noselect t :dedicated t :stick t)
+       ("*projectile-rails-generate*" :height 0.4 :position bottom :noselect t :dedicated t :stick t)
+       ("*projectile-rails-compilation*" :height 0.4 :position bottom :noselect t :dedicated t :stick t)
+       ("*Bundler*" :height 0.4 :position bottom :noselect t :dedicated t :stick t)
+       ("*Google Translate*" :height 0.4 :position bottom :noselect t :dedicated t :stick t)
+       ("^*WoMan.+*$" :regexp t :position bottom)
+       ("*nosetests*" :position bottom :noselect nil :dedicated t :stick t)
+       ("*grep*" :position bottom :noselect nil :dedicated t :stick t)
+       ("*ert*" :position bottom :noselect nil :dedicated t :stick t)
+       ("*undo-tree Diff*" :height 0.3 :position bottom :noselect nil :dedicated t :stick t)
+       ("*undo-tree*" :width 60 :position right :noselect nil :dedicated t :stick t)
+       ("*Async Shell Command*" :position bottom :noselect nil :dedicated t :stick t)
+       ("*Shell Command Output*" :position bottom :noselect nil :dedicated t :stick t)
+       ("*compilation*" :height 0.4 :position bottom :noselect t :dedicated t :stick t)
+       ("*Process List*" :height 0.4 :position bottom :noselect nil :dedicated t :stick t)
+       ("*Help*" :height 0.4 :position bottom :noselect t :dedicated t :stick t)))
+   '(popwin:universal-display-config '(t))
+   '(prettify-symbols-unprettify-at-point 'right-edge)
+   '(projectile-globally-ignored-directories
+     '("^\\.idea$" "^\\.vscode$" "^\\.ensime_cache$" "^\\.eunit$" "^\\.git$" "^\\.hg$" "^\\.fslckout$" "^_FOSSIL_$" "^\\.bzr$" "^_darcs$" "^\\.pijul$" "^\\.tox$" "^\\.svn$" "^\\.stack-work$" "^\\.ccls-cache$" "^\\.cache$" "^\\.clangd$" "^\\.bp-gems$"))
+   '(projectile-indexing-method 'hybrid)
+   '(purpose-x-popwin-height 0.15)
+   '(rainbow-identifiers-cie-l*a*b*-lightness 50)
+   '(rainbow-identifiers-cie-l*a*b*-saturation 20)
+   '(rainbow-identifiers-faces-to-override '(font-lock-variable-name-face))
+   '(require-final-newline t)
+   '(rspec-autosave-buffer t)
+   '(rspec-spec-command "rspec -f doc")
+   '(rspec-use-docker-when-possible t)
+   '(rubocopfmt-disabled-cops nil)
+   '(rubocopfmt-include-unsafe-cops t)
+   '(rubocopfmt-show-errors 'buffer)
+   '(rubocopfmt-use-bundler-when-possible nil)
+   '(rustic-ansi-faces
+     ["#282a36" "#ff5555" "#50fa7b" "#f1fa8c" "#61bfff" "#ff79c6" "#8be9fd" "#f8f8f2"])
+   '(safe-local-variable-values
+     '((rubocopfmt-rubocop-command . "rubocop")
+       (rubocopfmt-rubocop-command . "/Users/HMz/.gem/bin/rubocop --cache false")
+       (rubocopfmt-rubocop-command . "/Users/HMz/.gem/bin/rubocop")
+       (eval progn
+             (pp-buffer)
+             (indent-buffer))
+       (column-enforce-column . 125)
+       (rubocopfmt-mode . -1)
+       (typescript-backend . tide)
+       (javascript-backend . tide)))
+   '(shell-pop-cleanup-buffer-at-process-exit t)
+   '(shell-pop-full-span nil t)
+   '(shell-pop-restore-window-configuration t)
+   '(shell-pop-window-position "bottom" t)
+   '(shell-pop-window-size 30 t)
+   '(sp-highlight-pair-overlay nil)
+   '(sp-highlight-wrap-overlay nil)
+   '(sp-highlight-wrap-tag-overlay nil)
+   '(speedbar-use-images nil)
+   '(sublimity-attractive-centering-width 120)
+   '(sublimity-mode t)
+   '(sublimity-scroll-weight 2.0)
+   '(tab-width 2)
+   '(tabbar-mode t nil (tabbar))
+   '(tooltip-use-echo-area t)
+   '(tramp-copy-size-limit 1000000)
+   '(tramp-inline-compress-start-size 1000000)
+   '(tramp-verbose 10)
+   '(treemacs-position 'right)
+   '(treemacs-tag-follow-mode t)
+   '(truncate-lines nil)
+   '(use-dialog-box t)
+   '(use-package-check-before-init t)
+   '(use-package-compute-statistics t)
+   '(use-package-defaults
+     '((:straight
+        '(t)
+        straight-use-package-by-default)
+       (:config
+        '(t)
+        t)
+       (:init nil t)
+       (:catch t
+               (lambda
+                 (name args)
+                 (not use-package-expand-minimally)))
+       (:defer use-package-always-defer
+               (lambda
+                 (name args)
+                 (and use-package-always-defer
+                      (not
+                       (plist-member args :defer))
+                      (not
+                       (plist-member args :demand)))))
+       (:demand use-package-always-demand
+                (lambda
+                  (name args)
+                  (and use-package-always-demand
+                       (not
+                        (plist-member args :defer))
+                       (not
+                        (plist-member args :demand)))))
+       (:ensure
+        (list use-package-always-ensure)
+        (lambda
+          (name args)
+          (and use-package-always-ensure
+               (not
+                (plist-member args :load-path)))))
+       (:pin use-package-always-pin use-package-always-pin)))
+   '(use-package-expand-minimally nil)
+   '(use-package-minimum-reported-time 0)
+   '(use-package-verbose 'debug)
+   '(vc-annotate-background "#282a36")
+   '(vc-annotate-color-map
+     (list
+      (cons 20 "#50fa7b")
+      (cons 40 "#85fa80")
+      (cons 60 "#bbf986")
+      (cons 80 "#f1fa8c")
+      (cons 100 "#f5e381")
+      (cons 120 "#face76")
+      (cons 140 "#ffb86c")
+      (cons 160 "#ffa38a")
+      (cons 180 "#ff8ea8")
+      (cons 200 "#ff79c6")
+      (cons 220 "#ff6da0")
+      (cons 240 "#ff617a")
+      (cons 260 "#ff5555")
+      (cons 280 "#d45558")
+      (cons 300 "#aa565a")
+      (cons 320 "#80565d")
+      (cons 340 "#6272a4")
+      (cons 360 "#6272a4")))
+   '(vc-annotate-very-old-color nil)
+   '(volatile-highlights-mode t)
+   '(wdired-allow-to-change-permissions t)
+   '(web-mode-markup-indent-offset 2)
+   '(workgroups-mode t)
+   '(yascroll:delay-to-hide 1.5)
+   '(yascroll:scroll-bar '(right-fringe left-fringe text-area)))
+  (custom-set-faces
+   ;; custom-set-faces was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   '(ahs-definition-face ((t (:weight bold))))
+   '(ahs-edit-mode-face ((t (:weight bold))))
+   '(ahs-face ((t (:weight bold))))
+   '(ahs-plugin-whole-buffer-face ((t nil)))
+   '(all-the-icons-dorange ((t (:foreground "tan3"))))
+   '(all-the-icons-lmaroon ((t (:foreground "burlywood3"))))
+   '(all-the-icons-maroon ((t (:foreground "burlywood3"))))
+   '(anzu-match-2 ((t (:foreground "deep sky blue"))))
+   '(anzu-replace-highlight ((t (:box (:line-width 2 :color "sienna1")))))
+   '(bm-persistent-face ((t (:background "gray24" :box (:line-width (3 . 3) :color "salmon" :style flat-button) :overline "firebrick"))))
+   '(bold ((t (:weight bold))))
+   '(column-enforce-face ((t (:background "#323a40" :underline (:color "burlywood4" :style wave)))))
+   '(custom-button ((t (:background "lightgrey" :foreground "black" :box 2))))
+   '(custom-button-mouse ((t (:background "grey90" :foreground "black" :box 2))))
+   '(custom-button-pressed ((t (:background "gray" :foreground "black" :box 2))))
+   '(evil-search-highlight-persist-highlight-face ((t (:inherit lazy-highlight))))
+   '(fic-face ((t (:weight bold))))
+   '(flycheck-fringe-info ((t (:family "San Francisco" :foreground "cornflower blue" :inherit success))))
+   '(flyspell-duplicate ((t (:underline "DarkOrange"))))
+   '(flyspell-incorrect ((t (:background "#220000" :overline nil :underline "#ff5555"))))
+   '(font-lock-comment-face ((t (:foreground "LightSteelBlue3"))))
+   '(font-lock-warning-face ((t (:background "#373844" :foreground "#ffb86c" :underline (:color "red" :style wave)))))
+   '(fringe ((t (:foreground "DeepSkyBlue" :background unspecified))))
+   '(git-gutter:added ((t (:foreground "medium spring green" :weight bold))))
+   '(git-gutter:modified ((t (:foreground "deep pink" :weight bold))))
+   '(header-line ((t (:background "#44475a" :underline "gray20" :height 1.0 :family "San Francisco"))))
+   '(hi-yellow ((t nil)))
+   '(highlight-indent-guides-character-face ((t (:foreground "#3df1410a539f"))))
+   '(highlight-parentheses-highlight ((nil (:weight ultra-bold))) t)
+   '(hl-line ((t nil)))
+   '(hydra-face-red ((t (:foreground "#FF0000" :weight bold))))
+   '(indent-guide-face ((t (:inherit font-lock-comment-face :foreground "#669" :slant normal))))
+   '(line-number ((t (:background "#282a36" :foreground "#565761" :slant normal :height 0.8))))
+   '(line-number-current-line ((t (:inherit (font-lock-keyword-face hl-line line-number)))))
+   '(link ((t (:foreground "SkyBlue1" :underline nil :height 1.05 :family "San Francisco"))))
+   '(linum ((t (:inherit hl-line :background "#282a36" :foreground "#565761" :slant italic))))
+   '(lsp-lens-face ((t (:inherit lsp-details-face :foreground "steel blue" :family "San Francisco"))))
+   '(magit-blame-heading ((t (:inherit magit-blame-highlight :extend t :overline "dim gray"))))
+   '(magit-blame-highlight ((t (:inherit (font-lock-comment-face hl-line) :height 0.8 :family "San Francisco"))))
+   '(magit-blame-name ((t (:inherit font-lock-variable-name-face))))
+   '(magit-diff-added-highlight ((t (:extend t :background "#225522" :foreground "#cceecc"))))
+   '(magit-diff-our ((t (:background "cornflower blue"))))
+   '(magit-diff-our-highlight ((t (:background "#334477"))))
+   '(magit-log-author ((t (:foreground "dark gray" :family "San Francisco"))))
+   '(magit-section-heading ((t (:extend t :foreground "#ff79c6" :weight bold))))
+   '(magit-section-highlight ((t (:extend t :background "#464752"))))
+   '(minibuffer-prompt ((t (:foreground "#ff79c6" :weight bold :height 0.9 :family "San Francisco"))))
+   '(mode-line ((t (:foreground "White" :box (:line-width 1 :color "#44475a") :height 0.9 :family "San Francisco"))))
+   '(mode-line-inactive ((t (:inherit mode-line :background "#373844" :foreground "#f8f8f2" :height 120))))
+   '(neo-banner-face ((t (:inherit font-lock-constant-face :weight bold :family "San Francisco"))))
+   '(neo-button-face ((t (:underline nil :family "San Francisco"))))
+   '(neo-dir-link-face ((t (:foreground "DeepSkyBlue" :family "San Francisco"))))
+   '(neo-expand-btn-face ((t (:foreground "SkyBlue" :family "San Francisco"))))
+   '(neo-file-link-face ((t (:foreground "White" :family "San Francisco"))))
+   '(neo-root-dir-face ((t (:foreground "gray40" :weight bold))))
+   '(neo-vc-added-face ((t (:foreground "#50fa7b"))))
+   '(neo-vc-conflict-face ((t (:foreground "dark red"))))
+   '(neo-vc-edited-face ((t (:foreground "#ff79c6"))))
+   '(org-block ((t (:extend t :background "#1f1f3a" :foreground "powder blue"))))
+   '(org-block-begin-line ((t (:inherit (org-meta-line org-block) :extend t :overline "#666" :height 1.0))))
+   '(org-block-end-line ((t (:inherit (org-block-begin-line org-block) :extend t :overline nil))))
+   '(org-done ((t (:foreground "cyan" :height 1.2))))
+   '(org-headline-done ((t (:inherit org-headline-todo :weight bold :height 1.2))))
+   '(org-level-1 ((t (:inherit link :extend nil :foreground "tomato3" :underline nil :weight bold :height 1.3 :family "San Francisco"))))
+   '(org-level-2 ((t (:inherit nil :extend nil :foreground "goldenrod" :weight bold :height 1.1))))
+   '(org-level-3 ((t (:extend nil :foreground "light sky blue" :height 1.1))))
+   '(org-level-7 ((t (:extend nil :foreground "light salmon" :weight normal))))
+   '(org-link ((t (:inherit link :foreground "SkyBlue2" :underline nil))))
+   '(org-meta-line ((t (:inherit (fixed-pitch font-lock-comment-face) :foreground "#666"))))
+   '(org-quote ((t (:inherit org-block :foreground "gray80" :slant italic))))
+   '(org-todo ((t (:background "#373844" :foreground "#ffb86c" :weight bold :height 1.2))))
+   '(org-verbatim ((t (:inherit font-lock-variable-name-face :family "Fira Code"))))
+   '(origami-fold-replacement-face ((t (:inherit 'font-lock-builtin-face))))
+   '(outshine-level-1 ((t (:inherit outline-1 :weight bold :height 1.1 :family "San Francisco"))))
+   '(spacemacs-transient-state-title-face ((t (:inherit mode-line :height 0.8))))
+   '(tab-line ((t (:inherit variable-pitch :background "#44475a" :foreground "#bd93f9" :underline t :height 1.0))))
+   '(tabbar-default ((t (:inherit (hl-line header-line) :box nil :underline nil :weight light :height 0.8))))
+   '(tabbar-icon-unselected ((t (:box nil :inherit 'tabbar-default :underline t))))
+   '(tabbar-selected ((t (:inherit tabbar-default :background "#282a36" :box nil :overline nil :weight bold))))
+   '(treemacs-all-the-icons-root-face ((t (:height 1.0 :inherit font-lock-string-face))))
+   '(treemacs-directory-face ((t (:family "San Francisco" :inherit font-lock-type-face))))
+   '(treemacs-file-face ((t (:family "Monaco" :inherit default))))
+   '(treemacs-root-face ((t (:inherit font-lock-comment-face :weight bold :height 1.0))))
+   '(which-key-posframe-border ((t (:inherit default :background "gray50" :underline t))))
+   '(window-divider ((t (:foreground "black"))))
+   '(yascroll:thumb-fringe ((t (:inherit font-lock-comment-face :background "MediumPurple4" :foreground "MediumPurple4")))))
+  )

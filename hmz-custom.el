@@ -1,5 +1,6 @@
 ;; here are simple elisp customizations that may break and so cat get turned off easily
 
+(defun delete-window-or-frame (&optional window frame force)
   (interactive)
   (if (= 1 (length (window-list frame)))
       (condition-case nil
@@ -8,6 +9,8 @@
             (delete-frame frame force))
         (error 'hide-application))
     (delete-window window)))
+
+(setq magit-log-section-commit-count 35)
 
 ;; Unix Style C-h
 (global-set-key (kbd "C-?") 'help-command) ;; this isn't working...
@@ -158,7 +161,7 @@
 ;; (add-hook 'org-mode-hook
 ;;           (lambda () (define-key org-mode-map (kbd "C-c g") 'org-mac-grab-link)))
 
-  (setq org-use-property-inheritance t)
+(setq org-use-property-inheritance t)
 
 ;; C-o for add heading above in org-mode
 ;; TODO: move it to a layer/file about org-mode
@@ -190,7 +193,7 @@
     (lsp-ui-mode -1))
 
   (when (and buffer-read-only
-         (fboundp 'color-theme-buffer-local))
+             (fboundp 'color-theme-buffer-local))
     (color-theme-buffer-local 'color-theme-classic (current-buffer)))
 
   (setq lsp-ui-doc-enable nil)
@@ -215,8 +218,6 @@
 
   (face-remap-add-relative 'default '(:height 140))
 
-  (linum-mode -1)
-
   (flyspell-mode t)
   (flyspell-prog-mode)
 
@@ -227,8 +228,7 @@
   (if (featurep 'fic-mode)
       (fic-mode t))
 
-  (flycheck-mode 1)
-
+  ;; (flycheck-mode 1)
 
   (display-line-numbers-mode 1)
 
@@ -288,18 +288,16 @@
    #b00000000
    #b00000000])
 
-  ;; (defun my-esc (prompt)
-  ;;   "Functionality for escaping generally. Includes exiting Evil
-  ;;    insert state and C-g binding. "
-  ;;   (cond
-  ;;    ((or (evil-insert-state-p)
-  ;;         (evil-normal-state-p)
-  ;;         ;; (evil-replace-state-p)
-  ;;         (evil-visual-state-p)) [escape])
-  ;;    (t (keyboard-quit))
-  ;;    ))
-
-
+;; (defun my-esc (prompt)
+;;   "Functionality for escaping generally. Includes exiting Evil
+;;    insert state and C-g binding. "
+;;   (cond
+;;    ((or (evil-insert-state-p)
+;;         (evil-normal-state-p)
+;;         ;; (evil-replace-state-p)
+;;         (evil-visual-state-p)) [escape])
+;;    (t (keyboard-quit))
+;;    ))
 
 (defun hmz-init/evil-keyboard-quit (&optional prompt)
   "Keyboard quit and force normal state."
@@ -322,8 +320,6 @@
   (define-key transient-map (kbd "<escape>") 'transient-quit-one)
   (define-key transient-map (kbd "C-g") 'transient-quit-one))
 
-
-
 (add-hook 'minibuffer-setup-hook 'hmz-init/minibuffer-setup)
 (defun hmz-init/minibuffer-setup ()
   (setq evil-emacs-state-cursor '("SkyBlue2" bar))
@@ -338,7 +334,6 @@
               '((default (:height 1.3 :foreground "#CCC") variable-pitch)))) ; etc.
 
 
-(linum-mode 0)
 (display-line-numbers-mode 1)
 (global-display-line-numbers-mode t)
 
@@ -348,7 +343,7 @@
   (interactive)
 
   ;; no point on checking delimiters on org-mode
-  (rainbow-delimiters-mode-disable)
+  ;; (rainbow-delimiters-mode-disable)
 
   (prettify-symbols-mode 0)
   (setq prettify-symbols-alist '())
@@ -516,9 +511,10 @@
 
 ;; (require 'ob-js)
 
-(add-to-list org-babel-load-languages '((js . t) (emacs-lisp . t) (shell . t)))
+;; (add-to-list org-babel-load-languages '((js . t) (emacs-lisp . t) (shell . t)))
 
-;; (add-to-list 'org-babel-tangle-lang-exts '("js" . "js"))
+(add-to-list 'org-babel-tangle-lang-exts '("js" . "js"))
+(add-to-list 'org-babel-tangle-lang-exts '("ruby" . t))
 
 (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages)
 
@@ -548,7 +544,14 @@
           (kill-buffer-and-window)
           )))))
 
-(server-start)
+(global-display-line-numbers-mode 1)
 
+(setq tooltip-mode nil)
+(setq tooltip-use-echo-area t)
+
+;; NOTE: should not drag the pointer with the scroll, but it doesn't work
+;; (setq scroll-preserve-screen-position nil)
+
+(server-start)
 
 (provide 'hmz-custom)

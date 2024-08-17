@@ -1,7 +1,23 @@
-(setq debug-on-error nil)
+(setq debug-on-error t)
 
 (require 'use-package)
 (setq use-package-verbose 'debug)
+
+(use-package ultra-scroll-mac
+  :straight (ultra-scroll-mac :type git :host github :repo "jdtsmith/ultra-scroll-mac")
+  :if (eq window-system 'mac)
+                                        ;:load-path "~/code/emacs/ultra-scroll-mac" ; if you git clone'd instead of package-vc-install
+  :init
+  (setq scroll-conservatively 101 ; important!
+        scroll-margin 0)
+  :config
+  (ultra-scroll-mac-mode 1)
+  (setq scroll-bar-mode 1))
+
+(use-package explain-pause-mode
+  :straight (explain-pause-mode :type git :host github :repo "lastquestion/explain-pause-mode")
+  :config
+  (explain-pause-mode))
 
 (use-package hl7-mode
   :straight (hl7-mode :type git :host github :repo "bkruczyk/hl7-mode")
@@ -12,8 +28,7 @@
   ;; speed up bit lines (t = on)
   (setq-default bidi-inhibit-bpa t)
 
-  (toggle-truncate-lines 1)
-  )
+  (toggle-truncate-lines 1))
 
 (use-package libsqlite3)
 
@@ -68,28 +83,24 @@
      (word "true" "false")
      (word "xit" "it")
      (word "xcontext" "context")
-     (word "xdescribe" "describe")
+     (word "xdescribe" "describe"))))
 
-     )))
-
-;; (use-package all-the-icons-dired
-;;   :straight t
-;;   :init
-;;   (defun hmz-modules/set-dired-icons (&optional backward)
-;;     (interactive)
-;;     ;; (all-the-icons-dired-mode -1)
-;;     ;; (treemacs-icons-dired-mode -1)
-;;     )
-
-;;   (add-hook 'dired-mode-hook 'hmz-modules/set-dired-icons))
+(use-package all-the-icons-dired
+  :straight t
+  :init
+  (defun hmz-modules/set-dired-icons (&optional backward)
+    (interactive)
+    (all-the-icons-dired-mode -1)
+    (treemacs-icons-dired-mode -1))
+  (add-hook 'dired-mode-hook 'hmz-modules/set-dired-icons))
 
 (use-package org-mac-link
- :straight t
- :after org
- :init
- (add-hook 'org-mode-hook
-           (lambda ()
-             (define-key org-mode-map (kbd "C-c g") 'org-mac-link-get-link))))
+  :straight t
+  :after org
+  :init
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (define-key org-mode-map (kbd "C-c g") 'org-mac-link-get-link))))
 
 (add-to-list 'load-path (expand-file-name "~/.spacemacs.develop.d/straight/repos/all-the-icons"))
 
@@ -645,6 +656,14 @@
 
 (straight-use-package 'dash)
 
+(use-package diff-hl
+  :straight (diff-hl :type git :host github :repo "dgutov/diff-hl")
+  :hook (dired-mode . diff-hl-mode))
+
+(use-package git-gutter+
+  :straight (git-gutter+ :type git :host github :repo "nonsequitur/git-gutter-plus")
+  :hook (prog-mode . git-gutter+-mode))
+
 (use-package outshine
   :disabled
   :after dash
@@ -654,22 +673,31 @@
   (add-hook 'prog-mode-hook 'outshine-mode))
 
 (use-package doom-modeline
+  ;; :disabled
   :straight t
-  :catch t
+  :after (all-the-icons rainbow-delimiters rainbow-identifiers)
+  :init
+  (doom-modeline-mode 1)
+  ;; dirty patch
+  ;; fix doom-modeline and neotree not starting
+  (defun colors//rainbow-identifiers-ignore-keywords ()
+    "Do not colorize stuff with ‘font-lock-keyword-face’."
+    (setq-local rainbow-identifiers-faces-to-override
+                (delq 'font-lock-keyword-face
+                      rainbow-identifiers-faces-to-override)))
+
   :hook (prog-mode . doom-modeline-mode)
-  :demand t
-  :if window-system
-  :after all-the-icons
+  ;; :if window-system
   :config
   ;; The maximum displayed length of the branch name of version control.
   (setq doom-modeline-vcs-max-length 34)
   (setq doom-modeline-height 18)
   (display-battery-mode 0)
 
-  (doom-modeline-mode 1))
+  )
 
 (use-package yascroll
-  ;; :disabled
+  :disabled
   :straight t
   :config
   (global-yascroll-bar-mode 1))
@@ -757,6 +785,7 @@ So it safe to call it many times like in a minor mode hook."
   (add-hook 'ibuffer-sidebar-mode-hook #'j-ibuffer-projectile-run))
 
 (use-package dired
+  :disabled
   :straight nil
   :hook
   (dired-mode . hl-line-mode)
@@ -773,6 +802,7 @@ So it safe to call it many times like in a minor mode hook."
                              :background (face-background 'isearch))))
 
 (use-package dired-sidebar
+  :disabled
   :straight t
   :hook
   (dired-sidebar-mode . hide-mode-line-mode)
@@ -791,6 +821,7 @@ So it safe to call it many times like in a minor mode hook."
     (all-the-icons-dired-mode 0)))
 
 (use-package dired-subtree
+  :disabled
   :straight t
   :bind
   (:map dired-mode-map
@@ -804,8 +835,8 @@ So it safe to call it many times like in a minor mode hook."
     (setq dired-subtree-use-backgrounds nil)))
 
 (use-package stripe-buffer
-  :straight t
   :disabled
+  :straight t
   :hook
   (dired-mode . stripe-buffer-mode))
 
@@ -901,6 +932,7 @@ So it safe to call it many times like in a minor mode hook."
   )
 
 (use-package dired-k
+  :disabled
   :straight t
   :init
   (add-hook 'dired-initial-position-hook 'hl-line-mode)
@@ -927,14 +959,15 @@ So it safe to call it many times like in a minor mode hook."
     '(rspec-install-snippets))
 
   ;; somehow this function isn't defined but rspec-mode looks for it
-  (defun* get-closest-gemfile-root (&optional (file "Gemfile"))
-    (let ((root (expand-file-name "/")))
-      (loop
-       for d = default-directory then (expand-file-name ".." d)
-       if (file-exists-p (expand-file-name file d))
-       return d
-       if (equal d root)
-       return nil)))
+  ;; NOTE: this is broken, but rspec-mode install regardless
+  ;; (defun* get-closest-gemfile-root (&optional (file "Gemfile"))
+  ;;         (let ((root (expand-file-name "/")))
+  ;;           (loop
+  ;;            for d = default-directory then (expand-file-name ".." d)
+  ;;            if (file-exists-p (expand-file-name file d))
+  ;;            return d
+  ;;            if (equal d root)
+  ;;            return nil)))
 
   (defun rspec-runner ()
     "Return command line to run rspec."
@@ -944,10 +977,12 @@ So it safe to call it many times like in a minor mode hook."
       (concat (or zeus-command spring-command bundle-command)
               (if (rspec-rake-p)
                   (concat rspec-rake-command " spec")
-                rspec-spec-command)))))
+                rspec-spec-command))))
 
-;; (use-package rspec-simple
-;;   :straight (rspec-simple :type git :host github :repo "code-mancers/rspec-simple"))
+  )
+
+(use-package rspec-simple
+  :straight (rspec-simple :type git :host github :repo "code-mancers/rspec-simple"))
 
 (use-package yard-mode
   :straight t
@@ -1036,7 +1071,7 @@ So it safe to call it many times like in a minor mode hook."
     ;; to o
     (add-hook 'emacs-startup-hook
               (lambda () (spacemacs/set-leader-keys
-                           dotspacemacs-emacs-command-key 'spacemacs/amx))))
+                      dotspacemacs-emacs-command-key 'spacemacs/amx))))
 
   (spacemacs/set-leader-keys ":" 'spacemacs/amx-major-mode-commands)
   (spacemacs/set-leader-keys "SPC" 'spacemacs/amx)
@@ -1696,7 +1731,6 @@ So it safe to call it many times like in a minor mode hook."
     (interactive)
 
     ;; hide line numbers
-    ;; (linum-mode 0)
     (display-line-numbers-mode 0)
 
     ;; go away with modeline
