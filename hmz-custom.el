@@ -10,7 +10,8 @@
         (error 'hide-application))
     (delete-window window)))
 
-(setq magit-log-section-commit-count 35)
+(setq magit-log-section-commit-count 10)
+(setq magit-log-arguments '("--graph" "--color" "--decorate" "-n256" "--exclude=refs/tags/*"))
 
 ;; Unix Style C-h
 (global-set-key (kbd "C-?") 'help-command) ;; this isn't working...
@@ -544,13 +545,78 @@
           (kill-buffer-and-window)
           )))))
 
+(defun hmz/copy-region-with-file-and-line-numbers ()
+  "Copy region of code along with file name and line numbers."
+  (interactive)
+  (if (use-region-p)
+      (let* ((start (region-beginning))
+             (end (region-end))
+             (start-line (line-number-at-pos start))
+             (end-line (line-number-at-pos end))
+             (file-name (buffer-file-name))
+             (region-content (buffer-substring-no-properties start end)))
+        (kill-new (format "%s:%d-%d\n%s" file-name start-line end-line region-content))
+        (message "Copied region from %s:%d-%d" file-name start-line end-line))
+    (message "No region selected")))
+
+;; Use visual line motions in Evil Mode
+(evil-define-key 'normal 'global
+  "j" 'evil-next-visual-line
+  "k" 'evil-previous-visual-line)
+
+(evil-define-key 'motion 'global
+  "j" 'evil-next-visual-line
+  "k" 'evil-previous-visual-line)
+
+(defun hmz/projectile-disable-for-remote-buffers ()
+  "Disable projectile for remote buffers."
+  (when (file-remote-p default-directory)
+    (projectile-mode -1)))
+
+;; Add the custom function to the appropriate hook
+(add-hook 'find-file-hook 'hmz/projectile-disable-for-remote-buffers)
+(add-hook 'dired-mode-hook 'hmz/projectile-disable-for-remote-buffers)
+
+(setq tramp-inline-compress-start-size 1000) ;; Increase compression threshold
+(setq remote-file-name-inhibit-cache nil)    ;; Enable cache for remote files
+(setq tramp-verbose 10)                      ;; increase verbosity for debug
+;; (keep this as 1 if possible)
+
+;; TRAMP disable VC
+(setq vc-ignore-dir-regexp
+      (format "%s\\|%s" vc-ignore-dir-regexp tramp-file-name-regexp))
+
+;; TRAMP enamble async file
+(setq tramp-use-ssh-controlmaster-options nil)
+
 (global-display-line-numbers-mode 1)
 
 (setq tooltip-mode nil)
 (setq tooltip-use-echo-area t)
 
-;; NOTE: should not drag the pointer with the scroll, but it doesn't work
-;; (setq scroll-preserve-screen-position nil)
+;; no line truncation in iBuffer
+(add-hook 'ibuffer-mode-hook (lambda () (toggle-truncate-lines 1)))
+
+;; annoying flyckeck hovering messages (tooltips)
+(setq flycheck-display-errors-function #'flycheck-display-error-messages-unless-error-list)
+
+(setq magit-process-extreme-logging t)
+
+(defun hmz-custom/org-roam-collect-todos ()
+  "Collect all TODO entries from org-roam files."
+  (let ((todos ""))
+    (org-roam-db-sync) ;; Ensure the org-roam database is up-to-date
+    (dolist (file (org-roam-list-files))
+      (with-temp-buffer
+        (insert-file-contents file)
+        (org-mode)
+        (org-map-entries
+         (lambda ()
+           (setq todos (concat todos (buffer-substring-no-properties
+                                      (line-beginning-position)
+                                      (line-end-position)) "\n")))
+         "TODO")))
+    todos))
 
 (server-start)
 

@@ -39,7 +39,7 @@ This function should only modify configuration layer settings."
    dotspacemacs-configuration-layer-path '()
    ;; List of configuration layers to loader.
    dotspacemacs-configuration-layers
-   '(
+   '(systemd
      ;; go
      csv
      ;; ----------------------------------------------------------------
@@ -83,8 +83,9 @@ This function should only modify configuration layer settings."
      (vue :variables vue-backend 'dumb)
      (node :variables node-add-modules-path t)
      ;; custom layers
-     hmz-color-identifiers
+     ;; hmz-color-identifiers
      hmz-tabbar
+
 
      (treemacs :variables treemacs-use-all-the-icons-theme -1)
 
@@ -706,6 +707,7 @@ This function is called at the very end of Spacemacs initialization."
    '(ahs-idle-interval 1.0)
    '(alert-default-style 'notifier)
    '(auto-revert-buffer-list-filter 'magit-auto-revert-buffer-p)
+   '(auto-revert-interval 1)
    '(auto-revert-verbose t)
    '(before-save-hook
      '(time-stamp whitespace-cleanup spacemacs//python-sort-imports))
@@ -733,6 +735,7 @@ This function is called at the very end of Spacemacs initialization."
    '(dired-mode-hook '(hl-line-mode vinegar/dired-setup))
    '(display-buffer-alist '(("." nil (reusable-frames . t))))
    '(doom-modeline-buffer-encoding nil)
+   '(doom-modeline-buffer-file-name-style 'truncate-upto-project)
    '(doom-modeline-height 15)
    '(doom-modeline-indent-info nil)
    '(doom-modeline-mode t)
@@ -787,6 +790,7 @@ This function is called at the very end of Spacemacs initialization."
    '(magit-diff-refine-ignore-whitespace nil)
    '(magit-list-refs-sortby '("-creatordate"))
    '(magit-status-margin '(t age-abbreviated magit-log-margin-width t 11))
+   '(magit-status-mode-hook '(forge--init-buffer-topics-spec))
    '(magit-status-sections-hook
      '(magit-insert-status-headers magit-insert-merge-log magit-insert-rebase-sequence magit-insert-am-sequence magit-insert-sequencer-sequence magit-insert-bisect-output magit-insert-bisect-rest magit-insert-bisect-log magit-insert-untracked-files magit-insert-unstaged-changes magit-insert-staged-changes magit-insert-stashes magit-insert-unpushed-to-pushremote magit-insert-unpushed-to-upstream-or-recent magit-insert-unpulled-from-pushremote magit-insert-unpulled-from-upstream forge-insert-issues))
    '(markdown-hide-urls t)
@@ -819,7 +823,7 @@ This function is called at the very end of Spacemacs initialization."
    '(objed-cursor-color "#ff5555")
    '(org-blank-before-new-entry '((heading) (plain-list-item)))
    '(org-bullets-bullet-list '("◉" "○" "●" "☞"))
-   '(org-cycle-hide-block-startup t)
+   '(org-cycle-hide-block-startup nil)
    '(org-download-image-org-width 800)
    '(org-ellipsis " ▼")
    '(org-export-backends '(ascii html icalendar latex md odt))
@@ -925,7 +929,7 @@ This function is called at the very end of Spacemacs initialization."
    '(sublimity-scroll-weight 2.0)
    '(tab-width 2)
    '(tabbar-mode t nil (tabbar))
-   '(tooltip-use-echo-area t)
+   '(tooltip-use-echo-area t t)
    '(tramp-copy-size-limit 1000000)
    '(tramp-inline-compress-start-size 1000000)
    '(tramp-verbose 10)
@@ -1024,6 +1028,7 @@ This function is called at the very end of Spacemacs initialization."
    '(custom-button-pressed ((t (:background "gray" :foreground "black" :box 2))))
    '(evil-search-highlight-persist-highlight-face ((t (:inherit lazy-highlight))))
    '(fic-face ((t (:weight bold))))
+   '(fill-column-indicator ((t (:weight normal :slant normal :underline nil :overline nil :strike-through nil :box nil :inverse-video nil :foreground "#222222" :stipple nil :inherit shadow))))
    '(flycheck-fringe-info ((t (:family "San Francisco" :foreground "cornflower blue" :inherit success))))
    '(flyspell-duplicate ((t (:underline "DarkOrange"))))
    '(flyspell-incorrect ((t (:background "#220000" :overline nil :underline "#ff5555"))))
@@ -1050,7 +1055,7 @@ This function is called at the very end of Spacemacs initialization."
    '(magit-diff-added-highlight ((t (:extend t :background "#225522" :foreground "#cceecc"))))
    '(magit-diff-our ((t (:background "cornflower blue"))))
    '(magit-diff-our-highlight ((t (:background "#334477"))))
-   '(magit-log-author ((t (:foreground "dark gray" :family "San Francisco"))))
+   '(magit-log-author ((t (:foreground "dark gray" :family "Fira Code"))))
    '(magit-section-heading ((t (:extend t :foreground "#ff79c6" :weight bold))))
    '(magit-section-highlight ((t (:extend t :background "#464752"))))
    '(minibuffer-prompt ((t (:foreground "#ff79c6" :weight bold :height 0.9 :family "San Francisco"))))

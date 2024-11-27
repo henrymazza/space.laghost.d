@@ -3,6 +3,38 @@
 (require 'use-package)
 (setq use-package-verbose 'debug)
 
+;; Install persistent-scratch if you don't already have it
+(use-package persistent-scratch
+  :straight
+  :config
+  ;; Enable persistent-scratch mode
+  (persistent-scratch-setup-default))
+
+;; Optionally configure it to save at specific intervals
+(setq persistent-scratch-save-file "~/.emacs.d/persistent-scratch") ;; Save file location
+(setq persistent-scratch-autosave-interval 60) ;; Auto-save every 60 seconds
+
+(use-package super-save
+  :straight
+  :config
+  (super-save-mode +1)
+  (setq super-save-auto-save-when-idle t)
+  (setq super-save-remote-files nil))
+
+;; TODO: try to use this
+(use-package buffer-flip
+  :disabled
+  :straight
+  :bind  (("M-<tab>" . buffer-flip)
+          :map buffer-flip-map
+          ( "M-<tab>" .   buffer-flip-forward)
+          ( "M-S-<tab>" . buffer-flip-backward)
+          ( "M-ESC" .     buffer-flip-abort))
+  :config
+  (setq buffer-flip-skip-patterns
+        '("^\\*helm\\b"
+          "^\\*swiper\\*$")))
+
 (use-package ultra-scroll-mac
   :straight (ultra-scroll-mac :type git :host github :repo "jdtsmith/ultra-scroll-mac")
   :if (eq window-system 'mac)
@@ -588,55 +620,63 @@
 (use-package forge
   :disabled
   :straight t
+  :after (magit transient))
+
+(use-package magit-popup
+  :disabled
+  :straight t
   :after magit)
 
-;; (use-package magit-gh-pulls
-;;   :straight t
-;;   :disabled
-;;   :demand t
-;;   :catch t
-;;   :after magit-popup
-;;   :init
-;;   ;; NOTE: Broken! asks for magit-gh-pulls-pop which depends on:
-;;   (require 'magit-popup)
+(use-package magit-gh-pulls
+  :straight t
+  :disabled
+  ;; :demand t
+  ;; :catch t
+  ;; :after magit-popup
+  :init
+  ;; NOTE: Broken! asks for magit-gh-pulls-pop which depends on:
+  ;; (require 'magit-popup)
 
-;;   (require 'gh-url) ;; this is giving recursive load, try twice at least:
+  ;; (require 'gh-url) ;; this is giving recursive load, try twice at least:
 
-;;   :config
-;;   (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls))
+  :config
+  (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls)
+  ;; (add-hook 'magit-status-mode-hook 'turn-on-magit-gh-pulls)
+  )
+
 
 ;; author name customize
-;; (use-package magit
-;;     :straight t
-;;     :init
-;;     (progn
-;;       ;; (setq magit-log-margin '(t age magit-log-margin-width t 18)) ;Default value
-;;       (setq magit-log-margin '(t age-abbreviated magit-log-margin-width :author 11)))
-;;     :config
-;;     (progn
-;;       ;; Abbreviate author name. I added this so that I can view Magit log without
-;;       ;; too much commit message truncation even on narrow screens (like on phone).
-;;       (defun modi/magit-log--abbreviate-author (&rest args)
-;;         "The first arg is AUTHOR, abbreviate it.
-;;       First Last  -> F Last
-;;       First.Last  -> F Last
-;;       Last, First -> F Last
-;;       First       -> First (no change).
+(use-package magit
+  :straight t
+  :init
+  (progn
+    ;; (setq magit-log-margin '(t age magit-log-margin-width t 18)) ;Default value
+    (setq magit-log-margin '(t age-abbreviated magit-log-margin-width :author 18)))
+  :config
+  (progn
+    ;; Abbreviate author name. I added this so that I can view Magit log without
+    ;; too much commit message truncation even on narrow screens (like on phone).
+    (defun modi/magit-log--abbreviate-author (&rest args)
+      "The first arg is AUTHOR, abbreviate it.
+      First Last  -> F Last
+      First.Last  -> F Last
+      Last, First -> F Last
+      First       -> First (no change).
 
-;;       It is assumed that the author has only one or two names."
-;;         ;; ARGS               -> '((REV AUTHOR DATE))
-;;         ;; (car ARGS)         -> '(REV AUTHOR DATE)
-;;         ;; (nth 1 (car ARGS)) -> AUTHOR
-;;         (let* ((author (nth 1 (car args)))
-;;                (author-abbr (if (string-match-p "," author)
-;;                                 ;; Last, First -> F Last
-;;                                 (replace-regexp-in-string "\\(.*?\\), *\\(.*\\)" "\\1" author)
-;;                               ;; First Last -> F Last
-;;                               (replace-regexp-in-string "\\(.*\\)[. ]+\\(.*\\)" "\\1" author))))
-;;           (setf (nth 1 (car args)) author-abbr))
-;;         (car args))                       ;'(REV AUTHOR-ABBR DATE)
+      It is assumed that the author has only one or two names."
+      ;; ARGS               -> '((REV AUTHOR DATE))
+      ;; (car ARGS)         -> '(REV AUTHOR DATE)
+      ;; (nth 1 (car ARGS)) -> AUTHOR
+      (let* ((author (nth 1 (car args)))
+             (author-abbr (if (string-match-p "," author)
+                              ;; Last, First -> F Last
+                              (replace-regexp-in-string "\\(.*?\\), *\\(.*\\)" "\\1" author)
+                            ;; First Last -> F Last
+                            (replace-regexp-in-string "\\(.\\)\\w* \\(.*\\)" "\\1. \\2" author))))
+        (setf (nth 1 (car args)) author-abbr))
+      (car args))                       ;'(REV AUTHOR-ABBR DATE)
 
-;;       (advice-add 'magit-log-format-margin :filter-args #'modi/magit-log--abbreviate-author)))
+    (advice-add 'magit-log-format-margin :filter-args #'modi/magit-log--abbreviate-author)))
 
 (use-package org-link-minor-mode
   :straight t)
@@ -660,8 +700,16 @@
   :straight (diff-hl :type git :host github :repo "dgutov/diff-hl")
   :hook (dired-mode . diff-hl-mode))
 
+(use-package git-gutter
+  :straight (git-gutter+ :type git :host github :repo "emacsorphanage/git-gutter")
+  :init
+  (global-git-gutter-mode +1)
+  :hook (prog-mode . git-gutter-mode))
+
 (use-package git-gutter+
   :straight (git-gutter+ :type git :host github :repo "nonsequitur/git-gutter-plus")
+  ;; this one's revert doesn't seem to be working
+  :disabled
   :hook (prog-mode . git-gutter+-mode))
 
 (use-package outshine
@@ -1522,7 +1570,7 @@ So it safe to call it many times like in a minor mode hook."
   (setq neo-banner-message "")
   (setq neo-create-file-auto-open t)
   (setq neo-filepath-sort-function (lambda (f1 f2) (string< (downcase f1)
-                                                       (downcase f2))))
+                                                            (downcase f2))))
 
   (setq neo-vc-integration (quote (face char)))
   (setq neo-force-change-root t)
